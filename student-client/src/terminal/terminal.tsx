@@ -18,8 +18,12 @@ function Term(){
             xtermRef.current?.terminal.write("\b \b");
             commandRef.current = commandRef.current.slice(0,-1)
         } else if (code === 13) {
+            for(let i = 0; i < commandRef.current.length; i++){
+                xtermRef.current?.terminal.write("\b \b");
+            }
             commandRef.current = commandRef.current.concat('\n')
             socketRef.current?.emit('data', commandRef.current)
+            commandRef.current = ""
         } 
         else {
             commandRef.current = commandRef.current.concat(key) 
