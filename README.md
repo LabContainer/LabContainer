@@ -1,5 +1,6 @@
-# Code Capture
+# Lab Capture
 
 ## Project Structure
 
-- `studentenv` - Student Working Environment Frontend
+- `student-client` - Student Working Environment Frontend
+- `student-server` - Student Remote server to host and run code. Containerized to run on kubernetes
