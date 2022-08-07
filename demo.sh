@@ -11,7 +11,7 @@ node . &
 cd ../student-env
 docker-compose up dev &
 
-# start a client
-cd ../student-client
+# start client
+cd ../client
 npm i
 npm start
