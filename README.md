@@ -1,5 +1,12 @@
 # Lab Capture
 
+## Start Demo
+
+```bash
+chmod +x demo.sh
+./demo.sh
+```
+
 ## Project Structure
 
 - `student-client` - Student Working Environment Frontend

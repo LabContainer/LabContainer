@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 import { useImmer } from "use-immer";
 import { Socket } from 'dgram';
 
+import './terminal.css'
+
 function Term(){
     function onData(data : string){
         // socketRef.current?.emit('data', data)

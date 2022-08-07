@@ -3,15 +3,16 @@ import './App.css';
 
 import Editor from './editor/editor';
 import Term from './terminal/terminal';
+import NavBar from './navbar/navbar';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Lab Capture</h1>
+      <NavBar />
+      <div className='flexbox-container'>
         <Editor></Editor>
         <Term></Term>
-      </header>
+      </div>
     </div>
   );
 }
