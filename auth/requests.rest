@@ -1,0 +1,17 @@
+POST http://0.0.0.0:5000/create-user
+Content-Type: application/json
+
+{
+    "username": "parth",
+    "password": "abc"
+}
+
+###
+
+POST http://0.0.0.0:5000/logi2n
+Content-Type: application/json
+
+{
+    "username": "parth",
+    "password": "abc"
+}
