@@ -5,7 +5,7 @@ import './Login.css'
 const api_url = 'http://localhost:5000'
 
 async function loginUser(username: string, password: string){
-  return fetch(`${api_url}/login`, {
+  const response = await fetch(`${api_url}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -14,22 +14,38 @@ async function loginUser(username: string, password: string){
       username,
       password
     })
-  }).then(data => data.json()).then(data => data.access_token)
+  })
+  if(response.ok){
+    const json = await response.json()
+    return json.access_token
+  } else {
+    return undefined
+  }
 }
 
 export default function Login({ setToken } : { setToken : (token: string) => void}){
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     
+    const [failedAttempt, setFailedAttempt] = useState(false)
+
     const handleSubmit : React.FormEventHandler<HTMLFormElement> = async e => {
       e.preventDefault();
       const token = await loginUser(username, password);
-      setToken(token)
+      if(token !== undefined)
+        setToken(token)
+      else {
+        setFailedAttempt(true)
+      }
     }
-    
+    let failedMsg;
+    if(failedAttempt){ 
+      failedMsg = <p>Incorrect username/password , please try again</p>
+    }
     return <>
       <div className="login-container">
         <h1>Please Log in</h1>
+          { failedMsg }
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
             <p>Username</p>
@@ -40,7 +56,7 @@ export default function Login({ setToken } : { setToken : (token: string) => voi
             <input type="password" onChange={e => setPassword(e.target.value)}/>
           </label>
           <div>
-            <button type="submit">Submit</button>
+            <button type="submit">Login</button>
           </div>
         </form>
       </div>

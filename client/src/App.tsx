@@ -15,18 +15,19 @@ import useToken from './components/App/useToken';
 function App() {
   const {token, setToken} = useToken()
 
-  if(!token){
+  if(!token || token === undefined){
     return <>
     <Navbar />
     <Login setToken={setToken} />
     </>
   }
+  console.log(token)
   return (
     <div className="App">
       <Navbar />
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={ <Dashboard />} />
+          <Route path='/dashboard' element={ <Dashboard />} />
           <Route path='/login' element={ <Login setToken={setToken}/>} />
           <Route path='/env' element={ <Environment />} />
       
