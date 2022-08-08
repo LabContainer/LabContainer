@@ -1,15 +1,16 @@
-import imp
 import crud
 from db import SessionLocal, Envionment, User
 import schemas
 from typing import List, Union
-from fastapi import Depends, FastAPI, status, Response
+from fastapi import Depends, FastAPI, status, Response, Header
 from fastapi.middleware.cors import CORSMiddleware
 from requests import Session
 import uvicorn
 import jwt
 import dotenv
 import os
+import datetime
+import subprocess
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
@@ -40,21 +41,38 @@ app.add_middleware(
 
 @ app.get('/students/', response_model=List[schemas.UserBase])
 def get_students(limit: Union[int, None] = None, db: Session = Depends(get_db)):
+    # TODO add authentication
     users = crud.get_all_students(db, limit)
     usernames = [{"username": user.username} for user in users]
     return usernames
 
 
 @ app.post('/create-user', status_code=status.HTTP_201_CREATED)
-def create_user(user_info: schemas.UserCreate, db: Session = Depends(get_db)):
-    crud.create_user(db, user_info)
+def create_user(user_info: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
+    user = crud.get_user(db, user_info.username)
+    if not user:
+        crud.create_user(db, user_info)
+        return
+    else:
+        response.status_code = status.HTTP_409_CONFLICT
+        return
+
+
+@ app.get('/getenv', status_code=status.HTTP_200_OK)
+def get_environment(username: str, response: Response, authorization: str = Header(default=None), db: Session = Depends(get_db)):
+    user_token = authorization.split(' ')[1]
+    payload = verify_jwt(token=user_token)
+    if(payload["user"] == username):
+        env = crud.get_env_for_user(db, username)
+        if not env:
+            # TODO randomize
+            port = 12212
+            make_env(port)
+            new_env = schemas.EnvCreate(
+                ip="127.0.0.1", port=port, ssh_password="testpass")
+            return crud.create_student_env(db, new_env, username)
+    response.status_code = status.HTTP_401_UNAUTHORIZED
     return
-
-
-@ app.get('/getenv')
-def get_environment(username: str, db: Session = Depends(get_db)):
-    verify_jwt()
-    return crud.get_env_for_user(db, username)
 
 
 @ app.post("/login", status_code=status.HTTP_200_OK, response_model=Union[str, schemas.LoginResult])
@@ -64,7 +82,9 @@ def login(login_info: schemas.UserLogin, response: Response, db: Session = Depen
         payload = {
             "user": auth_user.username,
             "email": auth_user.email,
-            "is_student": auth_user.is_student
+            "is_student": auth_user.is_student,
+            # Keep logged in for 5 mins
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=300)
         }
         jwt_token = jwt.encode(payload, key=os.environ['SECRET_TOKEN'])
         return {
@@ -82,6 +102,16 @@ def verify_jwt(token: str):
         key=os.environ['SECRET_TOKEN'],
         algorithms=[header_data['alg'], ]
     )
+
+
+def make_env(port):
+    # TODO: use kubernetes here
+    container_id = subprocess.Popen(
+        ["docker", "run",  "-d", "-p", f"{port}:22", "student-env_dev"])
+
+
+def kill_env(container_id: str):
+    subprocess.Popen(["docker", "kill", container_id])
 
 
 if __name__ == '__main__':

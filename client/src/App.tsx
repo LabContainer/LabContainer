@@ -21,7 +21,6 @@ function App() {
     <Login setToken={setToken} />
     </>
   }
-  console.log(token)
   return (
     <div className="App">
       <Navbar />

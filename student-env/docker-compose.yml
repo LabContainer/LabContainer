@@ -3,4 +3,4 @@ services:
   dev:
     build: .
     ports:
-      - "10022:22"
+      - "${PORT}:22"

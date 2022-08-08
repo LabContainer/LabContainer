@@ -3,6 +3,6 @@ pydantic==1.9.1
 SQLAlchemy==1.4.39
 uvicorn==0.18.2
 fastapi==0.79.0
-PyJWT==2.4.0
+PyJWT
 python-dotenv==0.20.0
-python_bcrypt==0.3.2
+bcrypt

@@ -1,5 +1,10 @@
 # Student Backend
 
-Startup - `node .`
+Backend for student env - interfaces between `student-env` and `client`
 
-Backend for student env - interfaces between `student-env` and `student-client`
+
+Authenticates and Requests Environments via auth service
+
+## Start
+
+`npm  start`

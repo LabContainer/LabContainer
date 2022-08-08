@@ -2,6 +2,9 @@
 
 Provides API for creating and authenting users with JWT
 
+
+Manages student environments
+
 ## Start
 
 ```bash

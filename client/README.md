@@ -3,7 +3,8 @@
 Frontend application, includes
 
 - Student Working Environment
-- Login page
+- Login, Create Accounts
+- Student Dashboard
 - Course staff dashboard
 
 ## Start
