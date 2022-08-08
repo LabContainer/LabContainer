@@ -5,19 +5,17 @@
 # Start up student-server
 cd student-server 
 npm i
-node . &
-
-# Start dev container
-cd ../student-env
-docker-compose up dev &
+npm start &
+cd ..
 
 # Start up Auth service
-cd ../auth
+cd auth
 export PYTHONPATH=$PWD
 pip install -r requirements.txt
-uvicorn main:app --reload --port 5000 &
+cd ..
+uvicorn auth.main:app --reload --port 5000 &
 
 # start client
-cd ../client
+cd client
 npm i
 npm start &
