@@ -3,15 +3,22 @@ Content-Type: application/json
 
 {
     "username": "parth",
-    "password": "abc"
+    "password": "abc",
+    "is_student": true,
+    "email": "abc@gmail.com"
 }
 
 ###
+GET http://0.0.0.0:5000/students?limit=3
 
-POST http://0.0.0.0:5000/logi2n
+###
+GET http://0.0.0.0:5000/getenv?username=parth
+
+###
+POST http://0.0.0.0:5000/login
 Content-Type: application/json
 
 {
     "username": "parth",
-    "password": "abc"
+    "password": "ab2c"
 }

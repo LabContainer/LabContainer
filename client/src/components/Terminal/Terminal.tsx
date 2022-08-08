@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import { useImmer } from "use-immer";
 import { Socket } from 'dgram';
 
-import './terminal.css'
+import './Terminal.css'
 
 function Term(){
     function onData(data : string){

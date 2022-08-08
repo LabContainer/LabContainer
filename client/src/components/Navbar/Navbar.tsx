@@ -1,7 +1,7 @@
 import React from "react";
-import './navbar.css'
+import './Navbar.css'
 
-function NavBar(){
+function Navbar(){
     return <>
         <h1 className="nav-header">Lab Capture</h1>
         <ul className="nav">
@@ -12,4 +12,4 @@ function NavBar(){
     </>
 }
 
-export default NavBar;
+export default Navbar;

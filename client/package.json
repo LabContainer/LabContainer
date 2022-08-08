@@ -15,6 +15,7 @@
     "react": "^16.13.0",
     "react-ace": "^10.1.0",
     "react-dom": "^16.13.0",
+    "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "socket.io-client": "^4.5.1",
     "ssh2": "^1.11.0",
