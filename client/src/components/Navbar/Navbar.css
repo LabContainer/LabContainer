@@ -35,3 +35,8 @@
 .active {
   background-color: #04AA6D;
 }
+
+.notifications {
+  margin: 10px;
+  align-items: center;
+}

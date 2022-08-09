@@ -12,7 +12,7 @@ import jwt
 import dotenv
 import os
 import datetime
-from utils import *
+from auth.utils import *
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
@@ -64,18 +64,20 @@ def create_user(user_info: schemas.UserCreate, response: Response, db: Session =
 def get_environment(username: str, response: Response, authorization: str = Header(default=None), db: Session = Depends(get_db)):
     if authorization is not None:
         user_token = authorization.split(' ')[1]
-        print(user_token)
-        payload = verify_jwt(token=user_token)
-        if(payload["user"] == username):
-            env = crud.get_env_for_user(db, username)
-            if not env:
-                port = find_free_port()
-                print(port)
-                make_env(port)
-                new_env = schemas.EnvCreate(
-                    ip="127.0.0.1", port=port, ssh_password="testpass")
-                return crud.create_student_env(db, new_env, username)
-            return env
+        try:
+            payload = verify_jwt(token=user_token)
+            if(payload["user"] == username):
+                env = crud.get_env_for_user(db, username)
+                if not env:
+                    port = find_free_port()
+                    print(port)
+                    make_env(port)
+                    new_env = schemas.EnvCreate(
+                        ip="127.0.0.1", port=port, ssh_password="testpass")
+                    return crud.create_student_env(db, new_env, username)
+                return env
+        except jwt.exceptions.ExpiredSignatureError as e:
+            response.status_code = status.HTTP_401_UNAUTHORIZED
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return
 
@@ -91,6 +93,7 @@ def login(login_info: schemas.UserLogin, response: Response, db: Session = Depen
             # Keep logged in for 5 mins
             "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=300)
         }
+        print(auth_user.is_active)
         jwt_token = jwt.encode(payload, key=os.environ['SECRET_TOKEN'])
         return {
             "access_token": jwt_token
@@ -100,11 +103,19 @@ def login(login_info: schemas.UserLogin, response: Response, db: Session = Depen
     return "Not Allowed"
 
 
-def find_free_port():
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
+@app.post("/logout", status_code=status.HTTP_200_OK)
+def logout(username: str, response: Response, authorization: str = Header(default=None), db: Session = Depends(get_db)):
+    if authorization is not None:
+        user_token = authorization.split(' ')[1]
+        try:
+            payload = verify_jwt(token=user_token)
+            if(payload["user"] == username):
+                user = crud.set_user_inactive(db, username)
+                return user
+        except jwt.exceptions.ExpiredSignatureError as e:
+            return
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return
 
 
 if __name__ == '__main__':
