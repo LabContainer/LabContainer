@@ -1,5 +1,11 @@
 # Lab Capture
 
+## Reqirements
+
+- Python 3.8.10
+- Nodejs 16 LTS
+- Docker
+
 ## Start Demo
 
 ```bash
