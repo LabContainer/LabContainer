@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 import bcrypt
 
-from db import User, Envionment
-import schemas
+from auth.core.db import User, Envionment
+import auth.core.schemas as schemas
 
 
 def get_user(db: Session, username: str):

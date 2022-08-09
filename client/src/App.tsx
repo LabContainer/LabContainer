@@ -10,6 +10,7 @@ import Login from './pages/Login/Login';
 
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
 import useToken from './components/App/useToken';
+import Signup from './pages/Signup/Signup';
 
 
 function App() {
@@ -18,7 +19,12 @@ function App() {
   if(!token || token === undefined){
     return <>
     <Navbar />
-    <Login setToken={setToken} />
+    <BrowserRouter>
+        <Routes>
+          <Route path='/signup' element={ <Signup />} />
+          <Route  path='*' element={ <Login setToken={setToken}/>} />
+        </Routes>
+      </BrowserRouter>
     </>
   }
   return (
@@ -29,7 +35,7 @@ function App() {
           <Route path='/dashboard' element={ <Dashboard />} />
           <Route path='/login' element={ <Login setToken={setToken}/>} />
           <Route path='/env' element={ <Environment />} />
-      
+          <Route path='/signup' element={ <Signup />} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { useNavigate } from 'react-router-dom';
 import './Login.css'
 
 const api_url = 'http://localhost:5000'
@@ -26,7 +26,7 @@ async function loginUser(username: string, password: string){
 export default function Login({ setToken } : { setToken : (token: string) => void}){
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    
+    const navigate = useNavigate()
     const [failedAttempt, setFailedAttempt] = useState(false)
 
     const handleSubmit : React.FormEventHandler<HTMLFormElement> = async e => {
@@ -59,6 +59,10 @@ export default function Login({ setToken } : { setToken : (token: string) => voi
             <button type="submit">Login</button>
           </div>
         </form>
+        <label>
+          <p>New User? </p>
+          <button type="button" onClick={ () => { navigate('/signup')}}>Create Account</button>
+        </label>
       </div>
     </>
 }

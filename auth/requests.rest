@@ -2,23 +2,24 @@ POST http://0.0.0.0:5000/create-user
 Content-Type: application/json
 
 {
-    "username": "parth",
+    "username": "parth2",
     "password": "abc",
     "is_student": true,
-    "email": "abc@gmail.com"
+    "email": "abc2@gmail.com"
 }
 
 ###
-GET http://0.0.0.0:5000/students?limit=3
+GET http://0.0.0.0:5000/students?limit=2
 
 ###
-GET http://0.0.0.0:5000/getenv?username=parth
+GET http://0.0.0.0:5000/getenv?username=parth1
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoicGFydGgxIiwiZW1haWwiOiJhYmMxQGdtYWlsLmNvbSIsImlzX3N0dWRlbnQiOnRydWUsImV4cCI6MTY1OTk4MTY3MX0.ov4HYx7uVtX6RzGIQtO4wG4tO1Hfsd8cpTew0Pvi3Z4
 
 ###
 POST http://0.0.0.0:5000/login
 Content-Type: application/json
 
 {
-    "username": "parth",
-    "password": "ab2c"
+    "username": "parth1",
+    "password": "abc"
 }

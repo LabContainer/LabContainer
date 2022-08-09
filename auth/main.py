@@ -1,6 +1,8 @@
-import crud
-from db import SessionLocal, Envionment, User
-import schemas
+import socket
+from contextlib import closing
+import auth.crud.crud as crud
+from auth.core.db import SessionLocal, Envionment, User
+import auth.core.schemas as schemas
 from typing import List, Union
 from fastapi import Depends, FastAPI, status, Response, Header
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +12,7 @@ import jwt
 import dotenv
 import os
 import datetime
-import subprocess
+from utils import *
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
@@ -60,17 +62,20 @@ def create_user(user_info: schemas.UserCreate, response: Response, db: Session =
 
 @ app.get('/getenv', status_code=status.HTTP_200_OK)
 def get_environment(username: str, response: Response, authorization: str = Header(default=None), db: Session = Depends(get_db)):
-    user_token = authorization.split(' ')[1]
-    payload = verify_jwt(token=user_token)
-    if(payload["user"] == username):
-        env = crud.get_env_for_user(db, username)
-        if not env:
-            # TODO randomize
-            port = 12212
-            make_env(port)
-            new_env = schemas.EnvCreate(
-                ip="127.0.0.1", port=port, ssh_password="testpass")
-            return crud.create_student_env(db, new_env, username)
+    if authorization is not None:
+        user_token = authorization.split(' ')[1]
+        print(user_token)
+        payload = verify_jwt(token=user_token)
+        if(payload["user"] == username):
+            env = crud.get_env_for_user(db, username)
+            if not env:
+                port = find_free_port()
+                print(port)
+                make_env(port)
+                new_env = schemas.EnvCreate(
+                    ip="127.0.0.1", port=port, ssh_password="testpass")
+                return crud.create_student_env(db, new_env, username)
+            return env
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return
 
@@ -95,23 +100,11 @@ def login(login_info: schemas.UserLogin, response: Response, db: Session = Depen
     return "Not Allowed"
 
 
-def verify_jwt(token: str):
-    header_data = jwt.get_unverified_header(token)
-    return jwt.decode(
-        token,
-        key=os.environ['SECRET_TOKEN'],
-        algorithms=[header_data['alg'], ]
-    )
-
-
-def make_env(port):
-    # TODO: use kubernetes here
-    container_id = subprocess.Popen(
-        ["docker", "run",  "-d", "-p", f"{port}:22", "student-env_dev"])
-
-
-def kill_env(container_id: str):
-    subprocess.Popen(["docker", "kill", container_id])
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 
 if __name__ == '__main__':
