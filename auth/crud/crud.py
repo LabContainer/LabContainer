@@ -44,7 +44,9 @@ def login_user(db: Session, user: schemas.UserLogin):
 
 
 def create_student_env(db: Session, env: schemas.EnvCreate, username: str) -> Envionment:
-    db_env = Envionment(**env.dict(), ssh_user=username)
+
+    db_env = Envionment(ip_port=f"{env.ip}:{env.port}",
+                        ssh_password=env.ssh_password, ssh_user=username)
     db.add(db_env)
     db.commit()
     db.refresh(db_env)

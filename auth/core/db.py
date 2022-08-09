@@ -27,8 +27,7 @@ class User(Base):
 
 class Envionment(Base):
     __tablename__ = 'environment'
-    ip = Column(String, primary_key=True, index=True)
-    port = Column(String, index=True)
+    ip_port = Column(String, primary_key=True, index=True)
     ssh_password = Column(String)
     ssh_user = Column(String, ForeignKey("user.username"))
     # back_populates="environment")

@@ -70,10 +70,11 @@ def get_environment(username: str, response: Response, authorization: str = Head
                 env = crud.get_env_for_user(db, username)
                 if not env:
                     port = find_free_port()
-                    print(port)
-                    make_env(port)
+                    # TODO make secure with username and hashed password
+                    temp_pass = f"{username}_testpass"
+                    make_env(port, username, temp_pass)
                     new_env = schemas.EnvCreate(
-                        ip="127.0.0.1", port=port, ssh_password="testpass")
+                        ip="127.0.0.1", port=port, ssh_password=temp_pass)
                     return crud.create_student_env(db, new_env, username)
                 return env
         except jwt.exceptions.ExpiredSignatureError as e:

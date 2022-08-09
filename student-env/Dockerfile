@@ -2,9 +2,13 @@ FROM ubuntu:latest
 
 RUN apt update && apt install  openssh-server sudo -y
 
-RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 test 
+ARG ssh_user=test
+ARG ssh_pass=test
 
-RUN  echo 'test:test' | chpasswd
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 ${ssh_user} 
+
+
+RUN  echo $ssh_user:$ssh_pass | chpasswd
 
 RUN service ssh start
 
