@@ -32,20 +32,22 @@ def make_env(port: str, user: str, password: str):
     # TODO: use kubernetes here
     # Build container
     wd = os.getcwd()
-    os.chdir(os.path.join(wd, 'student-env'))
+    os.chdir(os.path.join(wd, 'auth/student-env'))
     print("Building user image...")
-    buildcmd = subprocess.run(["docker", "build", "--build-arg", f"ssh_user={user}", "--build-arg",
-                               f"ssh_pass={password}", "-t", f"studentenv:{user}", "."], capture_output=True)
+    buildcmd = subprocess.run(["docker", "build", "--build-arg",
+                              f"ssh_user={user}", "--build-arg", f"ssh_pass={password}", "-t", f"studentenv:{user}", "."], capture_output=True)
     print(buildcmd)
     os.chdir(wd)
     print("Built image")
     # Start container
     container = subprocess.run(
-        ["docker", "run",  "-d", "-p", f"{port}:22", f"studentenv:{user}"], capture_output=True)
+        ["docker", "run",  "-d", "--network", "envnet", "--name", f"env_{user}", "-p", f"{port}:22", f"studentenv:{user}"], capture_output=True)
     if container.stderr:
-        raise container.stderr
+        print(container.stderr)
+        raise RuntimeError(container.stderr)
     container_id = container.stdout.decode('utf8')
-    print("Created conainer: ", container_id)
+    print("Created container on host: ", container_id)
+    print("Connecting container to network: envnet")
     return container_id
 
 

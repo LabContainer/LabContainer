@@ -31,8 +31,9 @@ class EnvCreate(BaseModel):
     Schema for creating an environment
     TODO: Communicate with kubernetes controller to spin and keep track of running environments 
     """
-    ip: str
-    port: str
+    id: str
+    host: str
+    network: str
     ssh_password: str  # Plain string , security concern ?
 
     class Config:

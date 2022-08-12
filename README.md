@@ -8,9 +8,13 @@
 
 ## Start Demo
 
+### Frontend
+
+<https://codecapture.web.app>
+
+### Backend
 ```bash
-chmod +x demo.sh
-./demo.sh
+docker-compose up
 ```
 
 ## Project Structure
@@ -18,7 +22,7 @@ chmod +x demo.sh
 - `client` - Frontend application
 - `auth` - Authentication service
 - `student-server` - Student Remote server to serve client, and connect to env container via ssh
-- `student-env` - Student Working Container
+- `auth/student-env` - Student Working Container
 - `instructor-server` - Backend for course staff dashboard, analytics
 
 ## Links

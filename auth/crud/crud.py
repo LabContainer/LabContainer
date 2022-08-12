@@ -24,7 +24,7 @@ def get_all_students(db: Session, limit: int = None) -> List[User]:
 
 def create_user(db: Session, user: schemas.UserCreate) -> User:
     salt = bcrypt.gensalt()
-    hashed_pass = bcrypt.hashpw(user.password.encode('utf8'), salt)
+    hashed_pass = bcrypt.hashpw(user.password.encode('utf8'), salt).hex()
     db_user = User(username=user.username, email=user.email,
                    hashed_password=hashed_pass, is_active=False, is_student=user.is_student)
     db.add(db_user)
@@ -35,7 +35,7 @@ def create_user(db: Session, user: schemas.UserCreate) -> User:
 
 def login_user(db: Session, user: schemas.UserLogin):
     saved_user = get_user(db, user.username)
-    if saved_user is not None and bcrypt.checkpw(user.password.encode('utf8'), saved_user.hashed_password):
+    if saved_user is not None and bcrypt.checkpw(user.password.encode('utf8'), bytes.fromhex(saved_user.hashed_password)):
         saved_user.is_active = True
         db.commit()
         db.refresh(saved_user)
@@ -45,7 +45,7 @@ def login_user(db: Session, user: schemas.UserLogin):
 
 def create_student_env(db: Session, env: schemas.EnvCreate, username: str) -> Envionment:
 
-    db_env = Envionment(ip_port=f"{env.ip}:{env.port}",
+    db_env = Envionment(host=env.host, id=env.id, network=env.network,
                         ssh_password=env.ssh_password, ssh_user=username)
     db.add(db_env)
     db.commit()
@@ -57,7 +57,7 @@ def remove_student_env(db: Session, username: str):
     db_env = get_env_for_user(db, username)
     db.delete(db_env)
     db.commit()
-    db.refresh(db_env)
+    # db.refresh(db_env)
     return db_env
 
 

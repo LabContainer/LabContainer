@@ -13,6 +13,7 @@ import dotenv
 import os
 import datetime
 from auth.utils import *
+from auth.env_manager import *
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
@@ -30,6 +31,7 @@ def get_db():
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "https://codecapture.web.app"
 ]
 
 app.add_middleware(
@@ -69,12 +71,13 @@ def get_environment(username: str, response: Response, authorization: str = Head
             if(payload["user"] == username):
                 env = crud.get_env_for_user(db, username)
                 if not env:
-                    port = find_free_port()
+                    # port = find_free_port()
                     # TODO make secure with username and hashed password
                     temp_pass = f"{username}_testpass"
-                    make_env(port, username, temp_pass)
+                    container_id, network, name = create_new_container(
+                        username, temp_pass)
                     new_env = schemas.EnvCreate(
-                        ip="127.0.0.1", port=port, ssh_password=temp_pass)
+                        id=container_id, host=name, network=network, ssh_password=temp_pass)
                     return crud.create_student_env(db, new_env, username)
                 return env
         except jwt.exceptions.ExpiredSignatureError as e:
@@ -105,14 +108,20 @@ def login(login_info: schemas.UserLogin, response: Response, db: Session = Depen
 
 
 @app.post("/logout", status_code=status.HTTP_200_OK)
-def logout(username: str, response: Response, authorization: str = Header(default=None), db: Session = Depends(get_db)):
+def logout(response: Response, authorization: str = Header(default=None), db: Session = Depends(get_db)):
     if authorization is not None:
         user_token = authorization.split(' ')[1]
         try:
             payload = verify_jwt(token=user_token)
-            if(payload["user"] == username):
-                user = crud.set_user_inactive(db, username)
-                return user
+            crud.set_user_inactive(db, payload["user"])
+            env = crud.get_env_for_user(db, payload["user"])
+            if env:
+                print("Removing env:",  env.host, "id:", env.id)
+                kill_env(env.id)
+                crud.remove_student_env(db, payload["user"])
+            else:
+                print(f"No env found for user {payload['user']} :", env)
+            return
         except jwt.exceptions.ExpiredSignatureError as e:
             return
     response.status_code = status.HTTP_401_UNAUTHORIZED
