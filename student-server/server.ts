@@ -16,17 +16,22 @@ config({
 })
 
 let serverPort = 8080;
+let serverHost = '0.0.0.0';
 let server = http.createServer(app);
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3000", "https://codecapture.web.app"]
+}));
 
-server.listen(serverPort);
+server.listen(serverPort, serverHost);
 
 interface SocketData {
   decoded: jwt.JwtPayload
 }
 
 interface Environment {
-  ip_port: string
+  host: string
+  network: string
+  id: string
   ssh_user: string
   ssh_password: string
 }
@@ -50,7 +55,7 @@ async function requestUserEnvironment(api_url: string, token: string, username: 
 }
 
 async function connectToEnvironment(env: Environment, socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>) {
-  console.log(`Starting Secure shell to ${env.ip_port}`)
+  console.log(`Starting Secure shell to ${env.host}`)
   let ssh = new SSHClient();
   ssh.on("ready", () => {
     socket.emit("data", "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n");
@@ -80,8 +85,9 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
       "\r\n*** SSH CONNECTION ERROR: " + err.message + " ***\r\n"
     );
   }).connect({
-    host: env.ip_port.split(':')[0],
-    port: parseInt(env.ip_port.split(':')[1]),
+    // host: env.ip_port.split(':')[0],
+    // port: parseInt(env.ip_port.split(':')[1]),
+    host: env.host,
     username: env.ssh_user,
     password: env.ssh_password
   });
@@ -104,7 +110,7 @@ io.use((socket, next) => {
 }).on("connection", async function (socket) {
   socket.emit('connected', "Connected!");
 
-  const auth_service_api = 'http://localhost:5000'
+  const auth_service_api = 'http://auth:5000'
   const decoded = socket.data.decoded as jwt.JwtPayload
   const token = socket.handshake.query.token as string
 

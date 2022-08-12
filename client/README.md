@@ -1,5 +1,8 @@
 # Student Environment Frontend UI
 
+Demo: <https://codecapture.web.app>
+
+
 Frontend application, includes
 
 - Student Working Environment
@@ -7,6 +10,15 @@ Frontend application, includes
 - Student Dashboard
 - Course staff dashboard
 
-## Start
+## Local Start
 
-`npm start`
+```bash
+npm start
+```
+
+## Web
+
+```bash
+npm run build
+firebase deploy
+```

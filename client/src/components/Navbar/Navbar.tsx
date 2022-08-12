@@ -6,10 +6,26 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate } from "react-router-dom";
 import useToken from "../App/useToken";
 
+const api_url = 'http://localhost:5000'
+
+async function logoutUser(token: string){
+  const response = await fetch(`${api_url}/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  if(response.ok){
+    console.log('Logout')
+    return true
+  }
+  return false
+}
 
 function Navbar(){
     const navigate = useNavigate()
-    const {setToken} = useToken()
+    const {token, setToken} = useToken()
     return <>
         <h1 className="nav-header">Lab Capture</h1>
         <ul className="nav">
@@ -21,9 +37,12 @@ function Navbar(){
             </Badge>
         </IconButton>
         <li className="nav-item" onClick={ () => { 
-            setToken("")
-            navigate("/dashboard")
-            window.location.reload()
+            if(token){
+                logoutUser(token)
+                setToken("")
+                navigate("/dashboard")
+                window.location.reload()
+            }
         }}>Logout</li>
         </ul>
     </>

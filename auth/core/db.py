@@ -3,13 +3,13 @@ from sqlalchemy import Boolean, Column, ForeignKey, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
+# SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
 
 # postgres:
-# SQLALCHEMY_DATABASE_URL="postgresql://user:password@postgresserver.db"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:tempdbpass@postgresserver:5432"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={
-                       "check_same_thread": False})
+# sqlite ::: connect_args={"check_same_thread": False})
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 Base = declarative_base(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -27,7 +27,9 @@ class User(Base):
 
 class Envionment(Base):
     __tablename__ = 'environment'
-    ip_port = Column(String, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True)
+    host = Column(String, index=True)
+    network = Column(String, index=True)
     ssh_password = Column(String)
     ssh_user = Column(String, ForeignKey("user.username"))
     # back_populates="environment")
