@@ -2,7 +2,6 @@
 
 Demo: <https://codecapture.web.app>
 
-
 Frontend application, includes
 
 - Student Working Environment

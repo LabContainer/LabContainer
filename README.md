@@ -10,9 +10,16 @@
 
 ### Frontend
 
+```bash
+cd client
+npm start
+```
+
+or
 <https://codecapture.web.app>
 
 ### Backend
+
 ```bash
 docker-compose up
 ```
