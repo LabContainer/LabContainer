@@ -2,7 +2,7 @@
 
 Demo: <https://codecapture.web.app> [![Firebase deploy](https://github.com/ParthSindhu/CodeCapture/actions/workflows/firebase-hosting-merge.yml/badge.svg?branch=master)](https://github.com/ParthSindhu/CodeCapture/actions/workflows/firebase-hosting-merge.yml)
 
-Frontend application, includes
+Frontend application, includes:
 
 - Student Working Environment
 - Login, Create Accounts
