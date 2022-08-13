@@ -3,10 +3,17 @@ from sqlalchemy import Boolean, Column, ForeignKey, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
+import os
+import dotenv
+
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
 
+
+env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
+dotenv.load_dotenv(dotenv_path=env_path)
+
 # postgres:
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:tempdbpass@postgresserver:5432"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@postgresserver:5432"
 
 # sqlite ::: connect_args={"check_same_thread": False})
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

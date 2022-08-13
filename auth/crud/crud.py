@@ -14,8 +14,8 @@ def get_env_for_user(db: Session, username: str) -> Envionment:
     return db.query(Envionment).join(Envionment.owner).filter(User.username == username).first()
 
 
-def get_all_students(db: Session, limit: int = None) -> List[User]:
-    query = db.query(User).filter(User.is_student)
+def get_all_users(db: Session, limit: int = None) -> List[User]:
+    query = db.query(User)
     if limit is None:
         return query.all()
     else:

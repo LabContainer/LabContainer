@@ -17,7 +17,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const api_url = 'http://localhost:5000'
 
 async function loginUser(username: string, password: string){
-  const response = await fetch(`${api_url}/login`, {
+  const response = await fetch(`${api_url}/webapp/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

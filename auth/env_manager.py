@@ -22,7 +22,7 @@ def create_new_container(user: str, password: str):
         ["docker", "run",  "-d", "--network", network, "--name", name, f"studentenv:{user}"], capture_output=True)
     if container.stderr:
         raise RuntimeError(container.stderr)
-    container_id = container.stdout.decode('utf8')
+    container_id = container.stdout.decode('utf8').strip()
     print("Created container on host: ", container_id)
     return [container_id, network, name]
 

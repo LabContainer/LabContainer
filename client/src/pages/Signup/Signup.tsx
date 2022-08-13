@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 const api_url = 'http://localhost:5000'
 
 async function createUser(username: string, password: string, email: string, is_student: boolean){
-  const response = await fetch(`${api_url}/create-user`, {
+  const response = await fetch(`${api_url}/users/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

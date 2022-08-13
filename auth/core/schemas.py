@@ -8,6 +8,14 @@ class UserBase(BaseModel):
     username: str
 
 
+class UserInfo(UserBase):
+    """
+    Schema for User creation
+    """
+    email: str
+    is_student: bool
+
+
 class UserLogin(UserBase):
     """
     Schema for Login information
@@ -15,13 +23,10 @@ class UserLogin(UserBase):
     password: str
 
 
-class UserCreate(UserLogin):
+class UserCreate(UserLogin, UserInfo):
     """
     Schema for User creation
     """
-    email: str
-    is_student: bool
-
     class Config:
         orm_mode = True
 

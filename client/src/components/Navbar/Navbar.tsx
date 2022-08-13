@@ -9,7 +9,7 @@ import useToken from "../App/useToken";
 const api_url = 'http://localhost:5000'
 
 async function logoutUser(token: string){
-  const response = await fetch(`${api_url}/logout`, {
+  const response = await fetch(`${api_url}/webapp/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

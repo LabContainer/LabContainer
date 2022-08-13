@@ -43,7 +43,7 @@ console.log('Waiting for Connections...')
 
 async function requestUserEnvironment(api_url: string, token: string, username: string) {
   console.log('Requesting Auth Service for Environment...')
-  const resp = await fetch(`${api_url}/getenv?username=${username}`, {
+  const resp = await fetch(`${api_url}/environment/${username}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`

@@ -1,29 +1,31 @@
-POST http://0.0.0.0:5000/create-user
+# File for manual testing api server, install rest client extension in vscode
+
+POST http://0.0.0.0:5000/users/create
 Content-Type: application/json
 
 {
-    "username": "parth2",
+    "username": "parth3",
     "password": "abc",
-    "is_student": true,
-    "email": "abc2@gmail.com"
+    "is_student": false,
+    "email": "abc@gmail.com"
 }
 
 ###
-GET http://0.0.0.0:5000/students?limit=1
+GET http://0.0.0.0:5000/users?limit=2
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoicGFydGgzIiwiZW1haWwiOiJhYmNAZ21haWwuY29tIiwiaXNfc3R1ZGVudCI6ZmFsc2UsImV4cCI6MTY2MDM1NjUyNn0.3VXAnQC7ZKp2vgdYCf9jb_cmvA_T_EiU8VBqkq6wE4U
+###
+GET http://0.0.0.0:5000/environment/parth3
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoicGFydGgzIiwiZW1haWwiOiJhYmNAZ21haWwuY29tIiwiaXNfc3R1ZGVudCI6ZmFsc2UsImV4cCI6MTY2MDM1NjUyNn0.3VXAnQC7ZKp2vgdYCf9jb_cmvA_T_EiU8VBqkq6wE4U
 
 ###
-GET http://0.0.0.0:5000/getenv?username=parth1
-Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoicGFydGgxIiwiZW1haWwiOiJhYmMxQGdtYWlsLmNvbSIsImlzX3N0dWRlbnQiOnRydWUsImV4cCI6MTY1OTk4MTY3MX0.ov4HYx7uVtX6RzGIQtO4wG4tO1Hfsd8cpTew0Pvi3Z4
+POST http://0.0.0.0:5000/webapp/logout?username=gg
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoicGFydGgzIiwiZW1haWwiOiJhYmNAZ21haWwuY29tIiwiaXNfc3R1ZGVudCI6ZmFsc2UsImV4cCI6MTY2MDM1Njk2M30.oE_An-3kmAmSWQ8l2TmNHfR5OULSlCEYjht5r-XscR4
 
 ###
-POST http://0.0.0.0:5000/logout?username=parth1
-Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoicGFydGgxIiwiZW1haWwiOiJhYmMxQGdtYWlsLmNvbSIsImlzX3N0dWRlbnQiOnRydWUsImV4cCI6MTY2MDAzODA4Mn0.QrdUvza0TwImX_liNYDTg5CRXe-aXOdIQTbucgGeeK0
-
-###
-POST http://0.0.0.0:5000/login
+POST http://0.0.0.0:5000/webapp/login
 Content-Type: application/json
 
 {
     "username": "parth1",
-    "password": "abc"
+    "password": "abc3"
 }
