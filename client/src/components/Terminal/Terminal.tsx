@@ -5,8 +5,9 @@ import { useEffect, useRef } from 'react';
 import { useImmer } from "use-immer";
 import { Socket } from 'dgram';
 
-import './Terminal.css'
+// import './Terminal.css'
 import useToken from '../App/useToken';
+import { Box } from '@mui/material';
 
 function Term(){
     function onKey(event : {key : string, domEvent: KeyboardEvent}){
@@ -67,12 +68,14 @@ function Term(){
 
     
 
-    return <>
+    return <Box sx={{
+
+    }} flex={1}>
         <XTerm className='terminal-container'
             ref={xtermRef}
             onKey={onKey}
         />
-    </>
+    </Box>
 }
 
 export default Term
