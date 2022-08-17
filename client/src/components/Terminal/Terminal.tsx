@@ -1,14 +1,15 @@
 // Import XTerm
 import { XTerm } from 'xterm-for-react'
 import { io } from 'socket.io-client'
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useImmer } from "use-immer";
 import { Socket } from 'dgram';
-
-// import './Terminal.css'
-import useToken from '../App/useToken';
+import { FitAddon } from 'xterm-addon-fit'
+//@ts-ignore
+import xtermTheme from 'xterm-theme';
 import { Box } from '@mui/material';
 import './Terminal.css'
+import { AuthContext } from '../App/AuthContext';
 
 function Term(){
     function onKey(event : {key : string, domEvent: KeyboardEvent}){
@@ -35,7 +36,7 @@ function Term(){
             xtermRef.current?.terminal.write(key)
         }
     }
-    const {token} = useToken()
+    const {token} = useContext(AuthContext)
     const [data, setData] = useImmer("")
     const xtermRef = useRef<XTerm>(null)
     const socketRef = useRef<Socket>()
@@ -61,6 +62,12 @@ function Term(){
         socket.on("disconnect", function() {
             xtermRef.current?.terminal.writeln("***Disconnected from backend***");
         });
+        let fitaddon = new FitAddon();
+        xtermRef.current?.terminal.loadAddon(fitaddon);
+        fitaddon.fit()
+        xtermRef.current?.terminal.onResize(function (evt) {
+            // websocket.send({ rows: evt.rows });
+        });
     }, [setData, token])
 
     useEffect(() => {
@@ -70,11 +77,21 @@ function Term(){
     
 
     return <Box sx={{
-
     }} flex={1}>
         <XTerm className='terminal-container'
             ref={xtermRef}
             onKey={onKey}
+            options={{
+                theme: {
+                    background: "#151942",
+                    foreground: "#FFF"
+                },
+                fontSize: 15,
+                rendererType: 'dom',
+                fontFamily: `'Fira Mono', monospace`,
+                convertEol: true,
+
+            }}
         />
     </Box>
 }

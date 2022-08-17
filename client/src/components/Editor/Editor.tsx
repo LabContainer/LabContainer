@@ -27,7 +27,10 @@ class Editor extends React.Component {
     return <Box flex={1}>
         <AceEditor
           className="editor"
-          width="100%"
+          style={{
+            width: "100%",
+            height: "100%"
+          }}
           placeholder="Placeholder Text"
           mode="python"
           theme="github"

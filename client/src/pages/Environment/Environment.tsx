@@ -24,10 +24,15 @@ export default function Environment(){
     }, [chosenFile])
     return <>
         <Stack sx={{
-            margin: 0,
+            margin: "auto",
             padding: 0,
+            width: "80%",
+            height: "60%",
+            justifyContent: "center",
+            marginTop: "80px",
+            marginBottom: "80px"
         }} direction="row" justifyContent={"center"}>
-            <Stack flex={1}>
+            <Stack flex={1} >
                 <ScrollTabs
                     tabList={[
                         {
@@ -40,12 +45,12 @@ export default function Environment(){
                 {/* <E/> */}
                 <Editor></Editor>
             </Stack>
-            <Box flex={1}>
-            <Suspense fallback={<CircularIndeterminate/>}>
-                <Term/>
-            </Suspense>
+            <Stack flex={1}>
+                <Suspense fallback={<CircularIndeterminate/>}>
+                    <Term/>
+                </Suspense>
 
-            </Box>
+            </Stack>
         </Stack>
         
     </>
