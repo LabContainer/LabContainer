@@ -8,6 +8,7 @@ import { Socket } from 'dgram';
 // import './Terminal.css'
 import useToken from '../App/useToken';
 import { Box } from '@mui/material';
+import './Terminal.css'
 
 function Term(){
     function onKey(event : {key : string, domEvent: KeyboardEvent}){

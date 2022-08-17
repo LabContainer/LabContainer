@@ -13,58 +13,50 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../components/App/AuthContext';
+import fetchData from '../../components/App/fetch';
 
 const api_url = 'http://localhost:5000'
 
-async function loginUser(username: string, password: string){
-  const response = await fetch(`${api_url}/webapp/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      username,
-      password
-    })
-  })
-  if(response.ok){
-    const json = await response.json()
-    return json.access_token
-  } else {
-    return undefined
-  }
-}
-
 const theme = createTheme();
 
-export default function Login({ setToken } : { setToken : (token: string) => void}) {
-  const [failedAttempt, setFailedAttempt] = React.useState(false)
+export default function Login() {
+  const [failedMsg, setFailedMsg] = React.useState("");
+  const {token, setToken, username, setUsername} = React.useContext(AuthContext)
   const location = useLocation()
   const navigate = useNavigate()
+  
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const username = data.get('username')
     const password = data.get('password')
-    console.log(username, password)
     if( username !== null && password !== null){
-      const token = await loginUser(username as string, password as string);
-      if(token !== undefined)
-        setToken(token)
-        
+      // const auth_token = await loginUser(username as string, password as string);
+      const auth_token = await fetchData(token, setToken, `${api_url}/webapp/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          password
+        })
+      }).then(r => r?.access_token);
+
+      if(auth_token !== undefined){
+        setToken(auth_token)
+        setUsername(username as string)
         if(location.pathname === '/login'){
           // Redirect user to hashboard from login on success
           navigate('/dashboard')
         }
+      }
       else {
-        setFailedAttempt(true)
+        setFailedMsg("Incorrect username/password , please try again")
       }
     }
   };
-  let failedMsg;
-  if(failedAttempt){ 
-    failedMsg = "Incorrect username/password , please try again"
-  }
 
   return (
     <ThemeProvider theme={theme}>

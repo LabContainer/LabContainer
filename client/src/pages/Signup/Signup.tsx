@@ -32,10 +32,6 @@ async function createUser(username: string, password: string, email: string, is_
   return response.ok
 }
 
-
-
-
-
 const theme = createTheme();
 
 export default function SignUp() {
@@ -52,7 +48,7 @@ export default function SignUp() {
     const email = data.get('email')
     const username = data.get('username')
     const password = data.get('password')
-    const isStudent = data.get('isStudent') === "isStudent"
+    const isStudent = !!data.get('isStudent')
     if(username && password && email){
       const success = await createUser(username as string, password as string, email as string, isStudent)
       setFailedAttempt(!success)

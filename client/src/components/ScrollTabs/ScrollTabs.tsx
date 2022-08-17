@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
-export default function ScrollTabs({ tabList, setChosen } : { tabList : string[], setChosen: React.Dispatch<React.SetStateAction<number>>} ) {
+export default function ScrollTabs({ tabList, setChosen } : { tabList : {tab: string, id: number}[], setChosen: React.Dispatch<React.SetStateAction<number>>} ) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -21,7 +21,7 @@ export default function ScrollTabs({ tabList, setChosen } : { tabList : string[]
         allowScrollButtonsMobile
         aria-label="scrollable force tabs example"
       >
-        { tabList.map( tab => <Tab label={tab} />  ) }
+        { tabList.map( ({tab, id}) => <Tab label={tab} key={id} />  ) }
         
       </Tabs>
     </Box>
