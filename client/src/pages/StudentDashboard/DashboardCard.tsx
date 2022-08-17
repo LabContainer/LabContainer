@@ -59,6 +59,7 @@ export default function DashboardCard({data} : {data : DashBoardData}) {
           </IconButton>
         </Box>
       </Box>
+
     </Card>
   );
 }

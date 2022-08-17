@@ -30,6 +30,7 @@ export default function Dashboard(){
     setParam();
   }, [token, setToken, setSearchParams])
 
+
   const dashType = searchParams.get('type')
   if(dashType === 'student')
     return <StudentDashboard />

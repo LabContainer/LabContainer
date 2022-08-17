@@ -15,6 +15,7 @@ function App() {
   const {token, setToken} = useToken()
   return (
     <AuthContext.Provider value={{token, setToken}}>
+
     <div className="App">
       <Navbar />
       { !!token ? 

@@ -5,7 +5,6 @@ import CircularIndeterminate from "../../components/common/CircularInderminate";
 
 import './StudentDashboard.css'
 import { DashBoardData } from "./DashboardCard";
-
 const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 
 const DashCard = React.lazy(async () => {
