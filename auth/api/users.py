@@ -11,6 +11,17 @@ router = APIRouter(
 )
 
 
+@router.get("/me", response_model=schemas.UserInfo)
+async def get_user_info(response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
+    # Cannot have "me" username
+    user = crud.get_user(db, payload["user"])
+    return {
+        "username": user.username,
+        "email": user.email,
+        "is_student": user.is_student
+    }
+
+
 @router.get("/{username}", response_model=schemas.UserInfo)
 async def get_user_info(username: str, response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
     user = crud.get_user(db, username)

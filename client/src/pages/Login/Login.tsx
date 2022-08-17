@@ -22,7 +22,7 @@ const theme = createTheme();
 
 export default function Login() {
   const [failedMsg, setFailedMsg] = React.useState("");
-  const {token, setToken, username, setUsername} = React.useContext(AuthContext)
+  const {token, setToken} = React.useContext(AuthContext)
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -46,7 +46,6 @@ export default function Login() {
 
       if(auth_token !== undefined){
         setToken(auth_token)
-        setUsername(username as string)
         if(location.pathname === '/login'){
           // Redirect user to hashboard from login on success
           navigate('/dashboard')

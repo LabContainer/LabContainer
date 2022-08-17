@@ -8,26 +8,27 @@ import fetchData from '../../components/App/fetch';
 const auth_api_url = 'http://localhost:5000'
 
 export default function Dashboard(){
-  const {token, setToken, username, setUsername} = React.useContext(AuthContext)
+  const {token, setToken} = React.useContext(AuthContext)
   const [searchParams, setSearchParams] = useSearchParams();
   
   React.useEffect( () => {
     async function setParam(){
-      const data = await fetchData(token, setToken, `${auth_api_url}/users/${username}`, {
+      const data = await fetchData(token, setToken, `${auth_api_url}/users/me`, {
         method: 'GET'
       })
-      if(data?.is_student){
-        setSearchParams({
-          'type': 'student'
-        })
-      } else {
-        setSearchParams({
-          'type': 'staff'
-        })
-      }
+      if(data !== undefined)
+        if(data.is_student){
+          setSearchParams({
+            'type': 'student'
+          })
+        } else {
+          setSearchParams({
+            'type': 'staff'
+          })
+        }
     }
     setParam();
-  }, [username, token, setToken, setSearchParams])
+  }, [token, setToken, setSearchParams])
 
   const dashType = searchParams.get('type')
   if(dashType === 'student')

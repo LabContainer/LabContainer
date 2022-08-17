@@ -13,11 +13,8 @@ import { AuthContext } from './components/App/AuthContext';
 
 function App() {
   const {token, setToken} = useToken()
-  const [username, setUsername] = useState("")
-  
-  
   return (
-    <AuthContext.Provider value={{token, setToken, username, setUsername}}>
+    <AuthContext.Provider value={{token, setToken}}>
     <div className="App">
       <Navbar />
       { !!token ? 

@@ -9,44 +9,56 @@ import Typography from '@mui/material/Typography';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
+import CircularProgressWithLabel from '../../components/common/CircularProgressWithLabel';
 
-const data = {
-  "LabName" : "TestLab",
-  "Course" : "TestCourse"
+import './DashboardCard.css'
+
+export interface DashBoardData {
+  "LabName" : string
+  "Course" : string
+  "Progress": number
+  "Instructor": string
+  "TimeLeft" : string
 }
 
-export default function DashboardCard() {
+export default function DashboardCard({data} : {data : DashBoardData}) {
   const theme = useTheme();
 
   return (
-    <Card sx={{ display: 'flex' }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <CardContent sx={{ flex: '1 0 auto' }}>
+    <Card sx={{  margin: "30px" }}>
+      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: "space-evenly" }}>
+        <CardContent className='card_internal'>
           <Typography component="div" variant="h5">
-            Live From Space
+            { data.LabName }
+          </Typography>
+        </CardContent>
+        <CardContent sx={{ flex: '1 0 auto' , borderRight: "1px solid grey", flexDirection: 'column', justifyContent: "center"}} className='card_internal'>
+          <Typography component="div" variant="h5">
+            { data.Course }
           </Typography>
           <Typography variant="subtitle1" color="text.secondary" component="div">
-            Mac Miller
+            { data.Instructor }
+          </Typography>
+        </CardContent>
+        <CardContent className='card_internal'>
+          <Typography component="div" variant="h5">
+            <CircularProgressWithLabel value={data.Progress} size="5rem" ></CircularProgressWithLabel>
+          </Typography>
+        </CardContent>
+        <CardContent className='card_internal'>
+          <Typography component="div" variant="h5">
+            { data.TimeLeft } Left
           </Typography>
         </CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
-          <IconButton aria-label="previous">
-            {theme.direction === 'rtl' ? <SkipNextIcon /> : <SkipPreviousIcon />}
-          </IconButton>
+          <Typography component="div" variant="h5">
+            Continue
+          </Typography>
           <IconButton aria-label="play/pause">
             <PlayArrowIcon sx={{ height: 38, width: 38 }} />
           </IconButton>
-          <IconButton aria-label="next">
-            {theme.direction === 'rtl' ? <SkipPreviousIcon /> : <SkipNextIcon />}
-          </IconButton>
         </Box>
       </Box>
-      <CardMedia
-        component="img"
-        sx={{ width: 151 }}
-        image="/static/images/cards/live-from-space.jpg"
-        alt="Live from space album cover"
-      />
     </Card>
   );
 }
