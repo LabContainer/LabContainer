@@ -1,19 +1,6 @@
 
-  .terminal-container {
-    width: 960px;
-    height: 600px;
-    display: inline-block;
-    padding: 2px;
-  }
-  .function {
-    display: inline-block;
-    float: right;
-  }
-  .terminal-container .terminal {
-    background-color: #111;
-    color: #fafafa;
-    padding: 2px;
-  }
-  .terminal-container .terminal:focus .terminal-cursor {
-    background-color: #fafafa;
-  }
+.terminal-container {
+  width: 100%;
+  min-width: none;
+  height: 100%;
+}

@@ -5,37 +5,60 @@ import 'ace-builds/src-noconflict/mode-python'
 import 'ace-builds/src-noconflict/theme-solarized_light'
 import 'ace-builds/src-noconflict/ext-language_tools'
 import 'ace-builds/src-noconflict/snippets/python'
+import './Editor.css'
+import { Box } from "@mui/material";
+import './Editor.css'
+import ReactAce from "react-ace/lib/ace";
 
 function onChange(newVal : string){
     console.log("change", newVal)
 }
 
-function onLoad(test : any){
-    console.log(test)
-}
 
-function Editor() {
-    return <>
+class Editor extends React.Component {
+  ref;
+
+  constructor(props : any) {
+    super(props);
+    this.ref = React.createRef<ReactAce>()
+    this.ref.current?.editor.getSession()
+  }
+  render() {
+    return <Box flex={1}>
         <AceEditor
+          className="editor"
+          style={{
+            width: "100%",
+            height: "100%"
+          }}
           placeholder="Placeholder Text"
           mode="python"
-          theme="solarized_light"
-          name="blah2"
-          onLoad={onLoad}
+          theme="github"
+          name="aceeditor"
+          ref={this.ref}
+          onLoad={editorInstance => {
+            editorInstance.resize()
+            editorInstance.container.style.resize = "both";
+            // mouseup = css resize end
+            document.addEventListener("mouseup", e => {
+              editorInstance.resize()
+            });
+          }}
           onChange={onChange}
-          fontSize={20}
           showPrintMargin={true}
           showGutter={true}
           highlightActiveLine={true}
           value={``}
           setOptions={{
-          enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: true,
-          showLineNumbers: true,
-          tabSize: 2,
-          }}/>
-    </>
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true,
+            showLineNumbers: true,
+            tabSize: 2,
+          }}
+        />
+    </Box>
+  }
 }
 
 export default Editor
