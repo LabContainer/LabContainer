@@ -9,6 +9,8 @@ import jwt from 'jsonwebtoken'
 import { config } from 'dotenv'
 import fetch from 'node-fetch'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events'
+import { ExtendedError } from 'socket.io/dist/namespace'
+import timer from 'long-timeout'
 
 const app = express();
 config({
@@ -59,22 +61,28 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
   let ssh = new SSHClient();
   ssh.on("ready", () => {
     socket.emit("data", "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n");
-    ssh.shell(function (err, stream) {
-      if (err)
-        return socket.emit(
+    ssh.shell((err, stream) => {
+      if (err) {
+        socket.emit(
           "data",
-          "\r\n*** SSH SHELL ERROR: " + err.message + " ***\r\n"
-        );
+          "\r\n*** SSH SHELL ERROR: " + err.message + " ***\r\n");
+        socket.disconnect(true)
+      }
       // write user input to shell
-      socket.on("data", function (data) {
-        data.replace('\0', '')
-        stream.write(data);
-      });
-      stream.on("data", function (d: any) {
-        socket.emit("data", utf8.decode(d.toString("binary")));
-      }).on("close", function () {
-        ssh.end();
-      });
+      socket
+        .on("data", data => {
+          data.replace('\0', '')
+          stream.write(data);
+        })
+        .on("disconnect", () => {
+          socket.emit("d")
+          console.log("Closing ssh")
+          ssh.end()
+        })
+      stream
+        //@ts-ignore
+        .on("data", d => socket.emit("data", utf8.decode(d.toString("binary"))))
+        .on("close", ssh.end);
     });
   }).on("close", function () {
     socket.emit("data", "\r\n*** SSH CONNECTION CLOSED ***\r\n");
@@ -93,8 +101,9 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
   });
 }
 
-//Socket Connection
-io.use((socket, next) => {
+type SocketIOMiddleware = (socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>, next: (err?: ExtendedError | undefined) => any) => void
+
+const authenticateUser: SocketIOMiddleware = (socket, next) => {
   // Authenticate User
   if (socket.handshake.query && socket.handshake.query.token) {
     jwt.verify(socket.handshake.query.token as string, process.env.SECRET_TOKEN as string, function (err, decoded) {
@@ -107,17 +116,42 @@ io.use((socket, next) => {
   } else {
     next(new Error('Authentication Error'))
   }
-}).on("connection", async function (socket) {
-  socket.emit('connected', "Connected!");
+}
 
-  const auth_service_api = 'http://auth:5000'
-  const decoded = socket.data.decoded as jwt.JwtPayload
-  const token = socket.handshake.query.token as string
+const checkTokenExpiry: SocketIOMiddleware = (socket, next) => {
+  const decoded = socket.data.decoded // Assuming the decoded user is save on socket.user
 
-  const env = await requestUserEnvironment(auth_service_api, token, decoded.user)
-
-  if (env !== null) {
-    connectToEnvironment(env, socket)
+  if (!decoded?.exp) {
+    return next()
   }
-});
+
+  const expiresIn = (decoded.exp - Date.now() / 1000) * 1000
+  console.log("Setting expry:", expiresIn)
+  const timeout = timer.setTimeout(() => {
+    socket.disconnect(true)
+    console.log("Disconnecting socket")
+  }, expiresIn)
+
+  socket.on('disconnect', () => timer.clearTimeout(timeout))
+
+  return next()
+}
+
+//Socket Connection
+io
+  .use(authenticateUser)
+  .use(checkTokenExpiry)
+  .on("connection", async function (socket) {
+    socket.emit('connected', "Connected!");
+
+    const auth_service_api = 'http://auth:5000'
+    const decoded = socket.data.decoded as jwt.JwtPayload
+    const token = socket.handshake.query.token as string
+
+    const env = await requestUserEnvironment(auth_service_api, token, decoded.user)
+
+    if (env !== null) {
+      connectToEnvironment(env, socket)
+    }
+  });
 

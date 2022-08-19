@@ -8,12 +8,12 @@ import fetchData from '../../components/App/fetch';
 const auth_api_url = 'http://localhost:5000'
 
 export default function Dashboard(){
-  const {token, setToken} = React.useContext(AuthContext)
+  const {token, setToken, refresh_token} = React.useContext(AuthContext)
   const [searchParams, setSearchParams] = useSearchParams();
   
   React.useEffect( () => {
     async function setParam(){
-      const data = await fetchData(token, setToken, `${auth_api_url}/users/me`, {
+      const data = await fetchData(auth_api_url, `/users/me`, token, refresh_token, setToken, {
         method: 'GET'
       })
       if(data !== undefined)

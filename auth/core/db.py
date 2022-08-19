@@ -12,8 +12,11 @@ import dotenv
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
 
+MIGRATIONS=False
+
+postgres_host = "0.0.0.0" if MIGRATIONS else "postgresserver"
 # postgres:
-SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@postgresserver:5432"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{postgres_host}:5432"
 
 # sqlite ::: connect_args={"check_same_thread": False})
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -41,6 +44,13 @@ class Envionment(Base):
     ssh_user = Column(String, ForeignKey("user.username"))
     # back_populates="environment")
     owner = relationship(User, backref='environment')
+
+
+class RefreshTokens(Base):
+    __tablename__ = 'refresh_tokens'
+    token = Column(String, primary_key=True, index=True)
+    user = Column(String, ForeignKey("user.username"))
+    owner = relationship(User, backref='refresh_tokens')
 
 
 Base.metadata.create_all()

@@ -1,11 +1,10 @@
 import socket
 from contextlib import closing
-
-import subprocess
 import os
-from sys import stderr
 import jwt
 import dotenv
+import datetime
+import auth.core.schemas as schemas
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
@@ -18,38 +17,12 @@ def find_free_port():
         return s.getsockname()[1]
 
 
-def verify_jwt(token: str):
-    header_data = jwt.get_unverified_header(token)
-    print(os.environ['SECRET_TOKEN'])
-    return jwt.decode(
-        token,
-        key=os.environ['SECRET_TOKEN'],
-        algorithms=[header_data['alg'], ]
-    )
-
-
-def make_env(port: str, user: str, password: str):
-    # TODO: use kubernetes here
-    # Build container
-    wd = os.getcwd()
-    os.chdir(os.path.join(wd, 'auth/student-env'))
-    print("Building user image...")
-    buildcmd = subprocess.run(["docker", "build", "--build-arg",
-                              f"ssh_user={user}", "--build-arg", f"ssh_pass={password}", "-t", f"studentenv:{user}", "."], capture_output=True)
-    print(buildcmd)
-    os.chdir(wd)
-    print("Built image")
-    # Start container
-    container = subprocess.run(
-        ["docker", "run",  "-d", "--network", "envnet", "--name", f"env_{user}", "-p", f"{port}:22", f"studentenv:{user}"], capture_output=True)
-    if container.stderr:
-        print(container.stderr)
-        raise RuntimeError(container.stderr)
-    container_id = container.stdout.decode('utf8')
-    print("Created container on host: ", container_id)
-    print("Connecting container to network: envnet")
-    return container_id
-
-
-def kill_env(container_id: str):
-    subprocess.Popen(["docker", "kill", container_id])
+def gen_access_token(auth_user: schemas.UserCreate):
+    payload = {
+        "user": auth_user.username,
+        "email": auth_user.email,
+        "is_student": auth_user.is_student,
+        # Keep logged in for 5 mins before refresh
+        "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=300)
+    }
+    return jwt.encode(payload, key=os.environ['SECRET_TOKEN'])

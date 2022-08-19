@@ -10,9 +10,20 @@ export default function useToken() {
         sessionStorage.setItem('access_token', userToken)
         setToken(userToken)
     }
+    const getRefreshToken = () => {
+        return localStorage.getItem('refresh_token') || ""
+    }
+    const [refresh_token, setRefreshToken] = useState(getRefreshToken());
+
+    const saveRefreshToken = (userToken: string) => {
+        localStorage.setItem('refresh_token', userToken)
+        setRefreshToken(userToken)
+    }
 
     return {
         token,
-        setToken: saveToken
+        refresh_token,
+        setToken: saveToken,
+        setRefreshToken: saveRefreshToken
     }
 }

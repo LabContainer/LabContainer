@@ -26,6 +26,12 @@ POST http://0.0.0.0:5000/webapp/login
 Content-Type: application/json
 
 {
-    "username": "parth1",
-    "password": "abc3"
+    "username": "ccc",
+    "password": "ccc"
 }
+
+###
+GET http://0.0.0.0:5000/webapp/refresh
+Content-Type: application/json
+
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIn0.e5nQMK2iOagBvYOGkM3EoMAyZEvmTPxePnbi4xDczYU

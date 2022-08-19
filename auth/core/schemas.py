@@ -47,3 +47,4 @@ class EnvCreate(BaseModel):
 
 class LoginResult(BaseModel):
     access_token: str = None
+    refresh_token: str = None

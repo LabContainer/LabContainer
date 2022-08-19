@@ -22,7 +22,7 @@ const theme = createTheme();
 
 export default function Login() {
   const [failedMsg, setFailedMsg] = React.useState("");
-  const {token, setToken} = React.useContext(AuthContext)
+  const {token, refresh_token,setToken, setRefreshToken} = React.useContext(AuthContext)
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -33,7 +33,7 @@ export default function Login() {
     const password = data.get('password')
     if( username !== null && password !== null){
       // const auth_token = await loginUser(username as string, password as string);
-      const auth_token = await fetchData(token, setToken, `${api_url}/webapp/login`, {
+      const tokens = await fetchData(api_url, `/webapp/login`, token, refresh_token,setToken,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -42,10 +42,12 @@ export default function Login() {
           username,
           password
         })
-      }).then(r => r?.access_token);
-
-      if(auth_token !== undefined){
-        setToken(auth_token)
+      })
+      
+      if(tokens !== undefined){
+        const { access_token, refresh_token: new_refresh_token} = tokens 
+        setToken(access_token)
+        setRefreshToken(new_refresh_token)
         if(location.pathname === '/login'){
           // Redirect user to hashboard from login on success
           navigate('/dashboard')

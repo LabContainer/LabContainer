@@ -1,4 +1,4 @@
-import { Box, Container, Stack, styled } from "@mui/material";
+import { Box, Chip, Container, Stack, styled } from "@mui/material";
 import { red } from "@mui/material/colors";
 import React from "react";
 import ScrollTabs from "../../components/ScrollTabs/ScrollTabs";

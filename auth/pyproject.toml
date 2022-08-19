@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "auth"
+version = "0.1.0"
+description = ""
+authors = ["Parth Sindhu <sindhu.parth@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pydantic = "^1.9.1"
+SQLAlchemy = "^1.4.39"
+uvicorn = "^0.18.2"
+fastapi = "^0.79.0"
+python-dotenv = "^0.20.0"
+PyJWT = "^2.4.0"
+psycopg2 = "^2.9.3"
+bcrypt = "^3.2.2"
+alembic = "^1.8.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -17,7 +17,6 @@ async function logoutUser(token: string){
     }
   })
   if(response.ok){
-    console.log('Logout')
     return true
   }
   return false
@@ -25,7 +24,7 @@ async function logoutUser(token: string){
 
 function Navbar(){
     const navigate = useNavigate()
-    const {token, setToken} = useContext(AuthContext)
+    const {token, setToken, setRefreshToken} = useContext(AuthContext)
     return <>
         <h1 className="nav-header">Lab Capture</h1>
         <ul className="nav">
@@ -41,6 +40,7 @@ function Navbar(){
               if(token){
                 logoutUser(token)
                 setToken("")
+                setRefreshToken("")
                 navigate("/dashboard")
               }
             }}>Logout</li>

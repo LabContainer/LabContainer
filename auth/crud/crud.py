@@ -1,8 +1,9 @@
 from typing import List
 from sqlalchemy.orm import Session
 import bcrypt
+import jwt
 
-from auth.core.db import User, Envionment
+from auth.core.db import RefreshTokens, SessionLocal, User, Envionment
 import auth.core.schemas as schemas
 
 
@@ -67,3 +68,40 @@ def set_user_inactive(db: Session, username: str):
     db.commit()
     db.refresh(user)
     return user
+
+
+def add_rt(db: Session, username: str, token: str):
+    """
+    Add new rt for user
+    """
+    rt = RefreshTokens(token=token, user=username)
+    db.add(rt)
+    db.commit()
+
+
+def invalidate_rts(db: Session, username: str):
+    """
+    Invalidate all refresh tokens of user
+    """
+    rts = get_rts(db, username)
+    for rt in rts:
+        db.delete(rt)
+    db.commit()
+
+
+def get_rts(db: Session, username: str) -> List[RefreshTokens]:
+    """
+    Get all Refresh tokens for user.
+    """
+    return db.query(RefreshTokens).join(RefreshTokens.owner).filter(User.username == username).all()
+
+
+def check_rt(db: Session, username: str, token: str) -> bool:
+    """
+    Chaeck if user refresh token is valid
+    """
+    rts = get_rts(db, username)
+    for rt in rts:
+        if rt.token == token:
+            return True
+    return False

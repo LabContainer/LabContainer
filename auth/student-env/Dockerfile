@@ -14,4 +14,6 @@ RUN service ssh start
 
 EXPOSE 22
 
+SHELL ["/bin/bash", "-c"] 
+
 CMD ["/usr/sbin/sshd","-D"]

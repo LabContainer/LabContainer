@@ -13,25 +13,41 @@ const DashCard = React.lazy(async () => {
 })
 
 export default function StudentDashboard(){
-  const data : DashBoardData[] = [{
-    LabName : "TestLab",
-    Course : "TestCourse",
-    Instructor: "TestInstructor",
-    Progress: 30,
-    TimeLeft: "1day"
-  }, {
-    LabName : "TestLab",
-    Course : "TestCourse",
-    Instructor: "TestInstructor",
-    Progress: 30,
-    TimeLeft: "1day"
-  }, {
-    LabName : "TestLab",
-    Course : "TestCourse",
-    Instructor: "TestInstructor",
-    Progress: 30,
-    TimeLeft: "1day"
-  }]
+  const data : { 
+    data: DashBoardData,
+    id: number
+  }[] = [
+    { 
+      data: {
+        LabName : "TestLab",
+        Course : "TestCourse",
+        Instructor: "TestInstructor",
+        Progress: 30,
+        TimeLeft: "1day"
+      }, 
+      id: 1
+    },
+    { 
+      data: {
+        LabName : "TestLab",
+        Course : "TestCourse",
+        Instructor: "TestInstructor",
+        Progress: 30,
+        TimeLeft: "1day"
+      },
+      id: 2
+    },
+    { 
+      data: {
+        LabName : "TestLab",
+        Course : "TestCourse",
+        Instructor: "TestInstructor",
+        Progress: 30,
+        TimeLeft: "1day"
+      },
+      id: 3
+    }
+  ]
 
   return <>
     <Suspense fallback={<CircularIndeterminate/>}>
@@ -39,7 +55,7 @@ export default function StudentDashboard(){
       width: "80%",
       justifyContent: "space-evenly"
     }}>
-      {data.map(d =>  <DashCard data={d}/>)}
+      {data.map(d =>  <DashCard data={d.data} key={d.id}/>)}
 
     </Container>
     </Suspense>

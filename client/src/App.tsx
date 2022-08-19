@@ -12,9 +12,9 @@ import { AuthContext } from './components/App/AuthContext';
 
 
 function App() {
-  const {token, setToken} = useToken()
+  const {token, refresh_token, setToken, setRefreshToken} = useToken()
   return (
-    <AuthContext.Provider value={{token, setToken}}>
+    <AuthContext.Provider value={{token, refresh_token,setToken, setRefreshToken}}>
 
     <div className="App">
       <Navbar />

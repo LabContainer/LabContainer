@@ -27,6 +27,15 @@ def create_new_container(user: str, password: str):
     return [container_id, network, name]
 
 
+def check_env(conatiner_id: str) -> bool:
+    dockerps = subprocess.run(["docker", "ps", "-q"], capture_output=True)
+    running_ids = dockerps.stdout.decode('utf8').strip().split('\n')
+    for rid in running_ids:
+        if conatiner_id.startswith(rid):
+            return True
+    return False
+
+
 def kill_env(container_id: str):
     removed = subprocess.run(
         ["docker", "rm", container_id.strip(), "-f"], capture_output=True)
