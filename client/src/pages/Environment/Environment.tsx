@@ -1,5 +1,4 @@
-import { Box, Chip, Container, Stack, styled } from "@mui/material";
-import { red } from "@mui/material/colors";
+import { Stack} from "@mui/material";
 import React from "react";
 import ScrollTabs from "../../components/ScrollTabs/ScrollTabs";
 import { Suspense } from "react";
@@ -14,9 +13,7 @@ const Term = React.lazy(async () => {
     return import('../../components/Terminal/Terminal');
 })
 
-const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
-
-
+// const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 export default function Environment(){
     const [chosenFile, setChosenFile] = React.useState(1)
     React.useEffect(()=>{

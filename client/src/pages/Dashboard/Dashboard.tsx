@@ -28,7 +28,7 @@ export default function Dashboard(){
         }
     }
     setParam();
-  }, [token, setToken, setSearchParams])
+  }, [token, setToken, refresh_token, setSearchParams])
 
 
   const dashType = searchParams.get('type')

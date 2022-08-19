@@ -1,3 +1,0 @@
-docker-compose up -d postgresserver
-# Change MIGRATIONS=True in line 15 core/db.py
-alembic revision --autogenerate -m "<Revision Message>"

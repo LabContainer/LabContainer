@@ -4,12 +4,11 @@ import { io, Socket } from 'socket.io-client'
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useImmer } from "use-immer";
 import { FitAddon } from 'xterm-addon-fit'
-import { Box, Chip, Stack, Typography } from '@mui/material';
+import { Chip, Stack, Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done'
 import CloseIcon from '@mui/icons-material/Close'
 import './Terminal.css'
 import { AuthContext } from '../App/AuthContext';
-import CircularIndeterminate from '../common/CircularInderminate';
 import { Pending } from '@mui/icons-material';
 import { Container } from '@mui/system';
 import { refresh } from '../App/fetch';
