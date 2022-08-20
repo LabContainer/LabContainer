@@ -56,10 +56,12 @@ def create_student_env(db: Session, env: schemas.EnvCreate, username: str) -> En
 
 def remove_student_env(db: Session, username: str):
     db_env = get_env_for_user(db, username)
-    db.delete(db_env)
-    db.commit()
-    # db.refresh(db_env)
-    return db_env
+    if db_env is not None:
+        db.delete(db_env)
+        db.commit()
+    else:
+        print(f"No Env for user {username}")
+    return
 
 
 def set_user_inactive(db: Session, username: str):

@@ -30,7 +30,7 @@ docker-compose up
 - `auth` - Authentication service
 - `student-server` - Student Remote server to serve client, and connect to env container via ssh
 - `auth/student-env` - Student Working Container
-- `instructor-server` - Backend for course staff dashboard, analytics
+- `analytics-server` - Backend for course staff dashboard, analytics
 
 ## Links
 

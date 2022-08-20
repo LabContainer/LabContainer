@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
-export default function ScrollTabs({ tabList, setChosen } : { tabList : {tab: string, id: number}[], setChosen: React.Dispatch<React.SetStateAction<number>>} ) {
+export default function ScrollTabs({ tabList, setChosen } : { tabList : {tab: string, id: number}[], setChosen: (chosen: number) => void} ) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

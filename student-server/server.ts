@@ -86,12 +86,14 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
     });
   }).on("close", function () {
     socket.emit("data", "\r\n*** SSH CONNECTION CLOSED ***\r\n");
+    socket.disconnect()
   }).on("error", function (err) {
     console.log(err);
     socket.emit(
       "data",
       "\r\n*** SSH CONNECTION ERROR: " + err.message + " ***\r\n"
     );
+    socket.disconnect()
   }).connect({
     // host: env.ip_port.split(':')[0],
     // port: parseInt(env.ip_port.split(':')[1]),

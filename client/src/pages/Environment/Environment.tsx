@@ -1,6 +1,5 @@
-import { Stack} from "@mui/material";
+import { Stack } from "@mui/material";
 import React from "react";
-import ScrollTabs from "../../components/ScrollTabs/ScrollTabs";
 import { Suspense } from "react";
 import CircularIndeterminate from "../../components/common/CircularInderminate";
 
@@ -14,11 +13,8 @@ const Term = React.lazy(async () => {
 })
 
 // const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
-export default function Environment(){
-    const [chosenFile, setChosenFile] = React.useState(1)
-    React.useEffect(()=>{
-        // Editor to load file
-    }, [chosenFile])
+export default function Environment() {
+    
     return <>
         <Stack sx={{
             margin: "auto",
@@ -29,26 +25,14 @@ export default function Environment(){
             marginTop: "80px",
             marginBottom: "80px"
         }} direction="row" justifyContent={"center"}>
-            <Stack flex={1} >
-                <ScrollTabs
-                    tabList={[
-                        {
-                            tab: "file 1",
-                            id: 1
-                        }
-                    ]}
-                    setChosen = {setChosenFile}
-                />
-                {/* <E/> */}
-                <Editor></Editor>
-            </Stack>
+            <Editor></Editor>
             <Stack flex={1}>
-                <Suspense fallback={<CircularIndeterminate/>}>
-                    <Term/>
+                <Suspense fallback={<CircularIndeterminate />}>
+                    <Term />
                 </Suspense>
 
             </Stack>
         </Stack>
-        
+
     </>
 }
