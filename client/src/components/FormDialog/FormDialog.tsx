@@ -6,8 +6,19 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { Box, MenuItem, Select } from '@mui/material';
 
-export default function FormDialog({open, handleClose, handleSubmit} : {open : boolean , handleClose : React.MouseEventHandler<HTMLButtonElement>, handleSubmit: React.FormEventHandler<HTMLFormElement>}) {
+export default function FormDialog({open, handleClose, handleSubmit, languages} : 
+  {
+    open : boolean ,
+    handleClose : React.MouseEventHandler<HTMLButtonElement>, 
+    handleSubmit: React.FormEventHandler<HTMLFormElement>, 
+    languages: { 
+      lang: string,
+      key: number
+    }[]
+  }) {
+  const [lang, setLang] = React.useState(languages[0].lang)
   return (
     <div>
       <Dialog open={open} onClose={handleClose}>
@@ -17,16 +28,35 @@ export default function FormDialog({open, handleClose, handleSubmit} : {open : b
             Please Enter filename to create
           </DialogContentText>
           <form onSubmit={handleSubmit} id="dialog_form">
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="File Name"
-              name="filename"
-              type="name"
-              fullWidth
-              variant="standard"
-            />
+            <Box sx={{
+              display: "flex",
+              flexDirection: "row",
+              padding: "10px"
+            }}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="name"
+                label="File Name"
+                name="filename"
+                type="name"
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px"
+                }}
+              />
+              <Select
+                autoFocus
+                onChange={e => setLang(e.target.value)}
+                label="Language"
+                value={lang}
+                name="langSelect"
+                >
+                { languages.map( ({lang, key}) => <MenuItem value={lang} key={key}>{lang}</MenuItem>)}
+                
+              </Select>
+            </Box>
           </form>
         </DialogContent>
         <DialogActions>

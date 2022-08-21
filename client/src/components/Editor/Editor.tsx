@@ -4,10 +4,12 @@ import ScrollTabs from "../ScrollTabs/ScrollTabs";
 
 import * as ace from 'ace-builds/src-noconflict/ace'
 import 'ace-builds/src-noconflict/mode-python'
+import 'ace-builds/src-noconflict/mode-javascript'
 import 'ace-builds/src-noconflict/theme-solarized_light'
 import 'ace-builds/src-noconflict/ext-language_tools'
 import 'ace-builds/src-noconflict/snippets/python'
 import 'ace-builds/webpack-resolver'
+import 'ace-builds/src-noconflict/ext-beautify'
 import './Editor.css'
 import { Box , Button, Stack} from "@mui/material";
 import './Editor.css'
@@ -26,10 +28,11 @@ interface IState {
     tab: string,
     id: number,
     session: Ace.EditSession | undefined
-    mode: string
+    mode: string,
   }[],
   chosenFile: number,
   fileDialogOpen: boolean,
+  editorDestroyed: boolean
 }
 class Editor extends React.Component<IProps, IState> {
   ref;
@@ -38,14 +41,17 @@ class Editor extends React.Component<IProps, IState> {
     super(props)
     this.ref = React.createRef<ReactAce>()
     this.state = {
-      fileList : [{
-        tab: "file 1",
-        session: this.ref.current?.editor.getSession(),
-        id: 1,
-        mode: "python"
-      }],
+      fileList : [],
+      // TODO: To set initial file, could be loaded from props for lab session
+      // [{
+      //   tab: "file 1",
+      //   session: this.ref.current?.editor.getSession(),
+      //   id: 1,
+      //   mode: "python"
+      // }]
       chosenFile: 0,
-      fileDialogOpen: false
+      fileDialogOpen: false,
+      editorDestroyed: false
     }
     this.addFile = this.addFile.bind(this)
     this.setChosenFile = this.setChosenFile.bind(this)
@@ -54,20 +60,38 @@ class Editor extends React.Component<IProps, IState> {
   componentDidMount(): void {
     this.setState(state => {
       const newState = {...state}
-      newState.fileList[0].session = this.ref.current?.editor.getSession();
+      // newState.fileList[0].session = this.ref.current?.editor.getSession();
+      this.ref.current?.editor.destroy()
+      newState.editorDestroyed = true;
       return newState
     })
   }
   componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any): void {
     // Editor to load chosen file
-    const new_session = this.state.fileList[this.state.chosenFile].session
+    const new_session = this.state.fileList[this.state.chosenFile]?.session
     if(new_session){
       this.ref.current?.editor.setSession(new_session)
       return
     }
     const file = this.state.fileList[this.state.chosenFile]
+    // If invalid file do nothing
+    if(!file)
+      return
     console.log(`Creating Session. File ${file.tab} Mode: ${file.mode}`)
-    const session = ace.createEditSession(`File ${file.tab}`, file.mode)
+    if(this.ref.current && this.state.editorDestroyed){
+      this.ref.current.editor = ace.edit("aceeditor")
+      this.ref.current.editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+        showLineNumbers: true,
+        tabSize: 2,
+        useSoftTabs: true
+      })  
+      this.setState({editorDestroyed: false})
+    }
+    
+    const session : Ace.EditSession = ace.createEditSession(`File ${file.tab}`, file.mode)
     const updatedFileList = this.state.fileList.map( (file, index) => {
       if(index !== this.state.chosenFile) return file;
       file.session = session
@@ -78,6 +102,9 @@ class Editor extends React.Component<IProps, IState> {
     })
     this.ref.current?.editor.setSession(session)
     session.setValue("")
+    session.setMode(`ace/mode/${file.mode}`)
+    session.setTabSize(2)
+    session.setUseSoftTabs(true)
     // Set file list
     console.log("switched to session, react state updated")
   }
@@ -90,11 +117,12 @@ class Editor extends React.Component<IProps, IState> {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const filename = data.get('filename') as string
+    const lang = data.get('langSelect') as string
     const newFileList = this.state.fileList.concat({
       tab: filename,
       session: undefined,
-      id: this.state.fileList.slice(-1)[0].id + 1,
-      mode: "python"
+      id: (this.state.fileList.slice(-1)[0]?.id || 0) + 1,
+      mode: lang
     })
     this.setState({fileList: newFileList})
   }
@@ -110,7 +138,7 @@ class Editor extends React.Component<IProps, IState> {
           setChosen={this.setChosenFile}
           />
       <Box sx={{
-        backgroundColor: "white",
+        backgroundColor: "#f1f1f1",
         display: "flex",
         width: "fit-content",
         flexDirection: "row"
@@ -119,6 +147,18 @@ class Editor extends React.Component<IProps, IState> {
           open={this.state.fileDialogOpen}
           handleClose={this.closeAddFileDialog} 
           handleSubmit={this.addFile} 
+          languages={
+            [
+              {
+                lang: "python",
+                key: 1
+              },
+              {
+                lang: "javascript",
+                key: 2
+              }
+            ]
+          }
         />
         <Button variant="contained"  color="primary" size="small" sx={{
           margin: "8px"
@@ -140,8 +180,6 @@ class Editor extends React.Component<IProps, IState> {
             width: "100%",
             height: "100%"
           }}
-          placeholder="Placeholder Text"
-          mode="python"
           theme="github"
           name="aceeditor"
           ref={this.ref}
