@@ -19,9 +19,20 @@ services:
       - REFRESH_SECRET=${REFRESH_SECRET}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - authdb
+      - backend
+    restart: on-failure
+  analytics:
+    build: analytics
+    ports:
+      - "${ANALYTICS_PORT}:8000"
+    environment:
+      - SECRET_TOKEN=${SECRET_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
+      - /home/parth/work/sc-test/code-capture/sqlite.db:/app/sqlite.db
     networks:
       - backend
       - authdb

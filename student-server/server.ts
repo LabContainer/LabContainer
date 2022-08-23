@@ -11,6 +11,7 @@ import fetch from 'node-fetch'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import timer from 'long-timeout'
+import { setTokenSourceMapRange } from 'typescript'
 
 const app = express();
 config({
@@ -43,22 +44,34 @@ const io = new Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, Sock
 
 console.log('Waiting for Connections...')
 
-async function requestUserEnvironment(api_url: string, token: string, username: string) {
-  console.log('Requesting Auth Service for Environment...')
-  const resp = await fetch(`${api_url}/environment/${username}`, {
+async function requestUserEnvironment(api_url: string, team: string, username: string) {
+  console.log('Requesting Analytics Service for Environment...')
+  const token = jwt.sign({
+    user: username,
+    internal: "StudentService"
+  }, process.env.SECRET_TOKEN as string, {
+    expiresIn: '10s'
+  })
+  const resp = await fetch(`${api_url}/environment/${team}/${username}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
     }
   })
-  const env: any = await resp.json()
-  console.log('Received Environment from auth service: ', env)
-  return env
+  if (resp.ok) {
+    const env: any = await resp.json()
+    console.log('Received Environment from analytics service: ', env)
+    return env
+  } else {
+    console.error(await resp.text())
+  }
+  return undefined
 }
 
 async function connectToEnvironment(env: Environment, socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>) {
   console.log(`Starting Secure shell to ${env.host}`)
   let ssh = new SSHClient();
+
   ssh.on("ready", () => {
     socket.emit("data", "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n");
     ssh.shell((err, stream) => {
@@ -69,16 +82,15 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
         socket.disconnect(true)
       }
       // write user input to shell
-      socket
-        .on("data", data => {
-          data.replace('\0', '')
-          stream.write(data);
-        })
-        .on("disconnect", () => {
-          socket.emit("d")
-          console.log("Closing ssh")
-          ssh.end()
-        })
+      socket.on("data", data => {
+        data.replace('\0', '')
+        stream.write(data);
+      })
+      socket.on("disconnect", () => {
+        socket.emit("d")
+        console.log("Closing ssh")
+        ssh.end()
+      })
       stream
         //@ts-ignore
         .on("data", d => socket.emit("data", utf8.decode(d.toString("binary"))))
@@ -146,14 +158,18 @@ io
   .on("connection", async function (socket) {
     socket.emit('connected', "Connected!");
 
-    const auth_service_api = 'http://auth:5000'
+    const analyitcs_service_api = 'http://analytics:8000'
     const decoded = socket.data.decoded as jwt.JwtPayload
-    const token = socket.handshake.query.token as string
+    // const token = socket.handshake.query.token as string
 
-    const env = await requestUserEnvironment(auth_service_api, token, decoded.user)
+    const env = await requestUserEnvironment(analyitcs_service_api, socket.handshake.query.team as string, decoded.user)
 
-    if (env !== null) {
+    if (env) {
       connectToEnvironment(env, socket)
+    }
+    else {
+      console.log("No env found , deleting socket")
+      socket.disconnect(true)
     }
   });
 

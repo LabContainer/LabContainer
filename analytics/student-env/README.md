@@ -19,7 +19,7 @@ kubectl create deployment studentenv --image=studentenv:latest
 
 # When student logs in, increasing replicas
 kubectl scale deployment web --replicas=$Currently_Logged_in_users
-# find pod name, ip to put in auth db to assign to user
+# find pod name, ip to put in analytics db to assign to user
 
 # When user logs out removing the pod
 kubectl get pod # look in aut db for correct podname to remove

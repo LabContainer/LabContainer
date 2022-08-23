@@ -1,0 +1,66 @@
+# File for manual testing api server, install rest client extension in vscode
+GET http://0.0.0.0:8000/environment/te/pa
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjExNzM3Mzh9.UDYL46s_pIwM09ZseqrvL_5sTbVLjxY5BDP6T1zqSVU
+
+### login
+POST http://0.0.0.0:5000/webapp/login
+Content-Type: application/json
+
+{
+    "username": "ccc",
+    "password": "ccc"
+}
+
+## TESTING LABS
+
+###
+POST http://0.0.0.0:8000/labs/create
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+{
+    "id": "test2",
+    "course": "test",
+    "instructor": "test"
+}
+
+
+###
+GET http://0.0.0.0:8000/labs
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+###
+GET http://0.0.0.0:8000/labs/test
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+###
+GET http://0.0.0.0:8000/labs/test/teams
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+
+## TESTING TEAMS
+
+###
+POST http://0.0.0.0:8000/teams/create
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+{
+    "name": "testteam2",
+    "lab_id": "test"
+}
+
+###
+GET http://0.0.0.0:8000/teams?username=pa
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+###
+GET http://0.0.0.0:8000/teams/testteam3/labs
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+
+###
+POST http://0.0.0.0:8000/teams/testteam2/join?username=ccc
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+
+###
+POST http://0.0.0.0:8000/teams/testteam3/leave?username=pa
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ

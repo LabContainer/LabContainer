@@ -1,22 +1,20 @@
 [tool.poetry]
-name = "auth"
+name = "analytics"
 version = "0.1.0"
 description = ""
-authors = ["Parth Sindhu <sindhu.parth@gmail.com>"]
-license = "MIT"
+authors = ["Parth Sindhu <parth.sindhu@caseware.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pydantic = "^1.9.1"
-SQLAlchemy = "^1.4.39"
-uvicorn = "^0.18.2"
-fastapi = "^0.79.0"
-python-dotenv = "^0.20.0"
-PyJWT = "^2.4.0"
-psycopg2 = "^2.9.3"
+pydantic = "^1.9.2"
+SQLAlchemy = "^1.4.40"
 bcrypt = "^3.2.2"
+uvicorn = "^0.18.2"
+fastapi = "^0.79.1"
 alembic = "^1.8.1"
-requests = "^2.28.1"
+psycopg2 = "^2.9.3"
+PyJWT = "^2.4.0"
+python-dotenv = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 
