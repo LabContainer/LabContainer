@@ -65,7 +65,9 @@ async def get_environment(
         # TODO make secure with username and hashed password
         temp_pass = f"{username}#envpass"
 
-        container_id, network, name = create_new_container(username, temp_pass)
+        container_id, network, name = create_new_container(
+            username, team_name, temp_pass
+        )
         new_env = schemas.EnvCreate(
             id=container_id, host=name, network=network, ssh_password=temp_pass
         )

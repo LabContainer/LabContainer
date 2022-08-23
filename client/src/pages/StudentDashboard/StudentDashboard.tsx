@@ -5,7 +5,6 @@ import CircularIndeterminate from "../../components/common/CircularInderminate";
 
 import './StudentDashboard.css'
 import { DashBoardData } from "./DashboardCard";
-import useData from "../../components/App/useData";
 import fetchData from "../../components/App/fetch";
 import { AuthContext } from "../../components/App/AuthContext";
 import { AnalyticsServiceAPI } from "../../constants";
@@ -78,11 +77,16 @@ export default function StudentDashboard(){
   }[]>([])
   useEffect(() => {
     async function run(){
-      const data_list = await getData(user.username, token, refresh_token, setToken)
-      setData(data_list.map((d, i) => ({
-        data: d,
-        id: i
-      })))
+      console.log("fetching", user, token, refresh_token)
+      if(user){
+        const data_list = await getData(user.username, token, refresh_token, setToken)
+        setData(data_list.map((d, i) => ({
+          data: d,
+          id: i
+        })))
+      } else {
+        setToken("")
+      }
     }
     run()
   }, [user, token, refresh_token, setToken, setData])

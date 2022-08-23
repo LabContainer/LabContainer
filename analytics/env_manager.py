@@ -3,7 +3,7 @@ import subprocess
 import os
 
 
-def create_new_container(user: str, password: str):
+def create_new_container(user: str, team: str, password: str):
     # TODO: use kubernetes here
     # Build container image for user
     wd = os.getcwd()
@@ -26,7 +26,7 @@ def create_new_container(user: str, password: str):
     os.chdir(wd)
 
     # Start container
-    name = f"env_{user}"
+    name = f"env_{user}_{team}"
     network = "envnet"
     print(f"Starting new container: {name} in {network} network")
     # "-p", f"{port}:22" to access via port

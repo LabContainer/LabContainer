@@ -29,6 +29,8 @@ server.listen(serverPort, serverHost);
 
 interface SocketData {
   decoded: jwt.JwtPayload
+  timeout: timer.Timeout
+  ssh?: SSHClient
 }
 
 interface Environment {
@@ -42,7 +44,13 @@ interface Environment {
 //socket.io instantiation
 const io = new Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>(server, { cors: { origin: "*" } });
 
-console.log('Waiting for Connections...')
+console.log('Waiting for Connections....')
+
+// Store active user team envs here, allow only one per user - team
+// if multiple student servers, change to do redis locks
+var active_users: {
+  user: string, team: string
+}[] = []
 
 async function requestUserEnvironment(api_url: string, team: string, username: string) {
   console.log('Requesting Analytics Service for Environment...')
@@ -79,22 +87,32 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
         socket.emit(
           "data",
           "\r\n*** SSH SHELL ERROR: " + err.message + " ***\r\n");
+
         socket.disconnect(true)
       }
+      if (socket.disconnected) {
+        console.log("Disconnected socket received")
+        ssh.end()
+      }
+      socket.data.ssh = ssh
       // write user input to shell
       socket.on("data", data => {
         data.replace('\0', '')
         stream.write(data);
       })
-      socket.on("disconnect", () => {
-        socket.emit("d")
-        console.log("Closing ssh")
-        ssh.end()
-      })
+
       stream
         //@ts-ignore
-        .on("data", d => socket.emit("data", utf8.decode(d.toString("binary"))))
-        .on("close", ssh.end);
+        .on("data", d => {
+          const s = utf8.decode(d.toString("binary"))
+          socket.emit("data", s)
+        })
+        .on("close", () => {
+          console.log("Stream Closed!")
+          socket.disconnect(true)
+
+          ssh.end()
+        });
     });
   }).on("close", function () {
     socket.emit("data", "\r\n*** SSH CONNECTION CLOSED ***\r\n");
@@ -117,59 +135,96 @@ async function connectToEnvironment(env: Environment, socket: Socket<DefaultEven
 
 type SocketIOMiddleware = (socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>, next: (err?: ExtendedError | undefined) => any) => void
 
+const NO_ADDITIONAL_SESSIONS = 'no_additional'
+const NO_USER_TEAMS = 'no_user_team'
+const NO_TOKEN = 'no_token'
+const INVALID_TOKEN = 'invalid_token'
+
 const authenticateUser: SocketIOMiddleware = (socket, next) => {
   // Authenticate User
   if (socket.handshake.query && socket.handshake.query.token) {
     jwt.verify(socket.handshake.query.token as string, process.env.SECRET_TOKEN as string, function (err, decoded) {
       if (err)
-        return next(new Error('Authentication error'));
+        return next(new Error(INVALID_TOKEN));
       socket.data.decoded = decoded as jwt.JwtPayload;
       console.log('Connected to user: ', decoded)
       next();
     });
   } else {
-    next(new Error('Authentication Error'))
+    next(new Error(NO_TOKEN))
   }
 }
 
 const checkTokenExpiry: SocketIOMiddleware = (socket, next) => {
-  const decoded = socket.data.decoded // Assuming the decoded user is save on socket.user
+  const decoded = socket.data.decoded as jwt.JwtPayload// Assuming the decoded user is save on socket.user
 
   if (!decoded?.exp) {
-    return next()
+    next()
   }
 
-  const expiresIn = (decoded.exp - Date.now() / 1000) * 1000
+  const expiresIn = (decoded.exp as number - Date.now() / 1000) * 1000
   console.log("Setting expry:", expiresIn)
-  const timeout = timer.setTimeout(() => {
-    socket.disconnect(true)
+  socket.data.timeout = timer.setTimeout(() => {
+    socket.disconnect(false)
     console.log("Disconnecting socket")
   }, expiresIn)
+  next()
+}
 
-  socket.on('disconnect', () => timer.clearTimeout(timeout))
+const arrayContainsObject = (array: any[], object: any) => {
+  return array.some(item => Object.keys(item).every(key => item[key] === object[key]))
+}
 
-  return next()
+
+
+const checkMultipleSesions: SocketIOMiddleware = (socket, next) => {
+  const team = socket.handshake.query.team as string
+  const user = socket.data.decoded?.user as string
+  console.log("Checking Session", active_users)
+  if (team && user) {
+    if (!arrayContainsObject(active_users, { user, team })) {
+      active_users.push({ user, team })
+      console.log("Session Added", { user, team })
+      next()
+    } else next(new Error(NO_ADDITIONAL_SESSIONS))
+  } else next(new Error(NO_USER_TEAMS))
 }
 
 //Socket Connection
 io
   .use(authenticateUser)
   .use(checkTokenExpiry)
-  .on("connection", async function (socket) {
+  .use(checkMultipleSesions)
+  .on("connection", function (socket) {
     socket.emit('connected', "Connected!");
 
     const analyitcs_service_api = 'http://analytics:8000'
     const decoded = socket.data.decoded as jwt.JwtPayload
     // const token = socket.handshake.query.token as string
+    socket.on("disconnect", () => {
+      console.log("Closing ssh")
+      socket.emit("d")
+      socket.data.ssh?.end()
+      const ateam = socket.handshake.query.team
+      const auser = socket.data.decoded?.user
+      console.log("Removing", { auser, ateam })
+      active_users = active_users.filter(({ user, team }) =>
+        !(team === ateam &&
+          user === auser)
+      );
+      console.log("Removing", active_users)
+      if (socket.data.timeout)
+        timer.clearTimeout(socket.data.timeout)
+    })
 
-    const env = await requestUserEnvironment(analyitcs_service_api, socket.handshake.query.team as string, decoded.user)
-
-    if (env) {
-      connectToEnvironment(env, socket)
-    }
-    else {
-      console.log("No env found , deleting socket")
-      socket.disconnect(true)
-    }
+    requestUserEnvironment(analyitcs_service_api, socket.handshake.query.team as string, decoded.user).then(env => {
+      if (env) {
+        connectToEnvironment(env, socket)
+      }
+      else {
+        console.log("No env found , deleting socket")
+        socket.disconnect(true)
+      }
+    })
   });
 

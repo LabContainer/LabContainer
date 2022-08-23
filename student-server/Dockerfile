@@ -11,5 +11,6 @@ COPY . .
 
 RUN tsc
 EXPOSE 8080
+RUN npm i -g nodemon
 
-CMD [ "node" , "dist/server.js"]  
+CMD [ "nodemon" , "dist/server.js"]  

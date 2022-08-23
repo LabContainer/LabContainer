@@ -1,25 +1,37 @@
 import { useState } from "react";
+import { IUser } from "./AuthContext";
 
 export default function useToken() {
-    const getToken = () => {
-        return sessionStorage.getItem('access_token') || ""
+    const getAuth = () => {
+        const token = sessionStorage.getItem('access_token') || ""
+        if (token === "")
+            return { token, undefined }
+        let payload = jwtPayload(token)
+        const user = {
+            username: payload.user,
+            is_student: payload.is_student,
+            email: payload.email
+        }
+        return { token, user }
     }
-    const [token, setToken] = useState(getToken());
-    const [user, setUser] = useState({
-        username: "",
-        email: "",
-        is_student: false
-    });
+    const [token, setToken] = useState(getAuth().token);
+    const [user, setUser] = useState<IUser | undefined>(getAuth().user);
 
     const saveToken = (userToken: string) => {
         sessionStorage.setItem('access_token', userToken)
         setToken(userToken)
-        let payload = jwtPayload(userToken)
-        setUser({
-            username: payload.user,
-            is_student: payload.is_student,
-            email: payload.email
-        })
+        if (userToken !== "") {
+            let payload = jwtPayload(userToken)
+            setUser({
+                username: payload.user,
+                is_student: payload.is_student,
+                email: payload.email
+            })
+        } else {
+            console.log("Setting user undefined")
+            console.log("Setting token :", userToken)
+            setUser(undefined)
+        }
     }
     const getRefreshToken = () => {
         return localStorage.getItem('refresh_token') || ""

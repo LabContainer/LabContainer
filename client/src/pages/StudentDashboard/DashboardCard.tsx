@@ -22,6 +22,8 @@ export interface DashBoardData {
 
 export default function DashboardCard({data} : {data : DashBoardData}) {
   const {user} = React.useContext(AuthContext)
+  if(!user)
+    return <>No Auth Context</>
   return (
     <Card sx={{  margin: "30px" }}>
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: "space-evenly" }}>

@@ -53,7 +53,7 @@ def refresh(
 
 
 @router.post("/logout")
-def logout(payload: Dict = Depends(has_access), db: SessionLocal = Depends(get_db)):
+def logout(payload: Dict = Depends(has_refresh), db: SessionLocal = Depends(get_db)):
     crud.set_user_inactive(db, payload["user"])
     crud.invalidate_rts(db, payload["user"])
     # TODO

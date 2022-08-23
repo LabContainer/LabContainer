@@ -28,6 +28,7 @@
     "@types/jsonwebtoken": "^8.5.8",
     "@types/long-timeout": "^0.1.0",
     "@types/ssh2": "^1.11.5",
-    "@types/utf8": "^3.0.1"
+    "@types/utf8": "^3.0.1",
+    "nodemon": "^2.0.19"
   }
 }

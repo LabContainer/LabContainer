@@ -8,12 +8,12 @@ import { AuthContext } from "../App/AuthContext";
 
 const api_url = 'http://localhost:5000'
 
-async function logoutUser(token: string){
+async function logoutUser(refresh_token: string){
   const response = await fetch(`${api_url}/webapp/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${refresh_token}`
     }
   })
   if(response.ok){
@@ -24,7 +24,7 @@ async function logoutUser(token: string){
 
 function Navbar(){
     const navigate = useNavigate()
-    const {token, setToken, setRefreshToken} = useContext(AuthContext)
+    const {token, refresh_token, setToken, setRefreshToken} = useContext(AuthContext)
     return <>
         <h1 className="nav-header">Lab Capture</h1>
         <ul className="nav">
@@ -38,7 +38,7 @@ function Navbar(){
           </IconButton>
           <li className="nav-item" onClick={ () => { 
               if(token){
-                logoutUser(token)
+                logoutUser(refresh_token)
                 setToken("")
                 setRefreshToken("")
                 navigate("/dashboard")

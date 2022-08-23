@@ -1,7 +1,7 @@
 // Import XTerm
 import { XTerm } from 'xterm-for-react'
 import { io, Socket } from 'socket.io-client'
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useImmer } from "use-immer";
 import { FitAddon } from 'xterm-addon-fit'
 import { Chip, Stack, Typography } from '@mui/material';
@@ -11,17 +11,20 @@ import './Terminal.css'
 import { AuthContext } from '../App/AuthContext';
 import { Pending } from '@mui/icons-material';
 import { Container } from '@mui/system';
-import useRefresh from '../App/useRefresh';
-import { StudentServiceAPI } from '../../constants';
+import { AuthServiceAPI, StudentServiceAPI } from '../../constants';
+import { refresh } from '../App/fetch';
 
 enum EnvStatus{
     disconnected,
     connected,
     connecting
 }
+const NO_ADDITIONAL_SESSIONS = 'no_additional'
+const NO_USER_TEAMS = 'no_user_team'
+const NO_TOKEN = 'no_token'
+const INVALID_TOKEN = 'invalid_token'
 
 function Term({team, user} : {team : string, user: string}){
-    const refresh = useRefresh()
     function onKey(event : {key : string, domEvent: KeyboardEvent}){
         const  {key , domEvent} = event
         const code = key.charCodeAt(0);
@@ -46,17 +49,38 @@ function Term({team, user} : {team : string, user: string}){
             xtermRef.current?.terminal.write(key)
         }
     }
-    const {token} = useContext(AuthContext)
+    const {token, refresh_token, setToken} = useContext(AuthContext)
     const [data, setData] = useImmer("")
     const xtermRef = useRef<XTerm>(null)
     const socketRef = useRef<Socket>()
     const commandRef = useRef<string>("")
-    const reconnectRef = useRef<NodeJS.Timer>()
+    const tokenRef = useRef<string>(token)
     const [status, setStatus] = useState(EnvStatus.disconnected)
     
-
     // Connect to remote container via ssh
     useEffect( () => {
+        const onConnect = () => {
+            console.log("Connected")
+            xtermRef.current?.terminal.writeln("Backend Connected!")
+            setStatus(EnvStatus.connected)
+        }
+    
+        const onDisconnect = () => {
+            xtermRef.current?.terminal.writeln("***Disconnected from backend***");
+            refresh(AuthServiceAPI, refresh_token, setToken)
+            setStatus(EnvStatus.disconnected)
+        }
+        const onConnectError = (err: Error) => {
+            if(err.message === INVALID_TOKEN)
+                refresh(AuthServiceAPI, refresh_token, setToken)
+            else if(err.message === NO_ADDITIONAL_SESSIONS)
+                xtermRef.current?.terminal.writeln("***Connection limit reached***")
+            else console.error(err.message)
+            setStatus(EnvStatus.disconnected)
+        }
+        const onData =  (msg : string) => {
+            setData(msg)
+        }
         // Initial load
         setStatus(EnvStatus.disconnected)
         const server_url='http://localhost:8080';
@@ -93,62 +117,25 @@ function Term({team, user} : {team : string, user: string}){
             }
             return true
         })
+        
+        socketRef?.current?.on("connect", onConnect);
+        socketRef?.current?.on("data", onData)
+        socketRef?.current?.on("disconnect", onDisconnect);
+        socketRef?.current?.on("connect_error", onConnectError);
         return () => {
             socketRef.current?.off('disconnect');
-            clearInterval(reconnectRef.current)
             socketRef.current?.disconnect()
-            console.log(1)
         }
-    }, [token, refresh, team])
+    }, [token, team, setData,  refresh_token, setToken])
 
     useEffect(() => {
-        xtermRef.current?.terminal.write(data)
-        return () => {
-            socketRef.current?.off('disconnect');
-            clearInterval(reconnectRef.current)
-            socketRef.current?.disconnect()
-            console.log(2)
-        }
+        xtermRef.current?.terminal.write(data);
     }, [data])
-
-    useEffect(() => {
-        const tryConnect = async () => {
-            setStatus(EnvStatus.connecting)
-            refresh()
-            if (socketRef?.current?.connected === false) {
-                // use a connect() or reconnect() here if you want
-                socketRef.current = io(StudentServiceAPI, {
-                    query: {
-                        token,
-                        team
-                    },
-                }) as unknown as Socket;
-            }
-        }
-        reconnectRef.current = setInterval(tryConnect, 2000)
-        socketRef?.current?.on("connect", () => {
-            xtermRef.current?.terminal.writeln("Backend Connected!")
-            clearInterval(reconnectRef.current)
-            setStatus(EnvStatus.connected)
-        });
-
-        socketRef?.current?.on("data", msg => {
-            setData(msg)
-        })
-        socketRef?.current?.on("disconnect", function() {
-            xtermRef.current?.terminal.writeln("***Disconnected from backend***");
-            reconnectRef.current = setInterval(tryConnect, 5000)
-            setStatus(EnvStatus.disconnected)
-        });
-        return ()  => {
-            socketRef.current?.off('disconnect');
-            clearInterval(reconnectRef.current)
-            socketRef.current?.disconnect()
-            console.log(3)
-        }
-    }, [refresh, setData, team, token])
     
-
+    useEffect(() => {
+        tokenRef.current=token
+    }, [token])
+    
     return <Stack sx={{
     }} flex={1}>
         <Stack direction="row" spacing={1}>
