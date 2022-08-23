@@ -11,7 +11,8 @@ import './Terminal.css'
 import { AuthContext } from '../App/AuthContext';
 import { Pending } from '@mui/icons-material';
 import { Container } from '@mui/system';
-import { refresh } from '../App/fetch';
+import useRefresh from '../App/useRefresh';
+import { StudentServiceAPI } from '../../constants';
 
 enum EnvStatus{
     disconnected,
@@ -19,7 +20,8 @@ enum EnvStatus{
     connecting
 }
 
-function Term(){
+function Term({team, user} : {team : string, user: string}){
+    const refresh = useRefresh()
     function onKey(event : {key : string, domEvent: KeyboardEvent}){
         const  {key , domEvent} = event
         const code = key.charCodeAt(0);
@@ -44,7 +46,7 @@ function Term(){
             xtermRef.current?.terminal.write(key)
         }
     }
-    const {token, refresh_token, setToken} = useContext(AuthContext)
+    const {token} = useContext(AuthContext)
     const [data, setData] = useImmer("")
     const xtermRef = useRef<XTerm>(null)
     const socketRef = useRef<Socket>()
@@ -59,7 +61,10 @@ function Term(){
         setStatus(EnvStatus.disconnected)
         const server_url='http://localhost:8080';
         socketRef.current = io(server_url, {
-            query: {token}
+            query: {
+                token,
+                team
+            }
         }) as unknown as Socket;
         setStatus(EnvStatus.connecting)
 
@@ -89,26 +94,34 @@ function Term(){
             return true
         })
         return () => {
-            if(socketRef.current?.connected){
-                socketRef.current.disconnect()
-            }
+            socketRef.current?.off('disconnect');
+            clearInterval(reconnectRef.current)
+            socketRef.current?.disconnect()
+            console.log(1)
         }
-    }, [token])
+    }, [token, refresh, team])
 
     useEffect(() => {
         xtermRef.current?.terminal.write(data)
+        return () => {
+            socketRef.current?.off('disconnect');
+            clearInterval(reconnectRef.current)
+            socketRef.current?.disconnect()
+            console.log(2)
+        }
     }, [data])
 
     useEffect(() => {
         const tryConnect = async () => {
             setStatus(EnvStatus.connecting)
-            const server_url='http://localhost:8080';
-            const auth_url='http://localhost:5000';
-            await refresh(auth_url, refresh_token, setToken)
+            refresh()
             if (socketRef?.current?.connected === false) {
                 // use a connect() or reconnect() here if you want
-                socketRef.current = io(server_url, {
-                    query: {token}
+                socketRef.current = io(StudentServiceAPI, {
+                    query: {
+                        token,
+                        team
+                    },
                 }) as unknown as Socket;
             }
         }
@@ -127,8 +140,13 @@ function Term(){
             reconnectRef.current = setInterval(tryConnect, 5000)
             setStatus(EnvStatus.disconnected)
         });
-        return () => clearInterval(reconnectRef.current)
-    }, [token, refresh_token, setToken, setData])
+        return ()  => {
+            socketRef.current?.off('disconnect');
+            clearInterval(reconnectRef.current)
+            socketRef.current?.disconnect()
+            console.log(3)
+        }
+    }, [refresh, setData, team, token])
     
 
     return <Stack sx={{

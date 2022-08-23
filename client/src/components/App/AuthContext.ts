@@ -1,9 +1,9 @@
 import { createContext } from "react";
 
-interface User {
+export interface User {
     username: string,
     email: string,
-    is_student: string
+    is_student: boolean
 }
 
 // Default Auth Context
@@ -15,7 +15,7 @@ export const AuthContext = createContext({
     user: {
         username: "",
         email: "",
-        is_student: ""
-    },
-    setUser: (user: User) => { }
+        is_student: false
+    }
 })
+

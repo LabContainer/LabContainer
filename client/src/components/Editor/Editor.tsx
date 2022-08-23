@@ -20,7 +20,8 @@ import FormDialog from "../FormDialog/FormDialog";
 
 
 interface IProps {
-
+  team : string, 
+  user: string
 }
 
 interface IState {

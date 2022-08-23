@@ -5,10 +5,21 @@ export default function useToken() {
         return sessionStorage.getItem('access_token') || ""
     }
     const [token, setToken] = useState(getToken());
+    const [user, setUser] = useState({
+        username: "",
+        email: "",
+        is_student: false
+    });
 
     const saveToken = (userToken: string) => {
         sessionStorage.setItem('access_token', userToken)
         setToken(userToken)
+        let payload = jwtPayload(userToken)
+        setUser({
+            username: payload.user,
+            is_student: payload.is_student,
+            email: payload.email
+        })
     }
     const getRefreshToken = () => {
         return localStorage.getItem('refresh_token') || ""
@@ -24,6 +35,11 @@ export default function useToken() {
         token,
         refresh_token,
         setToken: saveToken,
-        setRefreshToken: saveRefreshToken
+        setRefreshToken: saveRefreshToken,
+        user
     }
+}
+
+export function jwtPayload(t: string) {
+    return JSON.parse(window.atob(t.split('.')[1]));
 }
