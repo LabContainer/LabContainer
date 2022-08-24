@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Box, Container, Typography, Stack } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Suspense } from "react";
 import CircularIndeterminate from "../../components/common/CircularInderminate";
@@ -11,7 +11,6 @@ import { AnalyticsServiceAPI } from "../../constants";
 const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 
 const DashCard = React.lazy(async () => {
-    await sleep(1000)
     return import('./DashboardCard');
 })
 
@@ -91,16 +90,36 @@ export default function StudentDashboard(){
     run()
   }, [user, token, refresh_token, setToken, setData])
 
-  return <>
-    <Suspense fallback={<CircularIndeterminate/>}>
-    <Container sx={{
+  return <> 
+  <Box sx={{
+    display : "flex",
+    justifyContent: "center"
+  }}>
+    <Stack sx={{
       width: "80%",
-      justifyContent: "space-evenly"
+      alignItems: "center"
     }}>
-      {data.map(d =>  <DashCard data={d.data} key={d.id}/>)}
+      <Typography variant="h4">
+        Hi , {user?.username}
+      </Typography>
+      <Typography variant="h6">
+        Current labs
+      </Typography>
+      <Suspense fallback={<CircularIndeterminate/>}>
+      <Container sx={{
+        width: "80%",
+        justifyContent: "space-evenly"
+      }}>
+        {  data.length ?
+         data.map(d =>  <DashCard data={d.data} key={d.id}/>)
+        :
+        <p> No Labs Available for user</p>
+        }
 
-    </Container>
-    </Suspense>
+      </Container>
+      </Suspense>
+    </Stack>
+  </Box>
   </>
 }
 

@@ -19,10 +19,6 @@ enum EnvStatus{
     connected,
     connecting
 }
-const NO_ADDITIONAL_SESSIONS = 'no_additional'
-const NO_USER_TEAMS = 'no_user_team'
-const NO_TOKEN = 'no_token'
-const INVALID_TOKEN = 'invalid_token'
 
 function Term({team, user} : {team : string, user: string}){
     function onKey(event : {key : string, domEvent: KeyboardEvent}){
@@ -54,8 +50,14 @@ function Term({team, user} : {team : string, user: string}){
     const xtermRef = useRef<XTerm>(null)
     const socketRef = useRef<Socket>()
     const commandRef = useRef<string>("")
+    const tokenRef = useRef<string>(token)
+    const reconnectRef = useRef<NodeJS.Timer>()
+    const reconnectingRef = useRef<NodeJS.Timer>()
     const [status, setStatus] = useState(EnvStatus.disconnected)
+    const didMount = useRef(false)
     
+    
+
     // Connect to remote container via ssh
     useEffect( () => {
         const onConnect = () => {
@@ -63,22 +65,12 @@ function Term({team, user} : {team : string, user: string}){
             xtermRef.current?.terminal.writeln("Backend Connected!")
             setStatus(EnvStatus.connected)
         }
-    
-        const onDisconnect = () => {
-            xtermRef.current?.terminal.writeln("***Disconnected from backend***");
-            refresh(AuthServiceAPI, refresh_token, setToken)
-            setStatus(EnvStatus.disconnected)
-        }
-        const onConnectError = (err: Error) => {
-            if(err.message === INVALID_TOKEN)
-                refresh(AuthServiceAPI, refresh_token, setToken)
-            else if(err.message === NO_ADDITIONAL_SESSIONS)
-                xtermRef.current?.terminal.writeln("***Connection limit reached***")
-            else console.error(err.message)
-            setStatus(EnvStatus.disconnected)
-        }
         const onData =  (msg : string) => {
             setData(msg)
+        }
+        const onDisconnect = () => {
+            xtermRef.current?.terminal.writeln("***Disconnected from backend***");
+            setStatus(EnvStatus.disconnected)
         }
         // Initial load
         setStatus(EnvStatus.disconnected)
@@ -89,7 +81,7 @@ function Term({team, user} : {team : string, user: string}){
                 team
             }
         }) as unknown as Socket;
-        setStatus(EnvStatus.connecting)
+        // setStatus(EnvStatus.connecting)
 
         let fitaddon = new FitAddon();
         xtermRef.current?.terminal.loadAddon(fitaddon);
@@ -120,16 +112,64 @@ function Term({team, user} : {team : string, user: string}){
         socketRef?.current?.on("connect", onConnect);
         socketRef?.current?.on("data", onData)
         socketRef?.current?.on("disconnect", onDisconnect);
-        socketRef?.current?.on("connect_error", onConnectError);
-        return () => {
-            socketRef.current?.off('disconnect');
-            socketRef.current?.disconnect()
-        }
-    }, [token, team, setData,  refresh_token, setToken])
+        // return () => {
+            // socketRef.current?.off('disconnect');
+            // clearInterval(reconnectRef.current)
+            // socketRef.current?.disconnect()
+        // }
+    }, [token, team, setData])
 
     useEffect(() => {
         xtermRef.current?.terminal.write(data);
     }, [data])
+    
+    // useEffect(() => {
+    //     tokenRef.current=token
+    // }, [token])
+
+    // // Hook to reconnect if failure
+    // useEffect(() => {
+    //     // Do not run recconection hook on initial render
+    //     async function tryConnect(){
+    //         await refresh(AuthServiceAPI, refresh_token, setToken)
+    //         if (socketRef?.current?.connected === false) {
+    //             console.log("here")
+    //             setStatus(EnvStatus.disconnected)
+    //             // use a connect() or reconnect() here if you want
+    //             socketRef.current = io(StudentServiceAPI, {
+    //                 query: {
+    //                     token: tokenRef.current,
+    //                     team
+    //                 },
+    //             }) as unknown as Socket;
+
+    //             socketRef?.current?.on("disconnect", onDisconnect);
+    //             socketRef?.current?.on("connect", onConnect);
+    //             socketRef?.current?.on("data", onData)
+
+                
+    //         } else if(socketRef?.current?.connected === true){
+    //             setStatus(EnvStatus.connected)
+    //         } else if(socketRef?.current?.connected === false)
+    //         console.log(socketRef?.current?.connected)
+    //     }
+    //     if(didMount.current){
+    //         if(status === EnvStatus.disconnected){
+    //             reconnectRef.current = setInterval(tryConnect, 5000)
+    //         }
+    //         else if (status === EnvStatus.connected){
+    //             clearInterval(reconnectRef.current)
+    //             clearTimeout(reconnectingRef.current)
+    //         }else {
+
+    //             reconnectingRef.current = setTimeout(tryConnect, 5000)
+                
+    //             // reconnectRef.current = setTimeout(tryConnect, 5000)
+    //             // alert("Timeout")
+    //         }
+    //     }
+    //     else didMount.current = true
+    // }, [status])
     
     return <Stack sx={{
     }} flex={1}>

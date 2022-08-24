@@ -1,7 +1,5 @@
 from typing import Any, Union, List
 from sqlalchemy.orm import Session
-import bcrypt
-import jwt
 from sqlalchemy.orm import Session
 from analytics.core.db import Envionment, Lab, Team, User
 import analytics.core.schemas as schemas
@@ -13,12 +11,20 @@ def create_lab(db: Session, lab: schemas.LabCreate):
     db.commit()
 
 
-def get_lab(db: Session, lab_id: str):
+def get_lab(db: Session, lab_id: str) -> Union[Lab, None]:
     return db.query(Lab).filter(Lab.id == lab_id).first()
 
 
 def get_labs(db: Session):
     return db.query(Lab).all()
+
+
+def get_users_per_lab(db: Session, lab_id: str):
+    return db.query(User).join(User.labs).filter(Lab.id == lab_id).all()
+
+
+def get_labs_for_user(db: Session, username: str):
+    return db.query(Lab).join(Lab.users).filter(User.name == username).all()
 
 
 def create_team(db: Session, team: schemas.TeamCreate):
@@ -34,6 +40,32 @@ def get_team(db: Session, team_name: str) -> Union[Team, None]:
     return db.query(Team).filter(Team.name == team_name).first()
 
 
+def add_user_to_lab(db: Session, username: str, lab_id: str):
+    user = get_user(db, username)
+    # define user if none
+    if user is None:
+        user = User(name=username)
+        db.add(user)
+
+    lab = get_lab(db, lab_id)
+    lab.users.append(user)
+    db.commit()
+    return
+
+
+def remove_user_from_lab(db: Session, username: str, lab_id: str):
+    user = get_user(db, username)
+    # define user if none
+    if user is None:
+        raise Exception("Invalid User")
+
+    lab = get_lab(db, lab_id)
+    if not lab:
+        raise Exception("Invalid Lab")
+    lab.users.remove(user)
+    db.commit()
+
+
 def get_teams_per_lab(db: Session, lab_id: str) -> List[Team]:
     return db.query(Team).join(Team.lab).filter(Lab.id == lab_id).all()
 
@@ -47,7 +79,7 @@ def get_lab_for_team(db: Session, team_name: str) -> Union[Any, Lab]:
 
 
 def get_users_in_team(db: Session, team_name: str) -> List[User]:
-    return db.query(User).join(User.team).filter(Team.name == team_name).all()
+    return db.query(User).join(User.teams).filter(Team.name == team_name).all()
 
 
 def get_user(db: Session, username: str) -> Union[User, None]:
@@ -58,14 +90,18 @@ def join_team(db: Session, team_name: str, username: str):
     user = get_user(db, username)
     if user is None:
         # User is none, Can't be in other teams for the same lab
-        team = get_team(db, team_name)
-        user = User(name=username)
-        team.users.append(user)
-        db.commit()
-        return
+        return Exception("No user in database, Add to lab")
 
-    teams = get_teams_for_user(db, username)
+    user_labs = get_labs_for_user(db, username)
     lab = get_lab_for_team(db, team_name)
+    # check if user in labs
+    valid = False
+    for ulab in user_labs:
+        if ulab.id == lab.id:
+            valid = True
+    if not valid:
+        raise Exception(f"User not in lab {lab.id}")
+    teams = get_teams_for_user(db, username)
     for team in teams:
         if team.lab_id == lab.id:
             raise Exception("User already in team for lab")
@@ -86,7 +122,10 @@ def leave_team(db: Session, team_name: str, username: str):
 
 
 def delete_team(db: Session, team_name: str):
-    pass
+    team = get_team(db, team_name)
+    if team:
+        db.delete(team)
+        db.commit()
 
 
 def get_env_for_user_team(

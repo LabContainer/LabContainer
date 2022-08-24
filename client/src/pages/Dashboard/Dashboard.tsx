@@ -4,16 +4,13 @@ import InstructorDashboard from '../InstructorDashboard/InstructorDashboard';
 import StudentDashboard from '../StudentDashboard/StudentDashboard';
 
 export default function Dashboard(){
-  const {user, token, setToken} = React.useContext(AuthContext)
+  const {user} = React.useContext(AuthContext)
   if(user)
     if(user.is_student)
       return <StudentDashboard />
     else
       return <InstructorDashboard />
   else {
-    console.log(user)
-    console.log(token)
-    // setToken("")
   }
   return <>No Auth Context</>
 }

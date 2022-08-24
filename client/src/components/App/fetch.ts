@@ -39,7 +39,7 @@ export async function refresh(base_url: string, refresh_token: string, setToken:
     const json = await response.json()
     setToken(json.access_token)
   } else {
-    if (Math.floor(response.status / 100) === 4) {
+    if (response.status === 401) {
       // Logout
       setToken("")
     }
