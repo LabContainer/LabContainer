@@ -8,7 +8,7 @@ import { DashBoardData } from "./DashboardCard";
 import fetchData from "../../components/App/fetch";
 import { AuthContext } from "../../components/App/AuthContext";
 import { AnalyticsServiceAPI } from "../../constants";
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const DashCard = React.lazy(async () => {
   return import("./DashboardCard");
