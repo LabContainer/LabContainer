@@ -7,6 +7,14 @@ POST http://0.0.0.0:5000/webapp/login
 Content-Type: application/json
 
 {
+    "username": "xx",
+    "password": "xx"
+}
+### login
+POST http://0.0.0.0:5000/webapp/login
+Content-Type: application/json
+
+{
     "username": "ccc",
     "password": "ccc"
 }
@@ -36,6 +44,14 @@ Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW
 GET http://0.0.0.0:8000/labs/test/teams
 Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
 
+###
+GET http://0.0.0.0:8000/labs/aa/users
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoieHgiLCJlbWFpbCI6Inh4eCIsImlzX3N0dWRlbnQiOmZhbHNlLCJleHAiOjE2NjE0MzkwNDh9.8rEjoFbOpNWEFloyCt_yrcKaIj8uCdUZVpch0oTecuY
+
+###
+GET http://0.0.0.0:8000/labs?username=ccc
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEzNTAwMTd9.l5AhQNhErvJJrAoSLybKirt7nr55DJrliriZIe5wBxI
+
 
 ## TESTING TEAMS
 
@@ -44,22 +60,22 @@ POST http://0.0.0.0:8000/teams/create
 Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
 
 {
-    "name": "testteam2",
-    "lab_id": "test"
+    "name": "testteam4",
+    "lab_id": "test2"
 }
 
 ###
-GET http://0.0.0.0:8000/teams?username=pa
-Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+GET http://0.0.0.0:8000/teams?username=ccc
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEzNTAwMTd9.l5AhQNhErvJJrAoSLybKirt7nr55DJrliriZIe5wBxI
 
 ###
-GET http://0.0.0.0:8000/teams/testteam3/labs
+GET http://0.0.0.0:8000/teams/testteam2
 Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
 
 
 ###
-POST http://0.0.0.0:8000/teams/testteam2/join?username=ccc
-Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEwODE0ODN9.u0kDhPOeOdDGeva2oWrLu2b_yKOhgWwIpIceQZUeLnQ
+POST http://0.0.0.0:8000/teams/testteam4/join?username=ccc
+Authorization:Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiY2NjIiwiZW1haWwiOiJjY2MiLCJpc19zdHVkZW50Ijp0cnVlLCJleHAiOjE2NjEzNTAwMTd9.l5AhQNhErvJJrAoSLybKirt7nr55DJrliriZIe5wBxI
 
 ###
 POST http://0.0.0.0:8000/teams/testteam3/leave?username=pa

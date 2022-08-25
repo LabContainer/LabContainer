@@ -67,7 +67,7 @@ def add_lab_user(
 
 
 @router.delete("/{lab_id}/users")
-def delete_lab(
+def delete_lab_user(
     lab_id: str,
     username: str,
     response: Response,
@@ -103,6 +103,8 @@ def get_lab_teams(
     payload: Dict[str, str] = Depends(has_access),
     db: SessionLocal = Depends(get_db),
 ):
-    if not payload["is_student"]:
+    if not payload["is_student"] or payload["user"] in [
+        user.name for user in crud.get_users_per_lab(db, lab_id)
+    ]:
         return crud.get_teams_per_lab(db, lab_id)
     response.status_code = status.HTTP_403_FORBIDDEN

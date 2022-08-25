@@ -1,9 +1,9 @@
 .nav-header {
-    text-align: center;
-    color: white;
-    background-color: rgb(102, 160, 210);
-    margin: 0px;
-    padding: 10px;
+  text-align: center;
+  color: white;
+  background-color: rgb(102, 160, 210);
+  margin: 0px;
+  padding: 10px;
 }
 
 .nav {
@@ -33,7 +33,7 @@
 }
 
 .active {
-  background-color: #04AA6D;
+  background-color: #04aa6d;
 }
 
 .notifications {

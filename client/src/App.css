@@ -1,10 +1,9 @@
-
 body {
   background-color: rgb(77, 127, 127);
   height: 100vh;
 }
 
-#root, .App {
+#root,
+.App {
   height: 100%;
 }
-

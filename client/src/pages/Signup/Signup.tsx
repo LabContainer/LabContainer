@@ -1,59 +1,69 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import * as React from "react";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
-const api_url = 'http://localhost:5000'
+const api_url = "http://localhost:5000";
 
-async function createUser(username: string, password: string, email: string, is_student: boolean){
+async function createUser(
+  username: string,
+  password: string,
+  email: string,
+  is_student: boolean
+) {
   const response = await fetch(`${api_url}/users/create`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       username,
       password,
       email,
-      is_student
-    })
-  })
-  return response.ok
+      is_student,
+    }),
+  });
+  return response.ok;
 }
 
 const theme = createTheme();
 
 export default function SignUp() {
-  const [failedAttempt, setFailedAttempt] = React.useState(false)
-  const navigate = useNavigate()
+  const [failedAttempt, setFailedAttempt] = React.useState(false);
+  const navigate = useNavigate();
 
-  let failMsg ;
-  if(failedAttempt){
-    failMsg = "Invalid data"
+  let failMsg;
+  if (failedAttempt) {
+    failMsg = "Invalid data";
   }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = data.get('email')
-    const username = data.get('username')
-    const password = data.get('password')
-    const isStudent = !!data.get('isStudent')
-    if(username && password && email){
-      const success = await createUser(username as string, password as string, email as string, isStudent)
-      setFailedAttempt(!success)
-      if(success){
-        navigate('/login')
+    const email = data.get("email");
+    const username = data.get("username");
+    const password = data.get("password");
+    const isStudent = !!data.get("isStudent");
+    if (username && password && email) {
+      const success = await createUser(
+        username as string,
+        password as string,
+        email as string,
+        isStudent
+      );
+      setFailedAttempt(!success);
+      if (success) {
+        navigate("/login");
       }
     }
   };
@@ -65,23 +75,26 @@ export default function SignUp() {
         <Box
           sx={{
             marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <Typography>
-            {failMsg}
-          </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Typography>{failMsg}</Typography>
+          <Box
+            component="form"
+            noValidate
+            onSubmit={handleSubmit}
+            sx={{ mt: 3 }}
+          >
             <Grid container spacing={2}>
-              <Grid item xs={12} >
+              <Grid item xs={12}>
                 <TextField
                   margin="normal"
                   required
@@ -92,7 +105,6 @@ export default function SignUp() {
                   autoComplete="username"
                   autoFocus
                 />
-
               </Grid>
               <Grid item xs={12}>
                 <TextField

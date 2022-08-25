@@ -1,20 +1,26 @@
-import * as React from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
+import * as React from "react";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
 
-import './ScrollTabs.css'
+import "./ScrollTabs.css";
 
-export default function ScrollTabs({ tabList, setChosen } : { tabList : {tab: string, id: number}[], setChosen: (chosen: number) => void} ) {
+export default function ScrollTabs({
+  tabList,
+  setChosen,
+}: {
+  tabList: { tab: string; id: number }[];
+  setChosen: (chosen: number) => void;
+}) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-    setChosen(newValue)
+    setChosen(newValue);
   };
 
   return (
-    <Box sx={{  bgcolor: 'background.paper', width: "100%"}}>
+    <Box sx={{ bgcolor: "background.paper", width: "100%" }}>
       <Tabs
         value={value}
         onChange={handleChange}
@@ -23,8 +29,9 @@ export default function ScrollTabs({ tabList, setChosen } : { tabList : {tab: st
         allowScrollButtonsMobile
         aria-label="scrollable force tabs example"
       >
-        { tabList.map( ({tab, id}) => <Tab label={tab} key={id} />  ) }
-        
+        {tabList.map(({ tab, id }) => (
+          <Tab label={tab} key={id} />
+        ))}
       </Tabs>
     </Box>
   );

@@ -1,7 +1,7 @@
 .card_internal {
-    padding-right: 25px;
-    padding-left: 25px;
-    display: flex;
-    align-items: center;
-    border-right: 1px solid grey;
+  padding-right: 25px;
+  padding-left: 25px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid grey;
 }

@@ -1,139 +1,209 @@
-import * as React from 'react';
-import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import MuiDrawer from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { mainListItems, secondaryListItems } from './listItems';
-import Chart from './Chart';
-import Deposits from './Deposits';
-import Orders from './Orders';
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import React from "react";
+import { AuthContext, IUser } from "../../components/App/AuthContext";
+import fetchData from "../../components/App/fetch";
+import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
+import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
+import FormDialogUsersAdd from "../../components/FormDialogUsersAdd/FormDialogUsersAdd";
+import { AnalyticsServiceAPI, AuthServiceAPI } from "../../constants";
+import { ILab } from "../StudentDashboard/StudentDashboard";
 
+const headCellsUsers: IHeadCell[] = [
+  {
+    id: "username",
+    numeric: false,
+    disablePadding: true,
+    label: "Username",
+  },
+  {
+    id: "email",
+    numeric: false,
+    disablePadding: true,
+    label: "Email",
+  },
+  {
+    id: "lab",
+    numeric: true,
+    disablePadding: false,
+    label: "Labs",
+  },
+  {
+    id: "info",
+    numeric: true,
+    disablePadding: false,
+    label: "More Info",
+  },
+];
+const headCellsLabs: IHeadCell[] = [
+  {
+    id: "id",
+    numeric: false,
+    disablePadding: true,
+    label: "Lab ID",
+  },
+  {
+    id: "course",
+    numeric: false,
+    disablePadding: true,
+    label: "Course",
+  },
+  {
+    id: "instructor",
+    numeric: true,
+    disablePadding: false,
+    label: "Instructor",
+  },
+  {
+    id: "info",
+    numeric: true,
+    disablePadding: false,
+    label: "More Info",
+  },
+];
 
+function InstructorDashboard() {
+  const { token, refresh_token, setToken } = React.useContext(AuthContext);
+  const [users, setUsers] = React.useState<IUser[]>([]);
+  const [labs, setLabs] = React.useState<ILab[]>([]);
+  const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
+  const [usersAddOpen, setUserAddOpen] = React.useState(false);
+  const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
+    []
+  );
 
-const drawerWidth: number = 240;
-
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
-    },
-  }),
-);
-
-const mdTheme = createTheme();
-
-function DashboardContent() {
-  const [open, setOpen] = React.useState(true);
-  const toggleDrawer = () => {
-    setOpen(!open);
-  };
-
+  React.useEffect(() => {
+    const abortController = new AbortController();
+    // Fetch all data
+    fetchData(AuthServiceAPI, "/users", token, refresh_token, setToken, {
+      method: "GET",
+      signal: abortController.signal,
+    }).then(setUsers);
+    fetchData(AnalyticsServiceAPI, "/labs", token, refresh_token, setToken, {
+      method: "GET",
+      signal: abortController.signal,
+    }).then(setLabs);
+    return () => {
+      abortController.abort();
+    };
+  }, [token, refresh_token, setToken, setUsers]);
   return (
-    <ThemeProvider theme={mdTheme}>
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-        <Drawer variant="permanent" open={open}>
-          <Toolbar
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
-            }}
-          >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <Divider />
-          <List component="nav">
-            {mainListItems}
-            <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
-          </List>
-        </Drawer>
-        <Box
-          component="main"
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
+      }}
+    >
+      <Stack>
+        <Typography variant="h3" sx={{ textAlign: "center" }}>
+          Instructor Dashboard
+        </Typography>
+        <Container
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
+            flexDirection: "row",
+            display: "flex",
+            justifyContent: "center",
           }}
         >
-          <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
-              {/* Chart */}
-              <Grid item xs={12} md={8} lg={9}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 240,
-                  }}
-                >
-                  <Chart />
-                </Paper>
-              </Grid>
-              {/* Recent Deposits */}
-              <Grid item xs={12} md={4} lg={3}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 240,
-                  }}
-                >
-                  <Deposits />
-                </Paper>
-              </Grid>
-              {/* Recent Orders */}
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Orders />
-                </Paper>
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-      </Box>
-    </ThemeProvider>
+          <Box sx={{ margin: "20px" }}>
+            <DataTable
+              onSelect={setSelectedUsers}
+              title="Users"
+              rows={
+                users
+                  ? users.map((user, i) => ({
+                      values: user as any,
+                      key: i,
+                    }))
+                  : []
+              }
+              headCells={headCellsUsers}
+            />
+            <Button variant="contained" onClick={() => setUserAddOpen(true)}>
+              {" "}
+              Add to Lab{" "}
+            </Button>
+            <FormDialogUsersAdd
+              handleClose={() => {
+                setUserAddOpen(false);
+              }}
+              open={usersAddOpen}
+              handleSubmit={(event) => {
+                event.preventDefault();
+                const data = new FormData(event.currentTarget);
+                const labid = data.get("id") as string;
+                for (const user_index of selectedUsers) {
+                  fetchData(
+                    AnalyticsServiceAPI,
+                    `/labs/${labid}/users?username=${
+                      users[parseInt(user_index)].username
+                    }`,
+                    token,
+                    refresh_token,
+                    setToken,
+                    {
+                      method: "POST",
+                    }
+                  );
+                }
+              }}
+            />
+          </Box>
+          <Box sx={{ margin: "20px" }}>
+            <DataTable
+              title="Labs"
+              rows={
+                labs
+                  ? labs.map((user, i) => ({
+                      values: user as any,
+                      key: i,
+                    }))
+                  : []
+              }
+              headCells={headCellsLabs}
+            />
+            <Button
+              variant="contained"
+              onClick={() => {
+                setLabsCreateOpen(true);
+              }}
+            >
+              {" "}
+              Create Lab{" "}
+            </Button>
+            <FormDialogAddLab
+              handleClose={() => {
+                setLabsCreateOpen(false);
+              }}
+              open={labsCreateOpen}
+              handleSubmit={(event) => {
+                event.preventDefault();
+                const data = new FormData(event.currentTarget);
+                const labid = data.get("id") as string;
+                const course = data.get("course") as string;
+                const instructor = data.get("instructor") as string;
+                fetchData(
+                  AnalyticsServiceAPI,
+                  "/labs/create",
+                  token,
+                  refresh_token,
+                  setToken,
+                  {
+                    method: "POST",
+                    body: JSON.stringify({
+                      id: labid,
+                      course: course,
+                      instructor: instructor,
+                    }),
+                  }
+                );
+              }}
+            />
+          </Box>
+        </Container>
+      </Stack>
+    </Box>
   );
 }
 
-export default function InstructorDashboard() {
-  return <DashboardContent />;
-}
+export default InstructorDashboard;

@@ -1,3 +1,4 @@
+import { AuthServiceAPI } from "../../constants"
 
 export default async function fetchData(
   base_url: string,
@@ -21,15 +22,15 @@ export default async function fetchData(
   } else {
     if (response.status === 401) {
       //Try refresh
-      await refresh(base_url, refresh_token, setToken)
+      await refresh(refresh_token, setToken)
     }
     return undefined
   }
 
 }
 
-export async function refresh(base_url: string, refresh_token: string, setToken: (new_token: string) => void) {
-  const response = await fetch(`${base_url}/webapp/refresh`, {
+export async function refresh(refresh_token: string, setToken: (new_token: string) => void) {
+  const response = await fetch(`${AuthServiceAPI}/webapp/refresh`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${refresh_token}`
@@ -39,7 +40,7 @@ export async function refresh(base_url: string, refresh_token: string, setToken:
     const json = await response.json()
     setToken(json.access_token)
   } else {
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       // Logout
       setToken("")
     }

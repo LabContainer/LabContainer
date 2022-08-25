@@ -190,6 +190,9 @@ const checkMultipleSesions: SocketIOMiddleware = (socket, next) => {
   } else next(new Error(NO_USER_TEAMS))
 }
 
+const getEnv: SocketIOMiddleware = (socket, next) => {
+}
+
 //Socket Connection
 io
   .use(authenticateUser)
@@ -223,6 +226,7 @@ io
       }
       else {
         console.log("No env found , deleting socket")
+        socket.emit('error', NO_USER_TEAMS)
         socket.disconnect(true)
       }
     })

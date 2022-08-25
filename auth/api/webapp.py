@@ -57,7 +57,9 @@ def logout(payload: Dict = Depends(has_refresh), db: SessionLocal = Depends(get_
     crud.set_user_inactive(db, payload["user"])
     crud.invalidate_rts(db, payload["user"])
     # TODO
-    auth_service_token = gen_internal_token(payload_fields={"user": payload["user"]})
+    auth_service_token = gen_internal_token(
+        payload_fields={"user": payload["user"], "is_student": False}
+    )
     analytics_api = "http://analytics:8000"
     resp = requests.get(
         f"{analytics_api}/teams?username={payload['user']}",

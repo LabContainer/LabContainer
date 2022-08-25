@@ -19,7 +19,7 @@ def get_labs(db: Session):
     return db.query(Lab).all()
 
 
-def get_users_per_lab(db: Session, lab_id: str):
+def get_users_per_lab(db: Session, lab_id: str) -> List[User]:
     return db.query(User).join(User.labs).filter(Lab.id == lab_id).all()
 
 
