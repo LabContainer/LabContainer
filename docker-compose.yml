@@ -6,8 +6,8 @@ services:
       - "${STUDENT_PORT}:8080"
     environment:
       - SECRET_TOKEN=${SECRET_TOKEN}
-    volumes:
-    - /home/parth/work/sc-test/code-capture/student-server/dist:/app/dist
+    # volumes:
+    # - /home/parth/work/sc-test/code-capture/student-server/dist:/app/dist
     networks:
       - backend
       - envnet
@@ -31,6 +31,8 @@ services:
       - "${ANALYTICS_PORT}:8000"
     environment:
       - SECRET_TOKEN=${SECRET_TOKEN}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
@@ -50,6 +52,20 @@ services:
       - postgres:/data/postgres
     ports:
       - "5432:5432"
+    networks:
+      - authdb
+    restart: unless-stopped
+  postgres-analytics:
+    container_name: postgres_container_analyics
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_analytics:/data/postgres
+    ports:
+      - "5433:5432"
     networks:
       - authdb
     restart: unless-stopped
@@ -82,3 +98,4 @@ networks:
 volumes:
   postgres:
   pgadmin:
+  postgres_analytics:

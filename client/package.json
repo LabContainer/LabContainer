@@ -2,7 +2,6 @@
   "name": "studentenv",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3000",
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
@@ -16,6 +15,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "ace-builds": "^1.8.1",
+    "http-proxy-middleware": "^2.0.6",
     "immer": "^9.0.15",
     "react": "^17.0.0",
     "react-ace": "^10.1.0",

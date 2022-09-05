@@ -6,21 +6,23 @@ from sqlalchemy.orm import sessionmaker, relationship
 import os
 import dotenv
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
+# SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
 
 
 env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
-# MIGRATIONS=False
+MIGRATIONS=False
 
-# postgres_host = "0.0.0.0" if MIGRATIONS else "postgres-analytics"
-# # postgres:
-# SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{postgres_host}:5432"
+postgres_host = "0.0.0.0" if MIGRATIONS else "postgres-analytics"
+# postgres:
+SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{postgres_host}:5432"
+
+print("********************************************", SQLALCHEMY_DATABASE_URL)
 
 # sqlite ::: connect_args={"check_same_thread": False})
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL #, connect_args={"check_same_thread": False}
 )
 
 Base = declarative_base(bind=engine)

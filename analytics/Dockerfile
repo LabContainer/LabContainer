@@ -8,7 +8,7 @@ RUN apt install libpq-dev gcc curl -y
 
 ENV PYTHONPATH=/app/analytics
 
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - 
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/root/.poetry python3 -
 ENV PATH="/root/.poetry/bin:$PATH"
 COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false
@@ -16,7 +16,7 @@ RUN poetry install --no-interaction
 
 COPY . analytics/
 
-EXPOSE 5000
+EXPOSE 8000
 
 # Volume for named pipe on host. Temp Solution, change when using kubernetes api
 # VOLUME [ "/hostpipe" ]
