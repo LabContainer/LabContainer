@@ -7,6 +7,7 @@ import "./Environment.css";
 
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
+import FileManagerFront from "../../components/FileManager/FileManager";
 
 const Term = React.lazy(async () => {
   return import("../../components/Terminal/Terminal");
@@ -18,26 +19,29 @@ export default function Environment() {
   return (
     <>
       {team && user ? (
-        <Stack
-          sx={{
-            margin: "auto",
-            padding: 0,
-            width: "80%",
-            height: "60%",
-            justifyContent: "center",
-            marginTop: "80px",
-            marginBottom: "80px",
-          }}
-          direction="row"
-          justifyContent={"center"}
-        >
-          <Editor team={team} user={user}></Editor>
-          <Stack flex={1}>
-            <Suspense fallback={<CircularIndeterminate />}>
-              <Term team={team} user={user} />
-            </Suspense>
+        <>
+          <Stack
+            sx={{
+              margin: "auto",
+              padding: 0,
+              // width: "80%",
+              height: "60%",
+              justifyContent: "center",
+              marginTop: "80px",
+              marginBottom: "80px",
+            }}
+            direction="row"
+            justifyContent={"center"}
+          >
+            <FileManagerFront />
+            <Editor team={team} user={user}></Editor>
+            <Stack flex={1}>
+              <Suspense fallback={<CircularIndeterminate />}>
+                <Term team={team} user={user} />
+              </Suspense>
+            </Stack>
           </Stack>
-        </Stack>
+        </>
       ) : null}
     </>
   );
