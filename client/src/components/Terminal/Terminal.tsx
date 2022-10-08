@@ -12,8 +12,6 @@ import { AuthContext } from "../App/AuthContext";
 import { Pending } from "@mui/icons-material";
 import { Container } from "@mui/system";
 import { refresh } from "../App/fetch";
-import fetchData from "../App/fetch";
-import { AnalyticsServiceAPI } from "../../constants";
 
 enum EnvStatus {
   disconnected,

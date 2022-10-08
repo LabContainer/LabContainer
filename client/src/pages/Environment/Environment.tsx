@@ -8,7 +8,6 @@ import "./Environment.css";
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
 import FileManagerFront from "../../components/FileManager/FileManager";
-import fetchData from "../../components/App/fetch";
 import { AnalyticsServiceAPI } from "../../constants";
 import { AuthContext } from "../../components/App/AuthContext";
 
@@ -19,7 +18,7 @@ const Term = React.lazy(async () => {
 // const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 export default function Environment() {
   const { user, team } = useParams();
-  const { token, refresh_token, setToken } = React.useContext(AuthContext);
+  const { token } = React.useContext(AuthContext);
   const [server, setServer] = React.useState("");
   // const server = "http://0.0.0.0:39627";
   //Fetch Server
