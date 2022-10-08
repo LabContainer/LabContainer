@@ -26,6 +26,8 @@ export default class SocketService {
         const io: ServerType = new Server(server, { cors: { origin: "*" } });
         console.log("Waiting for Connections....");
         const addActiveList: SocketIOMiddleware = (socket, next) => {
+
+            console.log("Authenticating User0")
             socket.data.active_users = this.active_users;
             next();
         }

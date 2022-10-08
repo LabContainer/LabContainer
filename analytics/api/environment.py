@@ -13,6 +13,8 @@ import asyncio
 import fcntl
 from contextlib import asynccontextmanager
 
+from analytics.utils import find_free_port
+
 
 router = APIRouter(prefix="/environment")
 
@@ -42,7 +44,7 @@ async def get_environment(
     db: SessionLocal = Depends(get_db),
 ):
     # only student service can call this endpoint
-    if payload["user"] != username or payload["internal"] != "StudentService":
+    if payload["user"] != username:
         response.status_code = status.HTTP_403_FORBIDDEN
         return
     teams = crud.get_teams_for_user(db, username)
@@ -64,12 +66,12 @@ async def get_environment(
 
         # TODO make secure with username and hashed password
         temp_pass = f"{username}#envpass"
-
+        port = find_free_port()
         container_id, network, name = create_new_container(
-            username, team_name, temp_pass
+            username, team_name, temp_pass, port
         )
         new_env = schemas.EnvCreate(
-            id=container_id, host=name, network=network, ssh_password=temp_pass
+            id=container_id, host=name, network=network, ssh_password=temp_pass, port=port
         )
         try:
             env = crud.create_user_env(db, new_env, username, team_name)

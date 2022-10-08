@@ -37,7 +37,6 @@ export default class TerminalService {
     }
 
     sendToClient(data: string) {
-        // Emit data to socket.io client in an event "output"
         this.socket.emit("data", data);
     }
 }

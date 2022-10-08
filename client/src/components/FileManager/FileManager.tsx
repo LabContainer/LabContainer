@@ -2,18 +2,37 @@ import React from "react";
 // import { FileManager } from "@syncfusion/ej2-react-filemanager";
 import { FileManager, FileNavigator } from "@opuscapita/react-filemanager";
 import connectorNodeV1 from "@opuscapita/react-filemanager-connector-node-v1";
+import CircularIndeterminate from "../common/CircularInderminate";
 
-function FileManagerFront() {
+function FileManagerFront({ server }: { server: string }) {
   //   React.useEffect(() => {
   //     let feObj: FileManager = new FileManager();
   //     feObj.appendTo("#file");
   //   }, []);
   //   return <div id="file"></div>;
-  const apiOptions = {
-    ...connectorNodeV1.apiOptions,
-    apiRoot: `http://localhost:8090/filemanager`, // Or you local Server Node V1 installation.
-  };
+  // const apiOptions = {
+  //   ...connectorNodeV1.apiOptions,
+  //   // apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation.
+  //   apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation.
+  // };
+  const apiOptions = React.useMemo(
+    () => ({
+      ...connectorNodeV1.apiOptions,
+      // apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation.
+      apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation
+    }),
+    [server]
+  );
+  console.log(server);
   console.log(apiOptions);
+  if (server.includes("undefined") || !server.includes("http")) {
+    return (
+      <div>
+        <CircularIndeterminate />
+        Waiting for file server
+      </div>
+    );
+  }
   return (
     // <div style={{ height: "480px" }}>
     //   <FileManager>
@@ -27,19 +46,21 @@ function FileManagerFront() {
     //     />
     //   </FileManager>
     // </div>
-    <div>
-      {/*NODE_JS_EXAMPLE*/}
+    // <div>
+    // {/*NODE_JS_EXAMPLE*/}
 
-      <div
-        style={{
-          height: "70vh",
-          //   height: "70vh",
-          //   minWidth: "320px",
-          maxWidth: "300px",
-          flex: "1",
-          //   marginBottom: "15px",
-        }}
-      >
+    <div
+      style={{
+        // height: "70vh",
+        // height: "100%",
+        flexGrow: 1,
+        //   minWidth: "320px",
+        // maxWidth: "300px",
+        flex: "1",
+        //   marginBottom: "15px",
+      }}
+    >
+      <FileManager>
         <FileNavigator
           api={connectorNodeV1.api}
           apiOptions={apiOptions}
@@ -81,8 +102,9 @@ function FileManagerFront() {
             console.log("onResourceItemRightClick", event, number, rowData)
           }
         />
-      </div>
+      </FileManager>
     </div>
+    // {/* </div> */}
   );
 }
 

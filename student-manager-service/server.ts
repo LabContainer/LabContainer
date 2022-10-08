@@ -11,26 +11,25 @@ import pkg from '@opuscapita/filemanager-server';
 const { middleware } = pkg;
 
 let fileManagerConfig = {
-    fsRoot: '/home/parth/Documents/Github/CodeCapture/student-server',
+    fsRoot: '/',
     rootName: 'Root folder'
 };
 
 const app = express();
 
 config({
-    path: '../.env'
+    path: '.env'
 })
 
 let serverPort = 8090;
 let server = http.createServer(app);
 app.use(cors({
-    origin: ["http://localhost:3000", "https://codecapture.web.app"]
+    origin: "*" //["http://localhost:3000", "https://codecapture.web.app"]
 }));
-app.use('/filemanager', middleware(fileManagerConfig));
+app.use('/filemanager/', middleware(fileManagerConfig));
 
-server.listen(serverPort, () => {
+server.listen(serverPort, '0.0.0.0', () => {
     const socketservice = new SocketService();
-
     socketservice.attach(server);
 });
 

@@ -5,7 +5,9 @@ SHELL ["/bin/bash", "-c"]
 
 RUN apt update
 RUN apt install libpq-dev gcc curl -y
-
+RUN DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+    docker.io
 ENV PYTHONPATH=/app/analytics
 
 RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/root/.poetry python3 -

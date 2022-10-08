@@ -4,10 +4,14 @@ import { DefaultEventsMap } from 'socket.io/dist/typed-events'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import timer from 'long-timeout'
 import { SocketIOMiddleware } from '.'
+import { config } from 'dotenv'
 
 
 // Store active user team envs here, allow only one per user - team
 // if multiple student servers, change to do redis locks
+config({
+    path: '.env'
+})
 
 
 const arrayContainsObject = (array: any[], object: any) => {

@@ -139,7 +139,7 @@ class Editor extends React.Component<IProps, IState> {
   }
   render() {
     return (
-      <Stack flex={1}>
+      <Stack flex={1} direction="column">
         <Stack direction={"row"}>
           <ScrollTabs
             tabList={this.state.fileList}

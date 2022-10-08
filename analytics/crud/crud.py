@@ -140,7 +140,8 @@ def get_env_for_user_team(
         .all()
     )
     if len(env_list) > 1:
-        raise Exception(f"More than one env found for team {team_name} user {username}")
+        raise Exception(
+            f"More than one env found for team {team_name} user {username}")
     if not env_list:
         return None
     return env_list[0]
@@ -155,6 +156,7 @@ def create_user_env(
         env_id=env.id,
         network=env.network,
         ssh_password=env.ssh_password,
+        port=env.port,
         ssh_user=username,
         ssh_user_team=team_name,
     )
