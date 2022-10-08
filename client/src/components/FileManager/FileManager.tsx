@@ -11,7 +11,7 @@ function FileManagerFront() {
   //   return <div id="file"></div>;
   const apiOptions = {
     ...connectorNodeV1.apiOptions,
-    apiRoot: `http://localhost:3020`, // Or you local Server Node V1 installation.
+    apiRoot: `http://localhost:8090/filemanager`, // Or you local Server Node V1 installation.
   };
   console.log(apiOptions);
   return (
