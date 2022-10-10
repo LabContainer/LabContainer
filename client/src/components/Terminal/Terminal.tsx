@@ -23,31 +23,15 @@ const NO_USER_TEAMS = "no_user_team";
 // const NO_TOKEN = "no_token";
 const INVALID_TOKEN = "invalid_token";
 
-function Term({ team, user }: { team: string; user: string }) {
-  function onKey(event: { key: string; domEvent: KeyboardEvent }) {
-    const { key, domEvent } = event;
-    const code = key.charCodeAt(0);
-    if (code === 127) {
-      //Backspace
-      if (commandRef.current.length > 0)
-        xtermRef.current?.terminal.write("\b \b");
-      commandRef.current = commandRef.current.slice(0, -1);
-    } else if (code === 13) {
-      for (let i = 0; i < commandRef.current.length; i++) {
-        xtermRef.current?.terminal.write("\b \b");
-      }
-      commandRef.current = commandRef.current.concat("\n");
-      socketRef.current?.emit("data", commandRef.current);
-      commandRef.current = "";
-    } else if (domEvent.key === "ArrowUp" || domEvent.key === "ArrowDown") {
-      socketRef.current?.emit("data", key);
-    } else if (domEvent.key === "ArrowLeft" || domEvent.key === "ArrowRight") {
-      // pass
-    } else {
-      commandRef.current = commandRef.current.concat(key);
-      xtermRef.current?.terminal.write(key);
-    }
-  }
+function Term({
+  team,
+  user,
+  server,
+}: {
+  team: string;
+  user: string;
+  server: string;
+}) {
   const { token, refresh_token, setToken } = useContext(AuthContext);
   const [data, setData] = useImmer("");
   const xtermRef = useRef<XTerm>(null);
@@ -69,6 +53,7 @@ function Term({ team, user }: { team: string; user: string }) {
       setStatus(EnvStatus.disconnected);
     };
     const onConnectError = (err: Error) => {
+      console.log(err.message);
       if (err.message === INVALID_TOKEN) refresh(refresh_token, setToken);
       else if (err.message === NO_ADDITIONAL_SESSIONS)
         xtermRef.current?.terminal.writeln("***Connection limit reached***");
@@ -87,8 +72,8 @@ function Term({ team, user }: { team: string; user: string }) {
     };
     // Initial load
     setStatus(EnvStatus.disconnected);
-    const server_url = "http://localhost:8080";
-    socketRef.current = io(server_url, {
+    console.log("Trying ", server);
+    socketRef.current = io(server, {
       query: {
         token,
         team,
@@ -100,6 +85,7 @@ function Term({ team, user }: { team: string; user: string }) {
     xtermRef.current?.terminal.loadAddon(fitaddon);
     fitaddon.fit();
 
+    // Allow copy and paste in terminal
     xtermRef.current?.terminal.attachCustomKeyEventHandler(
       (event: KeyboardEvent) => {
         if (event.repeat) return true;
@@ -131,7 +117,7 @@ function Term({ team, user }: { team: string; user: string }) {
       socketRef.current?.off("disconnect");
       socketRef.current?.disconnect();
     };
-  }, [token, team, setData, refresh_token, setToken]);
+  }, [token, team, setData, refresh_token, setToken, server]);
 
   useEffect(() => {
     xtermRef.current?.terminal.write(data);
@@ -139,7 +125,7 @@ function Term({ team, user }: { team: string; user: string }) {
 
   return (
     <Stack sx={{}} flex={1}>
-      <Stack direction="row" spacing={1}>
+      <Stack sx={{ width: "100%" }} direction="row" spacing={1}>
         <Container
           sx={{
             backgroundColor: "white",
@@ -184,7 +170,10 @@ function Term({ team, user }: { team: string; user: string }) {
       <XTerm
         className="terminal-container"
         ref={xtermRef}
-        onKey={onKey}
+        // onKey={()=>{}}
+        onData={(data) => {
+          socketRef.current?.emit("data", data);
+        }}
         options={{
           theme: {
             background: "#151942",

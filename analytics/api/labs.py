@@ -11,6 +11,8 @@ import traceback
 router = APIRouter(prefix="/labs")
 
 # Instructor only endpoints
+
+
 @router.post("/create")
 def create_lab(
     lab: schemas.LabCreate,

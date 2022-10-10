@@ -1,13 +1,16 @@
 from pydantic import BaseModel
 
+
 class TeamCreate(BaseModel):
-    name : str
+    name: str
     lab_id: str
+
 
 class LabCreate(BaseModel):
     id: str
     course: str
     instructor: str
+
 
 class EnvCreate(BaseModel):
     """
@@ -18,6 +21,7 @@ class EnvCreate(BaseModel):
     host: str
     network: str
     ssh_password: str  # Plain string , security concern ?
+    port: int
 
     class Config:
         orm_mode = True

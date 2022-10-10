@@ -1,17 +1,5 @@
 version: "3.5"
 services:
-  studentserver:
-    build: student-server
-    ports:
-      - "${STUDENT_PORT}:8080"
-    environment:
-      - SECRET_TOKEN=${SECRET_TOKEN}
-    # volumes:
-    # - /home/parth/work/sc-test/code-capture/student-server/dist:/app/dist
-    networks:
-      - backend
-      - envnet
-    restart: on-failure
   auth:
     build: auth
     ports:
@@ -24,7 +12,7 @@ services:
     networks:
       - authdb
       - backend
-    restart: on-failure
+    # restart: on-failure
   analytics:
     build: analytics
     ports:
@@ -35,12 +23,11 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
-      - /home/parth/work/sc-test/code-capture/sqlite.db:/app/sqlite.db
+      - ./student-manager-service:/app/student-manager-service
     networks:
       - backend
-      - authdb
-    restart: on-failure
+      - analyticsdb
+    # restart: on-failure
   postgresserver:
     container_name: postgres_container
     image: postgres
@@ -67,7 +54,7 @@ services:
     ports:
       - "5433:5432"
     networks:
-      - authdb
+      - analyticsdb
     restart: unless-stopped
   pgadmin:
     container_name: pgadmin_container
@@ -82,6 +69,7 @@ services:
       - "5050:80"
     networks:
       - authdb
+      - analyticsdb
     logging:
       driver: none
     restart: unless-stopped
@@ -93,6 +81,8 @@ networks:
   backend:
     driver: bridge
   authdb:
+    driver: bridge
+  analyticsdb:
     driver: bridge
 
 volumes:

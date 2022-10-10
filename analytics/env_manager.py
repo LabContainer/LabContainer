@@ -3,11 +3,11 @@ import subprocess
 import os
 
 
-def create_new_container(user: str, team: str, password: str):
+def create_new_container(user: str, team: str, password: str, port: int):
     # TODO: use kubernetes here
     # Build container image for user
     wd = os.getcwd()
-    os.chdir(os.path.join(wd, "analytics/student-env"))
+    os.chdir(os.path.join(wd, "student-manager-service"))
     print("Building user image...")
     buildcmd = subprocess.run(
         [
@@ -23,6 +23,8 @@ def create_new_container(user: str, team: str, password: str):
         ],
         capture_output=True,
     )
+    if buildcmd.stderr:
+        raise RuntimeError(buildcmd.stderr)
     os.chdir(wd)
 
     # Start container
@@ -32,15 +34,21 @@ def create_new_container(user: str, team: str, password: str):
     # "-p", f"{port}:22" to access via port
     if check_env(name):
         kill_env(name)
+    print(os.path.join(wd, 'student-manager-service'))
     container = subprocess.run(
         [
             "docker",
             "run",
             "-d",
+            "-p",
+            f"{port}:8090",
             "--network",
             network,
             "--name",
             name,
+            # debuging volume
+            # "-v",
+            # f"/home/parth/Documents/Github/CodeCapture/student-manager-service/dist:/app/dist",
             f"studentenv:{user}",
         ],
         capture_output=True,
@@ -53,7 +61,8 @@ def create_new_container(user: str, team: str, password: str):
 
 
 def check_env(name: str) -> bool:
-    cont = subprocess.run(["docker", "container", "inspect", name], capture_output=True)
+    cont = subprocess.run(
+        ["docker", "container", "inspect", name], capture_output=True)
     return cont.stdout.decode("utf8").strip() != "[]"
 
 

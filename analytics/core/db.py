@@ -12,17 +12,15 @@ import dotenv
 env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
-MIGRATIONS=False
+MIGRATIONS = False
 
 postgres_host = "0.0.0.0" if MIGRATIONS else "postgres-analytics"
 # postgres:
 SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{postgres_host}:5432"
 
-print("********************************************", SQLALCHEMY_DATABASE_URL)
-
 # sqlite ::: connect_args={"check_same_thread": False})
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL #, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL  # , connect_args={"check_same_thread": False}
 )
 
 Base = declarative_base(bind=engine)
@@ -84,6 +82,7 @@ class Envionment(Base):
     env_id = Column(String, primary_key=True, index=True)
     host = Column(String, index=True)
     network = Column(String, index=True)
+    port = Column(String)
     ssh_password = Column(String)
     ssh_user_team = Column(String, ForeignKey("teams.name"))
     ssh_user = Column(String, ForeignKey("users.name"))
