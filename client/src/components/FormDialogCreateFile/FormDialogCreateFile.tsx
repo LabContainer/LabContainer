@@ -20,6 +20,7 @@ export default function FormDialogCreateFile({
   languages: {
     lang: string;
     key: number;
+    ext: string;
   }[];
 }) {
   const [lang, setLang] = React.useState(languages[0].lang);

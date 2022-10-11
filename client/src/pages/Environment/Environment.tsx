@@ -7,7 +7,7 @@ import "./Environment.css";
 
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
-import FileManagerFront from "../../components/FileManager/FileManager";
+import FileExplorer from "../../components/FileExplorer/FileExplorer";
 import { AnalyticsServiceAPI } from "../../constants";
 import { AuthContext } from "../../components/App/AuthContext";
 
@@ -20,6 +20,10 @@ export default function Environment() {
   const { user, team } = useParams();
   const { token } = React.useContext(AuthContext);
   const [server, setServer] = React.useState("");
+  const [loadFile, setLoadFile] = React.useState({
+    name: "",
+    id: "",
+  });
   // const server = "http://0.0.0.0:39627";
   //Fetch Server
   React.useEffect(() => {
@@ -42,7 +46,10 @@ export default function Environment() {
         <>
           <Stack direction="row" sx={{ height: "100%" }}>
             <Box flex={1} sx={{ display: "flex" }}>
-              <FileManagerFront server={server} />
+              <FileExplorer
+                server={server}
+                addToDoubleQuickQueue={setLoadFile}
+              />
             </Box>
             <Stack
               flex={3}
@@ -59,10 +66,12 @@ export default function Environment() {
               direction="column"
               justifyContent={"center"}
             >
-              {/* <Box flex={1}> */}
-              <Editor team={team} user={user}></Editor>
-              {/* </Box> */}
-              {/* </Stack> */}
+              <Editor
+                team={team}
+                user={user}
+                loadFile={loadFile}
+                server={server}
+              ></Editor>
               <Stack flex={1}>
                 <Suspense fallback={<CircularIndeterminate />}>
                   <Term team={team} user={user} server={server} />
