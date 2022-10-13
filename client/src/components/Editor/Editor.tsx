@@ -19,6 +19,7 @@ import { Ace } from "ace-builds";
 import FormDialogCreateFile from "../FormDialogCreateFile/FormDialogCreateFile";
 import CircularIndeterminate from "../common/CircularInderminate";
 import { Buffer } from "buffer";
+import path from "path-browserify";
 
 interface IEditorProps {
   team: string;
@@ -69,13 +70,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
     this.ref = React.createRef<ReactAce>();
     this.state = {
       fileList: [],
-      // TODO: To set initial file, could be loaded from props for lab session
-      // [{
-      //   tab: "file 1",
-      //   session: this.ref.current?.editor.getSession(),
-      //   id: 1,
-      //   mode: "python"
-      // }]
       chosenFile: -1,
       fileDialogOpen: false,
       editorDestroyed: false,
@@ -86,8 +80,11 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
     this.addFile = this.addFile.bind(this);
     this.setChosenFile = this.setChosenFile.bind(this);
     this.closeAddFileDialog = this.closeAddFileDialog.bind(this);
+    this.saveFile = this.saveFile.bind(this);
+    this.findDirId = this.findDirId.bind(this);
+    this.getDirChildren = this.getDirChildren.bind(this);
   }
-  componentWillMount(): void {
+  componentDidMount(): void {
     this.setState((state) => {
       const newState = { ...state };
       // newState.fileList[0].session = this.ref.current?.editor.getSession();
@@ -113,11 +110,16 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
     }
     return null;
   }
+
   componentDidUpdate(
     prevProps: Readonly<IEditorProps>,
     prevState: Readonly<IEditorState>,
     snapshot?: any
   ): void {
+    /**
+     * Check if new loadFile given to editor component and start download if not started already
+     * Sets downloading state to false on completion
+     */
     if (this.state.downloading && !this.state.downloadStarted) {
       this.setState({ downloadStarted: true });
       Editor.downloadFile(
@@ -127,7 +129,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       ).then((text) => {
         if (text === null) {
           // download failed
-          this.setState({ downloading: false });
+          this.setState({ downloading: false, downloadStarted: false });
           return null;
         }
         // download succeded
@@ -148,7 +150,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         this.setState({ downloading: false, downloadStarted: false });
       });
     }
-    // Change Editor Context
+    // Change Editor Context if another file chosen
     if (this.state.chosenFile !== prevState.chosenFile) {
       // File session did not exist, new session needed
       const file = this.state.fileList[this.state.chosenFile];
@@ -169,11 +171,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         });
         this.setState({ editorDestroyed: false });
       }
-      // const updatedFileList = this.state.fileList.map((file, index) => {
-      //   if (index !== prevState.chosenFile) return file;
-      //   file.session = this.ref.current?.editor.getSession();
-      //   return file;
-      // });
       if (new_session) {
         this.ref.current?.editor.setSession(new_session);
         return;
@@ -182,12 +179,14 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         file.session = this.createNewSession(file);
         this.ref.current?.editor.setSession(file.session);
       }
-      // this.setState({ fileList: updatedFileList });
     }
   }
+  /**
+   * Create new Ace Editor Session for the selected file
+   */
   createNewSession(file: IFile) {
     // Creating new session
-    const fileContents = this.state.downloads[file.tab] || "Default";
+    const fileContents = this.state.downloads[file.tab] || "";
     const session: Ace.EditSession = ace.createEditSession(
       fileContents,
       file.mode
@@ -200,6 +199,9 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
     session.setUseSoftTabs(true);
     return session;
   }
+  /**
+   * Closes add file dialog
+   */
   closeAddFileDialog(
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ): void {
@@ -207,6 +209,9 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
     console.log(event.currentTarget.value);
     this.setState({ fileDialogOpen: false });
   }
+  /**
+   * Opens a file dialog to add a new file
+   */
   addFile(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -214,6 +219,12 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
     const lang = data.get("langSelect") as string;
     this.addToFileList(filename, lang);
   }
+  /**
+   * Updates Editor fileList to have a new file. Filelist update causes render of file tabs
+   * @param filename
+   * @param lang
+   * @param session
+   */
   addToFileList(
     filename: string,
     lang: string,
@@ -233,6 +244,12 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   setChosenFile(chosen: number) {
     this.setState({ chosenFile: chosen });
   }
+  /**
+   * Downloads a file into the editor state
+   * @param server
+   * @param filename
+   * @param id
+   */
   static async downloadFile(server: string, file: string, id: string) {
     console.log("Downloading file", file);
     return fetch(`${server}/filemanager/download?items=${id}`, {
@@ -243,6 +260,141 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       }
       return null;
     });
+  }
+  /**
+   * Recursive function to return the filemanager resource id of a directory
+   * @param dir
+   * @returns
+   */
+  async findDirId(dir: string) {
+    // Initial ID
+    let id = "";
+    const respoonse = await fetch(
+      `${this.props.server}/filemanager/files/${id}`,
+      {
+        method: "GET",
+      }
+    );
+    if (!respoonse.ok) {
+      console.log("Failed to get directory: " + id);
+      return null;
+    }
+    const root = await respoonse.json();
+    if (root.type !== "dir") {
+      // Need to search for dir
+      return null;
+    }
+    id = root.id;
+    // return root id
+    if (dir === "/") return id;
+    // recursive function
+    const getId = async (
+      server: string,
+      id: string,
+      directory: string
+    ): Promise<string | null> => {
+      const children = await this.getDirChildren(id);
+      if (children === null) return null;
+      for (const item of children.items) {
+        if (item.type === "dir") {
+          if (directory.startsWith("/" + item.name)) {
+            if (directory !== "/" + item.name) {
+              directory = directory.slice(item.name.length + 1);
+              return getId(server, item.id, directory);
+            } else return item.id;
+          }
+        }
+      }
+      return null;
+    };
+    return getId(this.props.server, id, dir);
+  }
+
+  async getDirChildren(id: string) {
+    const response_children = await fetch(
+      `${this.props.server}/filemanager/files/${id}/children`,
+      {
+        method: "GET",
+      }
+    );
+    if (!response_children.ok) {
+      console.log("Failed to get directory children: " + id);
+      return null;
+    }
+    return response_children.json();
+  }
+  /**
+   * Create New file on server
+   */
+  async createFile(filename: string, text: string, parent: string) {
+    const data = new FormData();
+
+    data.append("type", "file");
+    data.append("parentId", parent);
+    data.append(
+      "files",
+      new Blob([text], {
+        type: `application/${
+          filename.split(".").slice(1).slice(-1)[0] || "octet-stream"
+        }`,
+      }),
+      filename
+    );
+    return fetch(`${this.props.server}/filemanager/files`, {
+      method: "POST",
+      body: data,
+    }).then((resp) => {
+      if (resp.ok) {
+        console.log("File saved");
+        console.log(resp.json());
+      }
+    });
+  }
+
+  /**
+   * Delete file on server
+   * @param id
+   */
+  async deleteFile(id: string) {
+    const response = await fetch(
+      `${this.props.server}/filemanager/files/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (response.ok) {
+      console.log("File deleted");
+    }
+  }
+
+  async saveFile() {
+    const file = this.state.fileList[this.state.chosenFile];
+    if (!file) return;
+    const dir = path.dirname(file.tab);
+    const filename = path.basename(file.tab);
+    // Get Parent Directory
+    const parent = await this.findDirId(dir);
+    if (!parent) {
+      console.log("Failed to find parent directory");
+      return;
+    }
+    const session = this.ref.current?.editor.getSession();
+    if (!session) return;
+    const text = session.getValue();
+    const children = await this.getDirChildren(parent);
+
+    if (children === null) return;
+    for (const child of children.items) {
+      if (child.name === filename) {
+        // File already exists
+        // TODO : safe save - delete after creation of temp file
+        await this.deleteFile(child.id);
+        await this.createFile(filename, text, parent);
+        return;
+      }
+    }
+    // File does not exist
+    await this.createFile(filename, text, parent);
   }
   render() {
     return (
@@ -286,9 +438,9 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
               sx={{
                 margin: "8px",
               }}
+              onClick={this.saveFile}
             >
-              Upload
-              <input hidden accept="image/*" multiple type="file" />
+              Save
             </Button>
           </Box>
         </Stack>
