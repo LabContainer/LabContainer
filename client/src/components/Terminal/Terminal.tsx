@@ -117,7 +117,7 @@ function Term({
       socketRef.current?.off("disconnect");
       socketRef.current?.disconnect();
     };
-  }, [token, team, setData, setToken, server]);
+  }, [token, team, setData, refresh_token, setToken, server]);
 
   useEffect(() => {
     xtermRef.current?.terminal.write(data);
