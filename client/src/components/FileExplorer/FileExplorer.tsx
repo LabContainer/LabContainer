@@ -1,30 +1,24 @@
 import React from "react";
-// import { FileManager } from "@syncfusion/ej2-react-filemanager";
 import { FileManager, FileNavigator } from "@opuscapita/react-filemanager";
 import connectorNodeV1 from "@opuscapita/react-filemanager-connector-node-v1";
 import CircularIndeterminate from "../common/CircularInderminate";
 
-function FileManagerFront({ server }: { server: string }) {
-  //   React.useEffect(() => {
-  //     let feObj: FileManager = new FileManager();
-  //     feObj.appendTo("#file");
-  //   }, []);
-  //   return <div id="file"></div>;
-  // const apiOptions = {
-  //   ...connectorNodeV1.apiOptions,
-  //   // apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation.
-  //   apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation.
-  // };
+interface IFileExplorerProps {
+  server: string;
+  addToDoubleQuickQueue: (s: { name: string; id: string }) => void;
+}
+
+function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
   const apiOptions = React.useMemo(
     () => ({
       ...connectorNodeV1.apiOptions,
-      // apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation.
-      apiRoot: `${server}/filemanager`, // Or you local Server Node V1 installation
+      apiRoot: `${server}/filemanager`,
     }),
     [server]
   );
-  console.log(server);
-  console.log(apiOptions);
+  // Bug : Filemanager only works if loaded for first time with correct server.
+  // Rendering false ui unless server is ready
+  // TODO : Need a proper test / Solution to render filemanager skeleton UI properly
   if (server.includes("undefined") || !server.includes("http")) {
     return (
       <div>
@@ -34,21 +28,6 @@ function FileManagerFront({ server }: { server: string }) {
     );
   }
   return (
-    // <div style={{ height: "480px" }}>
-    //   <FileManager>
-    //     <FileNavigator
-    //       id="filemanager-1"
-    //       api={connectorNodeV1.api}
-    //       apiOptions={apiOptions}
-    //       capabilities={connectorNodeV1.capabilities}
-    //       listViewLayout={connectorNodeV1.listViewLayout}
-    //       viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
-    //     />
-    //   </FileManager>
-    // </div>
-    // <div>
-    // {/*NODE_JS_EXAMPLE*/}
-
     <div
       style={{
         // height: "70vh",
@@ -95,9 +74,24 @@ function FileManagerFront({ server }: { server: string }) {
           onResourceItemClick={(event: any, number: any, rowData: any) =>
             console.log("onResourceItemClick", event, number, rowData)
           }
-          onResourceItemDoubleClick={(event: any, number: any, rowData: any) =>
-            console.log("onResourceItemDoubleClick", event, number, rowData)
-          }
+          onResourceItemDoubleClick={(info: any) => {
+            // console.log("onResourceItemDoubleClick", event, number, rowData);
+            // open file
+            const { rowData } = info;
+            const { ancestors, name, type, size, id } = rowData;
+            if (type !== "file") return;
+
+            const path: string = ancestors
+              .map((obj: any) => obj.name)
+              .join("/");
+            const file = (path + "/" + name) as string;
+            console.log("File: ", file);
+            if (size < 100000) {
+              // less than 100KB (or close)
+              // tell environment to download file then load it in editor
+              addToDoubleQuickQueue({ name: file, id });
+            }
+          }}
           onResourceItemRightClick={(event: any, number: any, rowData: any) =>
             console.log("onResourceItemRightClick", event, number, rowData)
           }
@@ -108,4 +102,4 @@ function FileManagerFront({ server }: { server: string }) {
   );
 }
 
-export default FileManagerFront;
+export default FileExplorer;

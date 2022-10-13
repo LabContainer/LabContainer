@@ -10,9 +10,10 @@ import SocketService from './SocketService.js'
 import pkg from '@opuscapita/filemanager-server';
 const { middleware } = pkg;
 
+// Rootname used in frontend -- must be set to /
 let fileManagerConfig = {
     fsRoot: '/',
-    rootName: 'Root folder'
+    rootName: ''
 };
 
 const app = express();
