@@ -5,7 +5,7 @@ import { ExtendedError } from 'socket.io/dist/namespace'
 import timer from 'long-timeout'
 import { SocketIOMiddleware } from '.'
 import { config } from 'dotenv'
-import { INVALID_TOKEN, NO_ADDITIONAL_SESSIONS, NO_TOKEN } from './constants.js'
+import { INVALID_TOKEN, NO_ADDITIONAL_SESSIONS, NO_TOKEN, NO_USER_TEAMS } from './constants.js'
 
 
 // Store active user team envs here, allow only one per user - team
@@ -40,7 +40,7 @@ export const checkMultipleSesions: SocketIOMiddleware = (socket, next) => {
         return;
     }
     console.log("Session Not Added", { user, team });
-    next(new Error(NO_ADDITIONAL_SESSIONS));
+    next(new Error(NO_USER_TEAMS));
     return;
 }
 
