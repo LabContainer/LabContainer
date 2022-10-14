@@ -26,8 +26,6 @@ export default class SocketService {
         const io: ServerType = new Server(server, { cors: { origin: "*" } });
         console.log("Waiting for Connections....");
         const addActiveList: SocketIOMiddleware = (socket, next) => {
-
-            console.log("Authenticating User0")
             socket.data.active_users = this.active_users;
             next();
         }
@@ -39,8 +37,6 @@ export default class SocketService {
             .on("connection", (socket: SocketType) => {
                 socket.emit("connected", "Connected!");
 
-                const decoded = socket.data.decoded as jwt.JwtPayload;
-                // const token = socket.handshake.query.token as string
                 socket.on("disconnect", () => {
                     const ateam = socket.handshake.query.team;
                     const auser = socket.data.decoded?.user;
@@ -50,7 +46,7 @@ export default class SocketService {
                     if (socket.data.timeout)
                         timer.clearTimeout(socket.data.timeout);
                 });
-
+                console.log("Connection Complete!");
                 // Connect to node-pty
                 this.terminal = new TerminalService(socket);
                 // ready

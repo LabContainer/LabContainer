@@ -49,11 +49,9 @@ function Term({
 
     const onDisconnect = () => {
       xtermRef.current?.terminal.writeln("***Disconnected from backend***");
-      refresh(refresh_token, setToken);
       setStatus(EnvStatus.disconnected);
     };
     const onConnectError = (err: Error) => {
-      console.log(err.message);
       if (err.message === INVALID_TOKEN) refresh(refresh_token, setToken);
       else if (err.message === NO_ADDITIONAL_SESSIONS)
         xtermRef.current?.terminal.writeln("***Connection limit reached***");
@@ -113,6 +111,9 @@ function Term({
     socketRef?.current?.on("error", onError);
     socketRef?.current?.on("disconnect", onDisconnect);
     socketRef?.current?.on("connect_error", onConnectError);
+    socketRef?.current?.on("expired", () => {
+      refresh(refresh_token, setToken);
+    });
     return () => {
       socketRef.current?.off("disconnect");
       socketRef.current?.disconnect();
