@@ -97,9 +97,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   // Load Downloaded file
   static getDerivedStateFromProps(props: IEditorProps, state: IEditorState) {
     // check loadfile
-    console.log(Object.keys(state.downloads));
-    console.log(props.loadFile.name in state.downloads);
-    console.log(props.loadFile.name);
     if (!(props.loadFile.name in state.downloads)) {
       if (props.loadFile.name !== "") {
         if (!state.downloading) {

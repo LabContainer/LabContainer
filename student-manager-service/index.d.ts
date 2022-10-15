@@ -17,6 +17,7 @@ export interface Environment {
     ssh_user: string
     ssh_password: string
 }
+import { Socket } from "socket.io";
 type SocketIOMiddleware = (socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>, next: (err?: ExtendedError | undefined) => any) => void
 
 export type ServerType = Server<

@@ -6,7 +6,7 @@ import { SocketType } from '.';
 export default class TerminalService {
     shell: string
     ptyProcess: pty.IPty | null;
-    socket: SocketType | null;
+    socket: SocketType;
 
     // Initialize the terminal service
     constructor(socket: SocketType) {
@@ -26,8 +26,7 @@ export default class TerminalService {
             env: Object.entries(process.env).reduce((obj: { [key: string]: string }, [ckey, cval]) => (cval ? { ...obj, [ckey]: cval } : obj), {}),
         });
 
-        // Add a "data" event listener.
-        this.ptyProcess.on("data", (data) => {
+        this.ptyProcess.onData((data) => {
             this.sendToClient(data);
         });
     }
