@@ -28,7 +28,7 @@ def login(
                 "user": auth_user.username,
                 # refresh token lasts for 24 hours
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(seconds=60 * 60 * 24),
+                + datetime.timedelta(hours=24),
             },
             key=os.environ["REFRESH_SECRET"],
         )

@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 class TeamCreate(BaseModel):
     name: str
     lab_id: str
@@ -25,3 +24,10 @@ class EnvCreate(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class MilestoneCreate(BaseModel):
+    milestone_id: str
+    lab_id: str
+    deadline: str
+    description: str

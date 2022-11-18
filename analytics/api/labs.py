@@ -110,3 +110,17 @@ def get_lab_teams(
     ]:
         return crud.get_teams_per_lab(db, lab_id)
     response.status_code = status.HTTP_403_FORBIDDEN
+
+
+@router.get("/{lab_id}/milestones")
+def get_lab_milestones(
+    lab_id: str,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db: SessionLocal = Depends(get_db),
+):
+    if not payload["is_student"] or payload["user"] in [
+        user.name for user in crud.get_users_per_lab(db, lab_id)
+    ]:
+        return crud.get_milestones_per_lab(db, lab_id)
+    response.status_code = status.HTTP_403_FORBIDDEN

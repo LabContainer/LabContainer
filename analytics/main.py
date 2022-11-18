@@ -6,7 +6,7 @@ import dotenv
 import os
 from analytics.utils import *
 from analytics.env_manager import *
-from analytics.api import environment, team, labs
+from analytics.api import environment, team, labs, milestones
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(environment.router)
 app.include_router(team.router)
 app.include_router(labs.router)
+app.include_router(milestones.router)
 
 
 @app.get("/")
