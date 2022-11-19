@@ -1,5 +1,5 @@
 import imp
-from typing import Dict
+from typing import Dict, List
 from fastapi import APIRouter, status, Response, Header, Depends
 
 from analytics.core.db import SessionLocal
@@ -11,7 +11,7 @@ import traceback
 router = APIRouter(prefix="/teams")
 
 
-@router.get("/{team_name}")
+@router.get("/{team_name}", response_model=schemas.TeamCreate, tags=["teams"])
 def get_team(
     team_name: str,
     response: Response,
@@ -26,11 +26,14 @@ def get_team(
     print(users)
     for user in users:
         if user.name == payload["user"]:
-            return team
+            return schemas.TeamCreate(
+                name=team.name,
+                lab_id=team.lab_id
+            )
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("/")
+@router.get("/", response_model=List[schemas.TeamCreate], tags=["teams"])
 def get_user_teams(
     username: str,
     response: Response,
@@ -38,11 +41,12 @@ def get_user_teams(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] == username:
-        return crud.get_teams_for_user(db, username)
+        teams = crud.get_teams_for_user(db, username)
+        return [schemas.TeamCreate(**team.__dict__) for team in teams]
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.post("/create")
+@router.post("/create", tags=["teams"])
 def create_new_team(
     team: schemas.TeamCreate,
     response: Response,
@@ -63,7 +67,7 @@ def create_new_team(
         response.status_code = status.HTTP_409_CONFLICT
 
 
-@router.post("/{team_name}/join")
+@router.post("/{team_name}/join", tags=["teams"])
 def join_team(
     team_name: str,
     username: str,
@@ -77,7 +81,7 @@ def join_team(
         response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.post("/{team_name}/leave")
+@router.post("/{team_name}/leave", tags=["teams"])
 def leave_team(
     team_name: str,
     username: str,
@@ -92,11 +96,12 @@ def leave_team(
 
 
 # Individual
-@router.get("/{team_name}/lab")
+@router.get("/{team_name}/lab", response_model=schemas.LabCreate, tags=["teams"])
 def get_team_lab(
     team_name: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
     db: SessionLocal = Depends(get_db),
 ):
-    return crud.get_lab_for_team(db, team_name)
+    labs = crud.get_lab_for_team(db, team_name)
+    return schemas.LabCreate(**labs.__dict__)

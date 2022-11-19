@@ -35,7 +35,7 @@ async def lock():
         f.close()
 
 
-@router.get("/{team_name}/{username}")
+@router.get("/{team_name}/{username}", response_model=schemas.Environment, tags=["environment"])
 async def get_environment(
     team_name: str,
     username: str,
@@ -60,7 +60,13 @@ async def get_environment(
         env = crud.get_env_for_user_team(db, username, team_name)
         if env:
             if check_env(env.host):
-                return env
+                return schemas.Environment(
+                    host=env.host,
+                    port=env.port,
+                    ssh_password=env.ssh_password,
+                    network=env.network,
+                    ssh_user=env.ssh_user,
+                )
             # Non running env, remove
             crud.remove_user_env(db, username, team_name)
 
@@ -75,14 +81,20 @@ async def get_environment(
         )
         try:
             env = crud.create_user_env(db, new_env, username, team_name)
-            return env
+            return schemas.Environment(
+                host=env.host,
+                port=env.port,
+                ssh_password=env.ssh_password,
+                network=env.network,
+                ssh_user=env.ssh_user,
+            )
         except Exception:
             kill_env(name)
             traceback.print_exc()
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
 
-@router.delete("/{team_name}/{username}")
+@router.delete("/{team_name}/{username}", tags=["environment"])
 def delete_env(
     team_name: str,
     username: str,
@@ -106,7 +118,7 @@ def delete_env(
         response.status_code = status.HTTP_404_NOT_FOUND
 
 
-@router.post("/{username}/save")
+@router.post("/{username}/save", tags=["environment"])
 def save_environment():
     # TODO: Save Environment
     pass

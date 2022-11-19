@@ -8,10 +8,19 @@ from auth.api import users, webapp
 
 env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
-app = FastAPI()
 
 
-origins = ["http://localhost", "http://localhost:3000", "https://codecapture.web.app"]
+def custom_generate_unique_id(route):
+    # if len(route.tags) == 0:
+    #     raise Exception(route.name)
+    return f"{route.tags[0]}-{route.name}"
+
+
+app = FastAPI(generate_unique_id_function=custom_generate_unique_id)
+
+
+origins = ["http://localhost", "http://localhost:3000",
+           "https://codecapture.web.app"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +34,7 @@ app.include_router(users.router)
 app.include_router(webapp.router)
 
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 def root():
     return "AuthService API"
 

@@ -10,7 +10,15 @@ from analytics.api import environment, team, labs
 
 env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
 dotenv.load_dotenv(dotenv_path=env_path)
-app = FastAPI()
+
+
+def custom_generate_unique_id(route):
+    # if len(route.tags) == 0:
+    #     raise Exception(route.name)
+    return f"{route.tags[0]}-{route.name}"
+
+
+app = FastAPI(generate_unique_id_function=custom_generate_unique_id)
 
 
 origins = [
@@ -32,7 +40,7 @@ app.include_router(team.router)
 app.include_router(labs.router)
 
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 def root():
     return "Analytics Service API"
 

@@ -11,8 +11,8 @@ router = APIRouter(
 )
 
 
-@router.get("/me", response_model=schemas.UserInfo)
-async def get_user_info(response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
+@router.get("/me", response_model=schemas.UserInfo, tags=["users"])
+async def get_current_user_info(response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
     # Cannot have "me" username
     user = crud.get_user(db, payload["user"])
     return {
@@ -22,7 +22,7 @@ async def get_user_info(response: Response, payload: Dict[str, str] = Depends(ha
     }
 
 
-@router.get("/{username}", response_model=schemas.UserInfo)
+@router.get("/{username}", response_model=schemas.UserInfo, tags=["users"])
 async def get_user_info(username: str, response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
     user = crud.get_user(db, username)
     # TODO check is_student in db instead of jwt
@@ -37,7 +37,7 @@ async def get_user_info(username: str, response: Response, payload: Dict[str, st
     return
 
 
-@router.get('/', response_model=List[schemas.UserInfo])
+@router.get('/', response_model=List[schemas.UserInfo], tags=["users"])
 def get_users(response: Response, limit: Union[int, None] = None, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
     if not payload['is_student']:
         users = crud.get_all_users(db, limit)
@@ -52,7 +52,7 @@ def get_users(response: Response, limit: Union[int, None] = None, payload: Dict[
         return
 
 
-@router.post('/create')
+@router.post('/create', tags=["users"])
 def create_user(user_info: schemas.UserCreate, response: Response, db: SessionLocal = Depends(get_db)):
     # TODO: Email validation for students/staff
     user = crud.get_user(db, user_info.username)
