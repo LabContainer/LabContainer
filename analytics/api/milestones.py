@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 from fastapi import APIRouter, status, Response, Header, Depends
 
 from analytics.core.db import SessionLocal
@@ -9,7 +9,7 @@ from analytics.core import schemas
 router = APIRouter(prefix="/milestones")
 
 
-@router.post("/create")
+@router.post("/create", tags=["milestones"])
 def create_milestone(
     milestone: schemas.MilestoneCreate,
     response: Response,
@@ -17,24 +17,26 @@ def create_milestone(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"]:
-        return crud.create_milestone(db, milestone)
+        milestone = crud.create_milestone(db, milestone)
+        return schemas.MilestoneCreate(**milestone.__dict__)
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("")
+@router.get("", response_model=List[schemas.MilestoneCreate], tags=["milestones"])
 def get_milestones(
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
     db: SessionLocal = Depends(get_db)
 ):
     if not payload["is_student"]:
-        return crud.get_milestones(db)
+        milestones = crud.get_milestones(db)
+        return [schemas.MilestoneCreate(**milestone.__dict__) for milestone in milestones]
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("/{milestone_id}")
+@router.get("/{milestone_id}", response_model=schemas.MilestoneCreate, tags=["milestones"])
 def get_milestone(
     milestone_id: str,
     response: Response,
@@ -42,12 +44,13 @@ def get_milestone(
     db: SessionLocal = Depends(get_db)
 ):
     if not payload["is_student"]:
-        return crud.get_milestone(db, milestone_id)
+        m = crud.get_milestone(db, milestone_id)
+        return schemas.MilestoneCreate(**m.__dict__)
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.delete("/{milestone_id}")
+@router.delete("/{milestone_id}", tags=["milestones"])
 def delete_milestone(
     milestone_id: str,
     response: Response,
@@ -55,13 +58,13 @@ def delete_milestone(
     db: SessionLocal = Depends(get_db)
 ):
     if not payload["is_student"]:
-        return crud.delete_milestone(db, milestone_id)
+        crud.delete_milestone(db, milestone_id)
+        return
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 
 
-
-@router.patch("/{milestone_id}")
+@router.patch("/{milestone_id}", tags=["milestones"])
 def patch_milestone(
     milestone_id: str,
     milestone: schemas.MilestoneCreate,
@@ -70,7 +73,8 @@ def patch_milestone(
     db: SessionLocal = Depends(get_db)
 ):
     if not payload["is_student"]:
-        return crud.update_milestone(db, milestone_id, milestone)
+        crud.update_milestone(db, milestone_id, milestone)
+        return
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 

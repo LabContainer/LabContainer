@@ -5,72 +5,17 @@ import CircularIndeterminate from "../../components/common/CircularInderminate";
 
 import "./StudentDashboard.css";
 import { DashBoardData } from "./DashboardCard";
-import fetchData from "../../components/App/fetch";
 import { AuthContext } from "../../components/App/AuthContext";
-import { AnalyticsServiceAPI } from "../../constants";
+import useAPI from "../../api";
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const DashCard = React.lazy(async () => {
   return import("./DashboardCard");
 });
 
-export interface ITeam {
-  name: string;
-  lab_id: string;
-}
-
-export interface ILab {
-  instructor: string;
-  course: string;
-  id: string;
-}
-
-async function getData(
-  user: string,
-  token: string,
-  refresh_token: string,
-  setToken: (s: string) => void
-) {
-  const teams: ITeam[] = await fetchData(
-    AnalyticsServiceAPI,
-    `/teams?username=${user}`,
-    token,
-    refresh_token,
-    setToken,
-    {
-      method: "GET",
-    }
-  );
-  const labs: ILab[] = await fetchData(
-    AnalyticsServiceAPI,
-    `/labs?username=${user}`,
-    token,
-    refresh_token,
-    setToken,
-    {
-      method: "GET",
-    }
-  );
-  const data: DashBoardData[] = [];
-  for (let lab of labs) {
-    const team = teams.filter((team) => team.lab_id === lab.id);
-    data.push({
-      Course: lab.course,
-      Instructor: lab.instructor,
-      LabName: lab.id,
-      Progress: 30,
-      Team: team[0]?.name,
-      TimeLeft: "10",
-    });
-  }
-  return data;
-}
-
 export default function StudentDashboard() {
-  const { token, refresh_token, setToken, user } =
-    React.useContext(AuthContext);
-  const [reRender, setReRender] = React.useState(false);
-
+  const { user } = React.useContext(AuthContext);
+  const { LabsApi, TeamsApi } = useAPI();
   const [data, setData] = useState<
     {
       data: DashBoardData;
@@ -80,24 +25,30 @@ export default function StudentDashboard() {
   useEffect(() => {
     async function run() {
       if (user) {
-        const data_list = await getData(
-          user.username,
-          token,
-          refresh_token,
-          setToken
-        );
+        const teams = await TeamsApi.teamsGetUserTeams(user.username);
+        const labs = await LabsApi.labsGetLabs(user.username);
+        const data_list: DashBoardData[] = [];
+        for (let lab of labs) {
+          const team = teams.filter((team) => team.lab_id === lab.id);
+          data_list.push({
+            Course: lab.course,
+            Instructor: lab.instructor,
+            LabName: lab.id,
+            Progress: 30,
+            Team: team[0]?.name,
+            TimeLeft: "10",
+          });
+        }
         setData(
           data_list.map((d, i) => ({
             data: d,
             id: i,
           }))
         );
-      } else {
-        setToken("");
       }
     }
     run();
-  }, [user, token, refresh_token, setToken, setData, reRender]);
+  }, [user]);
 
   return (
     <>
@@ -129,7 +80,7 @@ export default function StudentDashboard() {
                     key={d.id}
                     reRender={() => {
                       console.log("Called");
-                      setReRender((prev) => !prev);
+                      // setReRender((prev) => !prev);
                     }}
                   />
                 ))

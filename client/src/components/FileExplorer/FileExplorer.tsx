@@ -3,6 +3,8 @@ import { FileManager, FileNavigator } from "@opuscapita/react-filemanager";
 import connectorNodeV1 from "@opuscapita/react-filemanager-connector-node-v1";
 import CircularIndeterminate from "../common/CircularInderminate";
 
+import "./FileExplorer.css";
+
 interface IFileExplorerProps {
   server: string;
   addToDoubleQuickQueue: (s: { name: string; id: string }) => void;
@@ -28,17 +30,7 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
     );
   }
   return (
-    <div
-      style={{
-        // height: "70vh",
-        // height: "100%",
-        flexGrow: 1,
-        //   minWidth: "320px",
-        // maxWidth: "300px",
-        flex: "1",
-        //   marginBottom: "15px",
-      }}
-    >
+    <div className="file-explorer-container">
       <FileManager>
         <FileNavigator
           api={connectorNodeV1.api}

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class TeamCreate(BaseModel):
     name: str
     lab_id: str
@@ -31,3 +32,21 @@ class MilestoneCreate(BaseModel):
     lab_id: str
     deadline: str
     description: str
+
+
+class Environment(BaseModel):
+    """
+    Schema for Environment
+    """
+    host: str
+    network: str
+    ssh_password: str  # Plain string , security concern ?
+    port: int
+    ssh_user: str
+
+    class Config:
+        orm_mode = True
+
+
+class User(BaseModel):
+    name: str

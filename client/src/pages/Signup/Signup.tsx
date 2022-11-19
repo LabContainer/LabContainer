@@ -13,36 +13,16 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import useApi from "../../api";
 
-const api_url = "http://localhost:5000";
-
-async function createUser(
-  username: string,
-  password: string,
-  email: string,
-  is_student: boolean
-) {
-  const response = await fetch(`${api_url}/users/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username,
-      password,
-      email,
-      is_student,
-    }),
-  });
-  return response.ok;
-}
+import "./Signup.css";
 
 const theme = createTheme();
 
 export default function SignUp() {
   const [failedAttempt, setFailedAttempt] = React.useState(false);
   const navigate = useNavigate();
-
+  const { UserApi } = useApi();
   let failMsg;
   if (failedAttempt) {
     failMsg = "Invalid data";
@@ -50,17 +30,17 @@ export default function SignUp() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = data.get("email");
-    const username = data.get("username");
-    const password = data.get("password");
-    const isStudent = !!data.get("isStudent");
+    const email = data.get("email") as string;
+    const username = data.get("username") as string;
+    const password = data.get("password") as string;
+    const is_student = !!data.get("isStudent");
     if (username && password && email) {
-      const success = await createUser(
-        username as string,
-        password as string,
-        email as string,
-        isStudent
-      );
+      const success = await UserApi.usersCreateUser({
+        email,
+        username,
+        password,
+        is_student,
+      });
       setFailedAttempt(!success);
       if (success) {
         navigate("/login");
@@ -72,14 +52,7 @@ export default function SignUp() {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box className="signup-container">
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
           </Avatar>

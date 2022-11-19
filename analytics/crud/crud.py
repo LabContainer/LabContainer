@@ -179,14 +179,15 @@ def remove_user_env(db: Session, username: str, team_name: str):
 
 def create_milestone(db: Session, milestone: schemas.MilestoneCreate):
     milestone_dict = milestone.dict()
-    milestone_dict["deadline"] = datetime.strptime(milestone_dict["deadline"], "%Y-%m-%d").date()
+    milestone_dict["deadline"] = datetime.strptime(
+        milestone_dict["deadline"], "%Y-%m-%d").date()
     new_milestone = Milestone(**milestone_dict)
     db.add(new_milestone)
     db.commit()
     return new_milestone
 
 
-def get_milestones(db: Session):
+def get_milestones(db: Session) -> List[Milestone]:
     return db.query(Milestone).all()
 
 
@@ -207,8 +208,9 @@ def delete_milestone(db: Session, milestone_id: str):
 
 def update_milestone(db: Session, milestone_id: str, milestone: schemas.MilestoneCreate):
     new_milestone_dict = milestone.dict()
-    new_milestone_dict["deadline"] = datetime.strptime(new_milestone_dict["deadline"], "%Y-%m-%d").date()
-    
+    new_milestone_dict["deadline"] = datetime.strptime(
+        new_milestone_dict["deadline"], "%Y-%m-%d").date()
+
     old_milestone = get_milestone(db, milestone_id)
     if old_milestone:
         stmt = (
@@ -218,4 +220,4 @@ def update_milestone(db: Session, milestone_id: str, milestone: schemas.Mileston
         )
         db.execute(stmt)
         db.commit()
-        return new_milestone_dict
+        return

@@ -1,0 +1,5 @@
+.file-explorer-container {
+  height: 100%;
+  flex-grow: 1;
+  flex: 1;
+}
