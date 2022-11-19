@@ -14,7 +14,7 @@ from auth.utils import gen_access_token, gen_internal_token
 router = APIRouter(prefix="/webapp")
 
 
-@router.post("/login", response_model=Union[str, schemas.LoginResult])
+@router.post("/login", response_model=schemas.LoginResult, tags=["webapp"])
 def login(
     login_info: schemas.UserLogin,
     response: Response,
@@ -36,10 +36,10 @@ def login(
         return {"access_token": access_token, "refresh_token": refresh_token}
 
     response.status_code = status.HTTP_401_UNAUTHORIZED
-    return "Not Allowed"
+    return schemas.LoginResult()
 
 
-@router.get("/refresh")
+@router.get("/refresh", response_model=schemas.LoginAccess, tags=["webapp"])
 def refresh(
     response: Response,
     payload: Dict = Depends(has_refresh),
@@ -52,7 +52,7 @@ def refresh(
         return {"access_token": access_token}
 
 
-@router.post("/logout")
+@router.post("/logout", tags=["webapp"])
 def logout(payload: Dict = Depends(has_refresh), db: SessionLocal = Depends(get_db)):
     crud.set_user_inactive(db, payload["user"])
     crud.invalidate_rts(db, payload["user"])
@@ -66,12 +66,9 @@ def logout(payload: Dict = Depends(has_refresh), db: SessionLocal = Depends(get_
         headers={"Authorization": f"Bearer {auth_service_token}"},
     )
     teams = resp.json()
-    print(teams)
     for team in teams:
-        print(team)
         resp = requests.delete(
             f"{analytics_api}/environment/{team['name']}/{payload['user']}",
             headers={"Authorization": f"Bearer {auth_service_token}"},
         )
-        print(resp.text)
     return

@@ -12,8 +12,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../../components/App/AuthContext";
 import { Button, MenuItem, Select, Stack } from "@mui/material";
 import FormDialogAddTeam from "../../components/FormDialogAddTeam/FormDialogAddTeam";
-import fetchData from "../../components/App/fetch";
-import { AnalyticsServiceAPI } from "../../constants";
+import useApi from "../../api";
 
 export interface DashBoardData {
   LabName: string;
@@ -35,24 +34,14 @@ function TeamCard({
 }) {
   const [createTeamOpen, setCreateTeamOpen] = React.useState(false);
   const [teamSelect, setTeamSelect] = React.useState("");
-  const { user, token, refresh_token, setToken } =
-    React.useContext(AuthContext);
+  const { user } = React.useContext(AuthContext);
+  const { LabsApi, TeamsApi } = useApi();
   const [data, setData] = React.useState<any[]>();
   React.useEffect(() => {
     // const abortController = new AbortController()
-    fetchData(
-      AnalyticsServiceAPI,
-      `/labs/${lab}/teams`,
-      token,
-      refresh_token,
-      setToken,
-      {
-        method: "GET",
-        // signal: abortController.signal
-      }
-    ).then(setData);
+    LabsApi.labsGetLabTeams(lab).then(setData);
     // return abortController.abort
-  }, [token, refresh_token, setToken, lab]);
+  }, [lab]);
 
   return (
     <>
@@ -65,16 +54,9 @@ function TeamCard({
               size="small"
               sx={{ margin: "5px" }}
               onClick={() => {
-                fetchData(
-                  AnalyticsServiceAPI,
-                  `/teams/${team}/leave?username=${user?.username}`,
-                  token,
-                  refresh_token,
-                  setToken,
-                  {
-                    method: "POST",
-                  }
-                ).then(reRenderCard);
+                TeamsApi.teamsLeaveTeam(team, user?.username || "").then(
+                  reRenderCard
+                );
               }}
             >
               {" "}
@@ -106,16 +88,9 @@ function TeamCard({
                 size="small"
                 sx={{ margin: "5px" }}
                 onClick={() => {
-                  fetchData(
-                    AnalyticsServiceAPI,
-                    `/teams/${teamSelect}/join?username=${user?.username}`,
-                    token,
-                    refresh_token,
-                    setToken,
-                    {
-                      method: "POST",
-                    }
-                  ).then(reRenderCard);
+                  TeamsApi.teamsJoinTeam(teamSelect, user?.username || "").then(
+                    reRenderCard
+                  );
                 }}
               >
                 {" "}
@@ -137,20 +112,12 @@ function TeamCard({
                   const data = new FormData(event.currentTarget);
                   const lab_id = data.get("id");
                   const team = data.get("name");
-                  fetchData(
-                    AnalyticsServiceAPI,
-                    "/teams/create",
-                    token,
-                    refresh_token,
-                    setToken,
-                    {
-                      method: "POST",
-                      body: JSON.stringify({
-                        name: team,
-                        lab_id,
-                      }),
-                    }
-                  ).then(reRenderCard);
+                  if (lab_id && team) {
+                    TeamsApi.teamsCreateNewTeam({
+                      lab_id: lab_id as string,
+                      name: team as string,
+                    }).then(reRenderCard);
+                  }
                 }}
               />
             </>

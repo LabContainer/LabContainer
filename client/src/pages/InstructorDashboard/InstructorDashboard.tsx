@@ -1,12 +1,11 @@
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import React from "react";
+import useAPI from "../../api";
+import { LabCreate } from "../../clients/AnalyticsClient";
 import { AuthContext, IUser } from "../../components/App/AuthContext";
-import fetchData from "../../components/App/fetch";
 import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
 import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
 import FormDialogUsersAdd from "../../components/FormDialogUsersAdd/FormDialogUsersAdd";
-import { AnalyticsServiceAPI, AuthServiceAPI } from "../../constants";
-import { ILab } from "../StudentDashboard/StudentDashboard";
 
 const headCellsUsers: IHeadCell[] = [
   {
@@ -64,28 +63,25 @@ const headCellsLabs: IHeadCell[] = [
 function InstructorDashboard() {
   const { token, refresh_token, setToken } = React.useContext(AuthContext);
   const [users, setUsers] = React.useState<IUser[]>([]);
-  const [labs, setLabs] = React.useState<ILab[]>([]);
+  const [labs, setLabs] = React.useState<LabCreate[]>([]);
   const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
   const [usersAddOpen, setUserAddOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
     []
   );
-
+  const { UserApi, LabsApi } = useAPI();
   React.useEffect(() => {
-    const abortController = new AbortController();
-    // Fetch all data
-    fetchData(AuthServiceAPI, "/users", token, refresh_token, setToken, {
-      method: "GET",
-      signal: abortController.signal,
-    }).then(setUsers);
-    fetchData(AnalyticsServiceAPI, "/labs", token, refresh_token, setToken, {
-      method: "GET",
-      signal: abortController.signal,
-    }).then(setLabs);
+    const user_promise = UserApi.usersGetUsers();
+    const lab_promise = LabsApi.labsGetLabs();
+
+    user_promise.then(setUsers);
+    lab_promise.then(setLabs);
+
     return () => {
-      abortController.abort();
+      user_promise.cancel();
+      lab_promise.cancel();
     };
-  }, [token, refresh_token, setToken, setUsers]);
+  }, [UserApi, LabsApi]);
   return (
     <Box
       sx={{
@@ -133,18 +129,8 @@ function InstructorDashboard() {
                 const data = new FormData(event.currentTarget);
                 const labid = data.get("id") as string;
                 for (const user_index of selectedUsers) {
-                  fetchData(
-                    AnalyticsServiceAPI,
-                    `/labs/${labid}/users?username=${
-                      users[parseInt(user_index)].username
-                    }`,
-                    token,
-                    refresh_token,
-                    setToken,
-                    {
-                      method: "POST",
-                    }
-                  );
+                  const user = users[parseInt(user_index)];
+                  LabsApi.labsAddLabUser(labid, user.username);
                 }
               }}
             />
@@ -182,21 +168,11 @@ function InstructorDashboard() {
                 const labid = data.get("id") as string;
                 const course = data.get("course") as string;
                 const instructor = data.get("instructor") as string;
-                fetchData(
-                  AnalyticsServiceAPI,
-                  "/labs/create",
-                  token,
-                  refresh_token,
-                  setToken,
-                  {
-                    method: "POST",
-                    body: JSON.stringify({
-                      id: labid,
-                      course: course,
-                      instructor: instructor,
-                    }),
-                  }
-                );
+                LabsApi.labsCreateLab({
+                  id: labid,
+                  course: course,
+                  instructor: instructor,
+                });
               }}
             />
           </Box>

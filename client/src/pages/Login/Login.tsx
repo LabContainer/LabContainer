@@ -14,9 +14,9 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../components/App/AuthContext";
-import fetchData from "../../components/App/fetch";
+import useApi from "../../api";
 
-const api_url = "http://localhost:5000";
+import "./Login.css";
 
 const theme = createTheme();
 
@@ -26,36 +26,25 @@ export default function Login() {
     React.useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const { WebappApi } = useApi();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    console.log("submit");
+
     const data = new FormData(event.currentTarget);
-    const username = data.get("username");
-    const password = data.get("password");
+    const username = data.get("username") as string;
+    const password = data.get("password") as string;
     if (username !== null && password !== null) {
-      // const auth_token = await loginUser(username as string, password as string);
-      const tokens = await fetchData(
-        api_url,
-        `/webapp/login`,
-        token,
-        refresh_token,
-        setToken,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            password,
-          }),
-        }
-      );
+      const tokens = await WebappApi.webappLogin({
+        username,
+        password,
+      });
 
       if (tokens !== undefined) {
         const { access_token, refresh_token: new_refresh_token } = tokens;
-        setToken(access_token);
-        setRefreshToken(new_refresh_token);
+        setToken(access_token as string);
+        setRefreshToken(new_refresh_token as string);
         if (location.pathname === "/login") {
           // Redirect user to hashboard from login on success
           navigate("/dashboard");
@@ -70,14 +59,7 @@ export default function Login() {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box className="login-container">
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
           </Avatar>

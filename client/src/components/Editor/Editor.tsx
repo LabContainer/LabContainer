@@ -401,14 +401,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
             tabList={this.state.fileList}
             setChosen={this.setChosenFile}
           />
-          <Box
-            sx={{
-              backgroundColor: "#f1f1f1",
-              display: "flex",
-              width: "fit-content",
-              flexDirection: "row",
-            }}
-          >
+          <Box className="editor-toolbar">
             <FormDialogCreateFile
               open={this.state.fileDialogOpen}
               handleClose={this.closeAddFileDialog}
@@ -419,29 +412,26 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
               variant="contained"
               color="primary"
               size="small"
-              sx={{
-                margin: "8px",
-              }}
+              className="editor-toolbar-button"
               onClick={() => {
                 this.setState({ fileDialogOpen: true });
               }}
             >
-              <AddIcon></AddIcon>
+              <AddIcon />
             </Button>
             <Button
               variant="contained"
               component="label"
               size="small"
-              sx={{
-                margin: "8px",
-              }}
+              className="editor-toolbar-button"
               onClick={this.saveFile}
             >
               Save
             </Button>
           </Box>
         </Stack>
-        <Box flex={1}>
+
+        <Box flex={1} className="editor-container">
           {this.state.downloading ? (
             <Container>
               Loading File {this.props.loadFile.name} <CircularIndeterminate />
@@ -452,6 +442,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
             style={{
               width: "100%",
               height: "100%",
+              display: this.state.downloading ? "none" : "block",
             }}
             theme="github"
             name="aceeditor"
