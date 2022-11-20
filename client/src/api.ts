@@ -43,7 +43,12 @@ export default function useAPI() {
                     // axios.request(originalRequest);
                     return axios(originalRequest);
                     // return axios.request(originalRequest);
-                })
+                }).catch(err => {
+                    console.error(err)
+                    // Logout
+                    setToken("");
+                    return Promise.reject(err);
+                });
             }
             return Promise.reject(error);
         });
@@ -59,13 +64,12 @@ export default function useAPI() {
     const TeamsApi = analytics.teams;
     const LabsApi = analytics.labs;
     const EnvironmentApi = analytics.environment;
-    const MilestonesApi = analytics.milestones;
+
     return {
         UserApi,
         WebappApi,
         TeamsApi,
         LabsApi,
-        EnvironmentApi,
-        MilestonesApi
+        EnvironmentApi
     }
 }
