@@ -43,7 +43,12 @@ export default function useAPI() {
                     // axios.request(originalRequest);
                     return axios(originalRequest);
                     // return axios.request(originalRequest);
-                })
+                }).catch(err => {
+                    console.error(err)
+                    // Logout
+                    setToken("");
+                    return Promise.reject(err);
+                });
             }
             return Promise.reject(error);
         });

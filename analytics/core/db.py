@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Boolean, Column, ForeignKey, String, Table, ForeignKeyConstraint
+from sqlalchemy import Boolean, Column, ForeignKey, String, Table, ForeignKeyConstraint, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -41,6 +41,7 @@ class Lab(Base):
     course = Column(String)
     instructor = Column(String)
     teams = relationship("Team", back_populates="lab")
+    milestones = relationship("Milestone", back_populates="lab")
     users = relationship(
         "User", secondary=association_table_user_lab, back_populates="labs"
     )
@@ -59,6 +60,7 @@ class Team(Base):
     name = Column(String, primary_key=True, index=True)
     lab_id = Column(String, ForeignKey("labs.id"))
     lab = relationship("Lab", back_populates="teams")
+    current_milestone = Column(String, ForeignKey("milestone.milestone_id"))
     users = relationship(
         "User", secondary=association_table_user_team, back_populates="teams"
     )
@@ -89,5 +91,13 @@ class Envionment(Base):
     owning_user = relationship("User", back_populates="environments")
     owning_team = relationship("Team", back_populates="environments")
 
+#Need to make milestone connection for team
+class Milestone(Base):
+    __tablename__ = "milestone"
+    milestone_id = Column(String, primary_key=True, index=True)
+    lab_id = Column(String, ForeignKey("labs.id"))
+    lab = relationship("Lab", back_populates="milestones")
+    deadline = Column(Date)
+    description = Column(String)
 
 Base.metadata.create_all()

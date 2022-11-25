@@ -27,6 +27,13 @@ class EnvCreate(BaseModel):
         orm_mode = True
 
 
+class MilestoneCreate(BaseModel):
+    milestone_id: str
+    lab_id: str
+    deadline: str
+    description: str
+
+
 class Environment(BaseModel):
     """
     Schema for Environment

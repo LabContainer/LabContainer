@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import Any, Union, List
+from sqlalchemy import update
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import Session
-from analytics.core.db import Envionment, Lab, Team, User
+from analytics.core.db import Envionment, Lab, Team, User, Milestone
 import analytics.core.schemas as schemas
 
 
@@ -174,3 +175,49 @@ def remove_user_env(db: Session, username: str, team_name: str):
     else:
         print(f"No Env for user {username}")
     return
+
+
+def create_milestone(db: Session, milestone: schemas.MilestoneCreate):
+    milestone_dict = milestone.dict()
+    milestone_dict["deadline"] = datetime.strptime(
+        milestone_dict["deadline"], "%Y-%m-%d").date()
+    new_milestone = Milestone(**milestone_dict)
+    db.add(new_milestone)
+    db.commit()
+    return new_milestone
+
+
+def get_milestones(db: Session) -> List[Milestone]:
+    return db.query(Milestone).all()
+
+
+def get_milestone(db: Session, milestone_id: str) -> Union[Milestone, None]:
+    return db.query(Milestone).filter(Milestone.milestone_id == milestone_id).first()
+
+
+def get_milestones_per_lab(db: Session, lab_id: str) -> List[Milestone]:
+    return db.query(Milestone).join(Milestone.lab).filter(Lab.id == lab_id).all()
+
+
+def delete_milestone(db: Session, milestone_id: str):
+    milestone = get_milestone(db, milestone_id)
+    if milestone:
+        db.delete(milestone)
+        db.commit()
+
+
+def update_milestone(db: Session, milestone_id: str, milestone: schemas.MilestoneCreate):
+    new_milestone_dict = milestone.dict()
+    new_milestone_dict["deadline"] = datetime.strptime(
+        new_milestone_dict["deadline"], "%Y-%m-%d").date()
+
+    old_milestone = get_milestone(db, milestone_id)
+    if old_milestone:
+        stmt = (
+            update(Milestone)
+            .where(Milestone.milestone_id == milestone_id)
+            .values(**new_milestone_dict)
+        )
+        db.execute(stmt)
+        db.commit()
+        return
