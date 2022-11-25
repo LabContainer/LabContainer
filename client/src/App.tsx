@@ -9,6 +9,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import useToken from "./components/App/useToken";
 import Signup from "./pages/Signup/Signup";
 import { AuthContext } from "./components/App/AuthContext";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 
 function App() {
   const { token, refresh_token, setToken, setRefreshToken, user } = useToken();
@@ -28,6 +29,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/*" element={<Navigate to="/login" />} />
           </Routes>
         )}

@@ -3,9 +3,11 @@ import "./Navbar.css";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import { Button, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App/AuthContext";
 import { Settings } from "@mui/icons-material";
+import Logo from '../../static/Cube.png';
 
 const api_url = "http://localhost:5000";
 
@@ -28,8 +30,22 @@ function Navbar() {
   const { token, refresh_token, setToken, setRefreshToken } =
     useContext(AuthContext);
   return (
-    <>
-      <h1 className="nav-header">Lab Capture</h1>
+    <div>
+      <h1 className="nav-header">
+        <Grid container spacing={3}>
+          <Grid className="nav-logo" item xs={5}>
+            <img src={Logo} />
+          </Grid>
+          <Grid item xs={3}>
+            <div className="nav-title">
+              Lab Container
+            </div>
+          </Grid>
+          <Grid className="nav-sign-in" item xs={4}>
+            <Button variant="outlined" sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="large">Sign In</Button>
+          </Grid>
+        </Grid>
+      </h1>
       <ul className="nav">
         {!!token ? (
           <>
@@ -73,7 +89,7 @@ function Navbar() {
           </>
         ) : null}
       </ul>
-    </>
+    </div>
   );
 }
 

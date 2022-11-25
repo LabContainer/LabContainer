@@ -1,0 +1,25 @@
+.home-colomn-left {
+    padding-top: 47px;
+}
+
+.home-column-image {
+    padding-top: 47px;
+}
+
+.image_container {
+    position: relative;
+    top: 129px;
+    left: 60px;
+}
+
+.engineer-elipse {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.engineer-image {
+    position: absolute;
+    left: 42px;
+    top: 151px;
+}
