@@ -6,7 +6,7 @@ import HomeColumn from "../../components/HomeColumn/HomeColumn";
 function ForgotPassword() {
     return (
         <HomeColumn>
-            <Grid container spacing={2}>
+            {/* <Grid container spacing={2}>
                 <Grid item xs={3}>
                     <img className="forgot-logo" src={Logo}/>
                 </Grid>
@@ -15,8 +15,8 @@ function ForgotPassword() {
                         Lab Container
                     </div>
                 </Grid>
-            </Grid>
-            <div className="forgot-form-title">
+            </Grid> */}
+            <div style={{ marginTop: "110px" }} className="forgot-form-title">
                 Forgot Password
             </div>
             <div className="forgot-form-description">
@@ -26,10 +26,10 @@ function ForgotPassword() {
                 <TextField id="outlined-basic" label="Email Address" variant="outlined" fullWidth={true} />
             </div>
             <div className="forgot-form-button">
-                <Button variant="contained" color="inherit" fullWidth={true} sx={{ fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="medium">Submit</Button>
+                <Button variant="contained" color="inherit" fullWidth={true} sx={{ fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="large">Submit</Button>
             </div>
             <div className="forgot-form-button create-account">
-                <Button variant="contained" color="inherit" fullWidth={true} sx={{fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="medium">Create Account</Button>
+                <Button variant="contained" color="inherit" fullWidth={true} sx={{fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="large">Create Account</Button>
             </div>
         </HomeColumn>
     );
