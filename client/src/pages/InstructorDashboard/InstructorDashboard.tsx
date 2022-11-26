@@ -81,7 +81,7 @@ function InstructorDashboard() {
       user_promise.cancel();
       lab_promise.cancel();
     };
-  }, [UserApi, LabsApi]);
+  }, []);
   return (
     <Box
       sx={{
