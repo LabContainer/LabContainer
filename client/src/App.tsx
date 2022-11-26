@@ -10,6 +10,7 @@ import useToken from "./components/App/useToken";
 import Signup from "./pages/Signup/Signup";
 import { AuthContext } from "./components/App/AuthContext";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import CreateAccount from "./pages/CreateAccount/CreateAccount";
 
 function App() {
   const { token, refresh_token, setToken, setRefreshToken, user } = useToken();
@@ -30,6 +31,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
+            <Route path="/createaccount" element={<CreateAccount />} />
             <Route path="/*" element={<Navigate to="/login" />} />
           </Routes>
         )}

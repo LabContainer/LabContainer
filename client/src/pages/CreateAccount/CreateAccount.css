@@ -1,0 +1,24 @@
+.create-form-title {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 3em;
+    line-height: 24px;
+    letter-spacing: -0.5px;
+    color: #444444;
+    padding: 16% 0% 0% 14%;
+}
+
+.create-form-textfield {
+    margin: 5% 13% 0% 14%;
+}
+
+.create-form-textfield.child {
+    margin: 3% 13% 0% 14%;
+}
+
+.create-form-button {
+    color: white;
+    border-radius: 10px;
+    margin: 3% 13% 0% 14%;
+}
