@@ -1,25 +1,32 @@
-.home-column-left {
-    padding-top: 47px;
+.home-box {
+    width: 85%;
+    height: 110%;
 }
 
-.home-column-image {
-    padding-top: 47px;
+.home-box.left {
+    background-color: white;
 }
 
-.image_container {
+.home-box.right {
     position: relative;
-    top: 129px;
-    left: 60px;
+    background-color: #243E6B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-column {
+    padding-top: 1.5%;
 }
 
 .engineer-elipse {
     position: absolute;
-    top: 0;
-    left: 0;
+    width: 70%;
+    height: 70%;
 }
 
 .engineer-image {
     position: absolute;
-    left: 42px;
-    top: 151px;
+    width: 60%;
+    height: auto;
 }

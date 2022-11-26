@@ -26,10 +26,10 @@ function ForgotPassword() {
                 <TextField id="outlined-basic" label="Email Address" variant="outlined" fullWidth={true} />
             </div>
             <div className="forgot-form-button">
-                <Button variant="contained" color="inherit" fullWidth={true} sx={{ fontSize: '2rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="large">Sign In</Button>
+                <Button variant="contained" color="inherit" fullWidth={true} sx={{ fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="medium">Submit</Button>
             </div>
             <div className="forgot-form-button create-account">
-                <Button variant="contained" color="inherit" fullWidth={true} sx={{fontSize: '2rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="large">Create Account</Button>
+                <Button variant="contained" color="inherit" fullWidth={true} sx={{fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="medium">Create Account</Button>
             </div>
         </HomeColumn>
     );

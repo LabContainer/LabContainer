@@ -34,7 +34,7 @@ function Navbar() {
       <h1 className="nav-header">
         <Grid container spacing={3}>
           <Grid className="nav-logo" item xs={5}>
-            <img src={Logo} />
+            <img className="nav-logo-size" src={Logo} />
           </Grid>
           <Grid item xs={3}>
             <div className="nav-title">
@@ -42,7 +42,7 @@ function Navbar() {
             </div>
           </Grid>
           <Grid className="nav-sign-in" item xs={4}>
-            <Button variant="outlined" sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="large">Sign In</Button>
+            <Button variant="outlined" sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Sign In</Button>
           </Grid>
         </Grid>
       </h1>

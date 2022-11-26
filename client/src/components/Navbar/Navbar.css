@@ -6,12 +6,16 @@
 }
 
 .nav-logo {
-  margin-top: 8px;
+  margin-top: 0.3%;
   text-align: right;
 }
 
+.nav-logo-size {
+  width: 35px;
+  height: auto;
+}
+
 .nav-sign-in {
-  margin-top: 8px;
   padding-right: 1%;
   text-align: right;
 }
@@ -21,7 +25,7 @@
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 400;
-  font-size: 1.5em;
+  font-size: 1.2em;
   letter-spacing: -0.5px;
 }
 

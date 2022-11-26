@@ -1,6 +1,7 @@
 body {
   background-color:#DBE8F4;
   height: 100vh;
+  overflow: hidden;
 }
 
 #root,
