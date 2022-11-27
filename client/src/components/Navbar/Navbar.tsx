@@ -41,56 +41,35 @@ function Navbar() {
               Lab Container
             </div>
           </Grid>
-          <Grid className="nav-sign-in" item xs={4}>
-            <Button variant="outlined" sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Sign In</Button>
+          <Grid item xs={4}>
+            {!!token ? (
+              <Grid container spacing={1}>
+                <Grid className="dashboard-navbar" item xs={10}>
+                    <Button variant="outlined" onClick={() => {
+                      navigate("/dashboard");
+                    }} sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Dashboard</Button>
+                </Grid>
+                <Grid item xs={2}>
+                  <Button variant="outlined" onClick={() => {
+                        logoutUser(refresh_token);
+                        setToken("");
+                        setRefreshToken("");
+                        navigate("/dashboard");
+                      }} sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Logout</Button>
+                </Grid>
+              </Grid>
+            ) :
+              ( <div className="nav-sign-in">
+                  <Button variant="outlined" onClick={() => {
+                    navigate("/login");
+                  }} sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Sign In</Button>
+                </div>
+              )}
           </Grid>
         </Grid>
       </h1>
-      <ul className="nav">
-        {!!token ? (
-          <>
-            <li
-              className="nav-item"
-              onClick={() => {
-                navigate("/dashboard");
-              }}
-            >
-              Dashboard
-            </li>
-            <IconButton
-              color="error"
-              className="notifications"
-              style={{ margin: "8px", float: "right" }}
-            >
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <IconButton
-              color="error"
-              className="notifications"
-              style={{ margin: "8px", float: "right" }}
-            >
-              <Settings />
-            </IconButton>
-            <li
-              className="nav-item"
-              onClick={() => {
-                if (token) {
-                  logoutUser(refresh_token);
-                  setToken("");
-                  setRefreshToken("");
-                  navigate("/dashboard");
-                }
-              }}
-            >
-              Logout
-            </li>
-          </>
-        ) : null}
-      </ul>
     </div>
   );
 }
-
+// TODO: Make Dashboard Button
 export default Navbar;

@@ -20,6 +20,10 @@
   text-align: right;
 }
 
+.dashboard-navbar {
+  text-align: right;
+}
+
 .nav-title {
   padding-left: 5%;
   font-family: 'Poppins';
