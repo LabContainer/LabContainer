@@ -6,16 +6,6 @@ import HomeColumn from "../../components/HomeColumn/HomeColumn";
 function ForgotPassword() {
     return (
         <HomeColumn>
-            {/* <Grid container spacing={2}>
-                <Grid item xs={3}>
-                    <img className="forgot-logo" src={Logo}/>
-                </Grid>
-                <Grid item xs={9}>
-                    <div className="forgot-title">
-                        Lab Container
-                    </div>
-                </Grid>
-            </Grid> */}
             <div style={{ marginTop: "110px" }} className="forgot-form-title">
                 Forgot Password
             </div>
