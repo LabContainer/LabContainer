@@ -28,10 +28,9 @@ function App() {
           </Routes>
         ) : (
           <Routes>
-            <Route path="/login" element={<Login />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/signup" element={<CreateAccount />} />
-            <Route path="Home" element={<Home />} />
+            <Route path="/login" element={<Home />} />
             <Route path="/*" element={<Navigate to="/login" />} />
           </Routes>
         )}
