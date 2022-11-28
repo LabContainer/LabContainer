@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar/Navbar";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Environment from "./pages/Environment/Environment";
 import Login from "./pages/Login/Login";
+import Home from "./pages/Home/home";
 
 import { Navigate, Route, Routes } from "react-router-dom";
 import useToken from "./components/App/useToken";
@@ -28,9 +29,9 @@ function App() {
           </Routes>
         ) : (
           <Routes>
-            <Route path="/login" element={<Login />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/signup" element={<CreateAccount />} />
+            <Route path="/login" element={<Home />} />
 
             <Route path="/*" element={<Navigate to="/login" />} />
           </Routes>
