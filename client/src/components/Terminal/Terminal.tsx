@@ -12,6 +12,7 @@ import { AuthContext } from "../App/AuthContext";
 import { Pending } from "@mui/icons-material";
 import { Container } from "@mui/system";
 import { refresh } from "../App/fetch";
+import useAPI from "../../api";
 
 enum EnvStatus {
   disconnected,
@@ -38,7 +39,7 @@ function Term({
   const socketRef = useRef<Socket>();
   const commandRef = useRef<string>("");
   const [status, setStatus] = useState(EnvStatus.disconnected);
-
+  const {WebappApi, UserApi} = useAPI()
   // Connect to remote container via ssh
   useEffect(() => {
     const onConnect = () => {
@@ -51,8 +52,15 @@ function Term({
       xtermRef.current?.terminal.writeln("***Disconnected from backend***");
       setStatus(EnvStatus.disconnected);
     };
-    const onConnectError = (err: Error) => {
-      if (err.message === INVALID_TOKEN) refresh(refresh_token, setToken);
+    const onConnectError = async (err: Error) => {
+      if (err.message === INVALID_TOKEN) {
+        WebappApi.httpRequest.config.TOKEN = refresh_token;
+        const tokens = await WebappApi.webappRefresh();
+        const token = tokens.access_token || ""
+        WebappApi.httpRequest.config.TOKEN = token;
+        // setToken(token)
+        // refresh(refresh_token, setToken);
+      }
       else if (err.message === NO_ADDITIONAL_SESSIONS)
         xtermRef.current?.terminal.writeln("***Connection limit reached***");
       else console.error(err.message);
@@ -118,7 +126,7 @@ function Term({
       socketRef.current?.off("disconnect");
       socketRef.current?.disconnect();
     };
-  }, [token, team, setData, refresh_token, setToken, server]);
+  }, [team, setData, refresh_token, setToken, server]);
 
   useEffect(() => {
     xtermRef.current?.terminal.write(data);

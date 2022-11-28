@@ -18,6 +18,19 @@ export default function useAPI() {
 
     const UserApi = auth.users;
     const WebappApi = auth.webapp;
+    // // 
+    // axios.interceptors.request.use(
+    //     request => {
+    //         if(request.url?.includes('/webapp/refresh')){
+    //             (request as any)._retry = true;
+    //             console.log('caught')
+    //             return request;
+    //         }
+    //         console.log('not caught');
+    //         return request;
+    //     },
+    //     error => error
+    // )
 
     // Add refresh token interceptor in axios
     axios.interceptors.response.use(
