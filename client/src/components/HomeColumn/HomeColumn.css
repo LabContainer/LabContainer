@@ -1,0 +1,32 @@
+.home-box {
+    width: 45vw;
+    height: 85vh;
+}
+
+.home-box.left {
+    background-color: white;
+}
+
+.home-box.right {
+    position: relative;
+    background-color: #243E6B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-column {
+    padding-top: 1.5%;
+}
+
+.engineer-elipse {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+}
+
+.engineer-image {
+    position: absolute;
+    width: 60%;
+    height: auto;
+}
