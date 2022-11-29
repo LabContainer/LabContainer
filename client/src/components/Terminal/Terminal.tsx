@@ -11,7 +11,8 @@ import "./Terminal.css";
 import { AuthContext } from "../App/AuthContext";
 import { Pending } from "@mui/icons-material";
 import { Container } from "@mui/system";
-import { refresh } from "../App/fetch";
+import useRefresh from "../App/useRefresh";
+import useAPI from "../../api";
 
 enum EnvStatus {
   disconnected,
@@ -38,7 +39,8 @@ function Term({
   const socketRef = useRef<Socket>();
   const commandRef = useRef<string>("");
   const [status, setStatus] = useState(EnvStatus.disconnected);
-
+  const [refresh, toggleRefresh] = useState(false);
+  useRefresh(refresh);
   // Connect to remote container via ssh
   useEffect(() => {
     const onConnect = () => {
@@ -51,12 +53,14 @@ function Term({
       xtermRef.current?.terminal.writeln("***Disconnected from backend***");
       setStatus(EnvStatus.disconnected);
     };
-    const onConnectError = (err: Error) => {
-      if (err.message === INVALID_TOKEN) refresh(refresh_token, setToken);
+    const onConnectError = async (err: Error) => {
+      setStatus(EnvStatus.disconnected);
+      if (err.message === INVALID_TOKEN) {
+        toggleRefresh(!refresh);
+      }
       else if (err.message === NO_ADDITIONAL_SESSIONS)
         xtermRef.current?.terminal.writeln("***Connection limit reached***");
       else console.error(err.message);
-      setStatus(EnvStatus.disconnected);
     };
     const onError = (err: string) => {
       if (err === NO_USER_TEAMS) {
@@ -78,6 +82,7 @@ function Term({
       },
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
+    console.log(token);
 
     let fitaddon = new FitAddon();
     xtermRef.current?.terminal.loadAddon(fitaddon);
@@ -112,13 +117,13 @@ function Term({
     socketRef?.current?.on("disconnect", onDisconnect);
     socketRef?.current?.on("connect_error", onConnectError);
     socketRef?.current?.on("expired", () => {
-      refresh(refresh_token, setToken);
+      toggleRefresh(!refresh);
     });
     return () => {
       socketRef.current?.off("disconnect");
       socketRef.current?.disconnect();
     };
-  }, [token, team, setData, refresh_token, setToken, server]);
+  }, [team, server, token]);
 
   useEffect(() => {
     xtermRef.current?.terminal.write(data);
