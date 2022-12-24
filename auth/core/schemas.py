@@ -8,14 +8,25 @@ class UserBase(BaseModel):
 
     username: str
 
+    
+
 
 class UserInfo(UserBase):
     """
     Schema for User creation
     """
-
+ 
     email: str
     is_student: bool
+
+
+class UserForgotInfo(UserBase):
+    """
+    Schema for User creation
+    """
+
+    email: str
+
 
 
 class UserLogin(UserBase):
@@ -24,6 +35,24 @@ class UserLogin(UserBase):
     """
 
     password: str
+
+class resetPassword(UserBase):
+    """
+    Schema for Login information
+    """
+
+    password: str
+
+
+
+
+class passwordUpdate(UserBase):
+    """
+    Schema for Updating password
+    """
+
+    newPassword : str
+    confirmNewPassword: str
 
 
 class UserCreate(UserLogin, UserInfo):

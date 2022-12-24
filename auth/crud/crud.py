@@ -46,6 +46,20 @@ def login_user(db: Session, user: schemas.UserLogin):
         return saved_user
     return None
 
+################
+
+def updatePassword(db: Session, user: schemas.resetPassword) -> User:
+    user = get_user(db, username)
+    salt = bcrypt.gensalt()
+    hashed_pass = bcrypt.hashpw(user.password.encode("utf8"), salt).hex()
+    user.password = hashed_pass
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+######################
+
 
 def set_user_inactive(db: Session, username: str):
     user = get_user(db, username)

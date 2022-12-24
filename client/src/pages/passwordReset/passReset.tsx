@@ -17,8 +17,8 @@ import { useNavigate } from "react-router-dom";
 const api_url = "http://localhost:3000";
 
 async function passReset(
-  username: string,
-  email: string,
+  password: string,
+  confirmPassword: string,
 ) {
   const response = await fetch(`${api_url}/users/create`, {
     method: "GET",
@@ -26,8 +26,8 @@ async function passReset(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username,
-      email,
+      password,
+      confirmPassword,
     }),
   });
   return response.ok;
@@ -46,12 +46,12 @@ export default function SignUp() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = data.get("email");
-    const username = data.get("username");
-    if (username && email) {
+    const confirmPassword = data.get("confirmPassword");
+    const password = data.get("password");
+    if (password && confirmPassword) {
       const success = await passReset(
-        username as string,
-        email as string,
+        password as string,
+        confirmPassword as string,
       );
       setFailedAttempt(!success);
       if (success) {
@@ -76,7 +76,7 @@ export default function SignUp() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Forgot password
+            Update your password
           </Typography>
           <Typography>{failMsg}</Typography>
           <Box
@@ -92,9 +92,9 @@ export default function SignUp() {
                   required
                   fullWidth
                   id="user"
-                  label="Username"
-                  name="username"
-                  autoComplete="username"
+                  label="password"
+                  name="password"
+                  autoComplete="password"
                   autoFocus
                 />
               </Grid>
@@ -102,10 +102,10 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
+                  id="confirmPassword"
+                  label="confirmPassword"
+                  name="confirmPassword"
+                  autoComplete="confirmPassword"
                 />
               </Grid>
             </Grid>
@@ -115,7 +115,7 @@ export default function SignUp() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Forgot Password
+              Update Password
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>

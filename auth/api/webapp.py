@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 import datetime
 import os
 import jwt
+import smtplib, ssl
 
 from auth.core.db import SessionLocal
 from auth.crud import crud
@@ -12,6 +13,31 @@ from auth.dependencies import get_db, has_access, has_refresh
 from auth.utils import gen_access_token, gen_internal_token
 
 router = APIRouter(prefix="/webapp")
+
+
+import smtplib
+fromMy = 'yourMail@yahoo.com' # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
+to  = 'SomeOne@Example.com'
+subj='TheSubject'
+date='2/1/2010'
+message_text='Hello Or any thing you want to send'
+
+msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % ( fromMy, to, subj, date, message_text )
+
+
+
+# smtp_server = "smtp.gmail.com"
+# port = 587  # For starttls
+# sender_email = "ECE496forgot@gmail.com"
+# password = "designteam"
+
+# message = """\
+# Subject: Hi there
+
+# This message is sent from Python."""
+
+# context = ssl.create_default_context()
+
 
 
 @router.post("/login", response_model=Union[str, schemas.LoginResult])
@@ -37,6 +63,74 @@ def login(
 
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return "Not Allowed"
+
+
+#############
+
+@router.post("/passReset", response_model=Union[str, schemas.LoginResult])
+def resetPasswordFunction(
+    login_info: schemas.resetPassword,
+    response: Response,
+    db: SessionLocal = Depends(get_db),
+):
+    auth_user = crud.updatePassword(db,usernameInfo.username)
+    if auth_user is not None:
+        access_token = gen_access_token(auth_user)
+        refresh_token = jwt.encode(
+            {
+                "password": auth_user.password,
+                # refresh token lasts for 24 hours
+                "exp": datetime.datetime.now(tz=datetime.timezone.utc)
+                + datetime.timedelta(seconds=60 * 60 * 24),
+            },
+            key=os.environ["REFRESH_SECRET"],
+        )
+        return {"access_token": access_token, "refresh_token": refresh_token}
+
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return "Not Allowed"
+
+
+###########
+
+
+@router.get("/forgot")
+def forgot(
+    usernameInfo: schemas.UserForgotInfo,
+    db: SessionLocal = Depends(get_db),
+):
+    auth_user = crud.get_user(db,usernameInfo.username)
+    if auth_user is not None:
+        try :
+            access_token = gen_access_token(auth_user)
+            print("point one")
+            fromMy = "ece496@outlook.com" # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
+            to  = usernameInfo.email
+            resetLink = "http://localhost:3000/passReset/%s" % (access_token)
+            subj='Password Reset Email'
+            date='2/1/2010'
+            message_text= "Your Password Reset Link is %s" % (resetLink)
+
+            msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % ( fromMy, to, subj, date, message_text )
+
+
+            mailserver = smtplib.SMTP('smtp.office365.com',587)
+            mailserver.ehlo()
+            mailserver.starttls()
+            print("point two")
+            mailserver.login("ece496@outlook.com", "designteam1234")
+            print("point3")
+            #Adding a newline before the body text fixes the missing message body
+            mailserver.sendmail(fromMy, to,msg)
+            print("point4")
+            mailserver.quit()
+            print("email sent")
+        except :
+            print('email not sent')
+
+
+
+
 
 
 @router.get("/refresh")
