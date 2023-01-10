@@ -10,6 +10,8 @@ class LabCreate(BaseModel):
     id: str
     course: str
     instructor: str
+    description: str
+    environment_init_script: str
 
 
 class EnvCreate(BaseModel):

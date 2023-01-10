@@ -40,6 +40,8 @@ class Lab(Base):
     id = Column(String, primary_key=True, index=True)
     course = Column(String)
     instructor = Column(String)
+    description = Column(String)
+    environment_init_script = Column(String)
     teams = relationship("Team", back_populates="lab")
     milestones = relationship("Milestone", back_populates="lab")
     users = relationship(
@@ -99,5 +101,6 @@ class Milestone(Base):
     lab = relationship("Lab", back_populates="milestones")
     deadline = Column(Date)
     description = Column(String)
+    test_script = Column(String)
 
 Base.metadata.create_all()

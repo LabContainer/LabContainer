@@ -49,9 +49,11 @@ async def get_environment(
         return
     teams = crud.get_teams_for_user(db, username)
     valid = False
+    init_script = ""
     for team in teams:
         # No team for user, can't make env
         if team.name == team_name:
+            init_script = team.lab.environment_init_script
             valid = True
     if not valid:
         print(crud.get_env_for_user_team(db, username, team_name))
@@ -74,7 +76,7 @@ async def get_environment(
         temp_pass = f"{username}#envpass"
         port = find_free_port()
         container_id, network, name = create_new_container(
-            username, team_name, temp_pass, port
+            username, team_name, temp_pass, port, init_script
         )
         new_env = schemas.EnvCreate(
             id=container_id, host=name, network=network, ssh_password=temp_pass, port=port
