@@ -44,19 +44,6 @@ export default function FormDialogAddTeam({
                   marginRight: "20px",
                 }}
               />
-              <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Lab ID"
-                name="id"
-                type="name"
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />
             </Box>
           </form>
         </DialogContent>

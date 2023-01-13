@@ -37,6 +37,7 @@ export default function StudentDashboard() {
             Progress: 30,
             Team: team[0]?.name,
             TimeLeft: "10",
+            id: lab.id,
           });
         }
         setData(

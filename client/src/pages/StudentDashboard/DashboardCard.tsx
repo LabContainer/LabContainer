@@ -21,15 +21,18 @@ export interface DashBoardData {
   Instructor: string;
   TimeLeft: string;
   Team?: string;
+  id: string;
 }
 
 function TeamCard({
   team,
   lab,
+  id,
   reRenderCard,
 }: {
   team?: string;
   lab: string;
+  id: string;
   reRenderCard: () => void;
 }) {
   const [createTeamOpen, setCreateTeamOpen] = React.useState(false);
@@ -39,9 +42,9 @@ function TeamCard({
   const [data, setData] = React.useState<any[]>();
   React.useEffect(() => {
     // const abortController = new AbortController()
-    LabsApi.labsGetLabTeams(lab).then(setData);
+    LabsApi.labsGetLabTeams(id).then(setData);
     // return abortController.abort
-  }, [lab]);
+  }, [id]);
 
   return (
     <>
@@ -110,11 +113,10 @@ function TeamCard({
                 handleSubmit={(event) => {
                   event.preventDefault();
                   const data = new FormData(event.currentTarget);
-                  const lab_id = data.get("id");
                   const team = data.get("name");
-                  if (lab_id && team) {
+                  if (team) {
                     TeamsApi.teamsCreateNewTeam({
-                      lab_id: lab_id as string,
+                      lab_id: id,
                       name: team as string,
                     }).then(reRenderCard);
                   }
@@ -184,6 +186,7 @@ export default function DashboardCard({
           <TeamCard
             team={data.Team}
             lab={data.LabName}
+            id={data.id}
             reRenderCard={reRender}
           />
         </CardContent>
