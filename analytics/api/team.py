@@ -90,7 +90,11 @@ def leave_team(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] == username:
-        crud.leave_team(db, team_name, username)
+        try:
+            crud.leave_team(db, team_name, username)
+        except:
+            # unable to leave team
+            response.status_code = status.HTTP_404_NOT_FOUND
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 

@@ -41,9 +41,11 @@ function TeamCard({
   const { LabsApi, TeamsApi } = useApi();
   const [data, setData] = React.useState<any[]>();
   React.useEffect(() => {
-    // const abortController = new AbortController()
-    LabsApi.labsGetLabTeams(id).then(setData);
-    // return abortController.abort
+    const teams_promise = LabsApi.labsGetLabTeams(id);
+    teams_promise.then(setData);
+    return () => {
+      teams_promise.cancel();
+    };
   }, [id]);
 
   return (

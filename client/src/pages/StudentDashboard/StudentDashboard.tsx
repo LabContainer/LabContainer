@@ -23,32 +23,37 @@ export default function StudentDashboard() {
     }[]
   >([]);
   useEffect(() => {
-    async function run() {
-      if (user) {
-        const teams = await TeamsApi.teamsGetUserTeams(user.username);
-        const labs = await LabsApi.labsGetLabs(user.username);
-        const data_list: DashBoardData[] = [];
-        for (let lab of labs) {
-          const team = teams.filter((team) => team.lab_id === lab.id);
-          data_list.push({
-            Course: lab.course,
-            Instructor: lab.instructor,
-            LabName: lab.name,
-            Progress: 30,
-            Team: team[0]?.name,
-            TimeLeft: "10",
-            id: lab.id,
-          });
-        }
-        setData(
-          data_list.map((d, i) => ({
-            data: d,
-            id: i,
-          }))
-        );
-      }
+    if (user) {
+      const teams_promise = TeamsApi.teamsGetUserTeams(user.username);
+      const labs_promise = LabsApi.labsGetLabs(user.username);
+      const data_list: DashBoardData[] = [];
+      labs_promise.then((labs) => {
+        teams_promise.then((teams) => {
+          for (let lab of labs) {
+            const team = teams.filter((team) => team.lab_id === lab.id);
+            data_list.push({
+              Course: lab.course,
+              Instructor: lab.instructor,
+              LabName: lab.name,
+              Progress: 30,
+              Team: team[0]?.name,
+              TimeLeft: "10",
+              id: lab.id,
+            });
+          }
+          setData(
+            data_list.map((d, i) => ({
+              data: d,
+              id: i,
+            }))
+          );
+        });
+      });
+      return () => {
+        teams_promise.cancel();
+        labs_promise.cancel();
+      };
     }
-    run();
   }, [user]);
 
   return (
