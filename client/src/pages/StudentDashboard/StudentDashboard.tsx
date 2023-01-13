@@ -33,7 +33,7 @@ export default function StudentDashboard() {
           data_list.push({
             Course: lab.course,
             Instructor: lab.instructor,
-            LabName: lab.id,
+            LabName: lab.name,
             Progress: 30,
             Team: team[0]?.name,
             TimeLeft: "10",
@@ -65,7 +65,7 @@ export default function StudentDashboard() {
           }}
         >
           <Typography variant="h4">Hi , {user?.username}</Typography>
-          <Typography variant="h6">Current labs</Typography>
+          <Typography variant="h5">Current labs</Typography>
           <Suspense fallback={<CircularIndeterminate />}>
             <Container
               sx={{

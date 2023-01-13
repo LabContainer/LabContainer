@@ -43,15 +43,19 @@ def get_team(db: Session, team_name: str) -> Union[Team, None]:
 
 def add_user_to_lab(db: Session, username: str, lab_id: str):
     user = get_user(db, username)
-    # define user if none
-    if user is None:
-        user = User(name=username)
-        db.add(user)
-
     lab = get_lab(db, lab_id)
-    lab.users.append(user)
-    db.commit()
-    return
+
+    if lab is not None:
+        # define user if none
+        if user is None:
+            user = User(name=username)
+            db.add(user)
+        lab.users.append(user)
+        db.commit()
+    else:
+        return False
+    
+    return True
 
 
 def remove_user_from_lab(db: Session, username: str, lab_id: str):

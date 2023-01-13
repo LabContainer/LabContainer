@@ -77,6 +77,7 @@ interface IEnhancedTableProps {
   orderBy: string;
   rowCount: number;
   headCells: IHeadCell[];
+  selectionEnable: boolean;
 }
 
 interface IEnhancedTableToolbarProps {
@@ -99,6 +100,7 @@ function EnhancedTableHead(props: IEnhancedTableProps) {
     numSelected,
     rowCount,
     onRequestSort,
+    selectionEnable,
   } = props;
   const createSortHandler =
     (property: string) => (event: React.MouseEvent<unknown>) => {
@@ -109,15 +111,17 @@ function EnhancedTableHead(props: IEnhancedTableProps) {
     <TableHead>
       <TableRow>
         <TableCell padding="checkbox">
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              "aria-label": "select all desserts",
-            }}
-          />
+          {selectionEnable ? (
+            <Checkbox
+              color="primary"
+              indeterminate={numSelected > 0 && numSelected < rowCount}
+              checked={rowCount > 0 && numSelected === rowCount}
+              onChange={onSelectAllClick}
+              inputProps={{
+                "aria-label": "select all desserts",
+              }}
+            />
+          ) : null}
         </TableCell>
         {props.headCells.map((headCell) => (
           <TableCell
@@ -203,11 +207,13 @@ export default function DataTable({
   headCells,
   title,
   onSelect,
+  selectionEnable,
 }: {
   rows: IDataTableRow[];
   headCells: IHeadCell[];
   title: string;
   onSelect?: (sl: readonly string[]) => void;
+  selectionEnable: boolean;
 }) {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<string>("calories");
@@ -217,8 +223,8 @@ export default function DataTable({
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   React.useEffect(() => {
-    if (onSelect) onSelect(selected);
-  }, [selected, onSelect]);
+    if (onSelect && selectionEnable) onSelect(selected);
+  }, [selected, onSelect, selectionEnable]);
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: string
@@ -229,7 +235,7 @@ export default function DataTable({
   };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
+    if (event.target.checked && selectionEnable) {
       const newSelected = rows.map((n) => n.key);
       setSelected(newSelected.map((n) => n.toString()));
       return;
@@ -238,6 +244,7 @@ export default function DataTable({
   };
 
   const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
+    if (!selectionEnable) return;
     const selectedIndex = selected.indexOf(name);
     let newSelected: readonly string[] = [];
 
@@ -296,6 +303,7 @@ export default function DataTable({
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
               headCells={headCells}
+              selectionEnable={selectionEnable}
             />
             <TableBody>
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
@@ -322,13 +330,15 @@ export default function DataTable({
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{
-                            "aria-labelledby": labelId,
-                          }}
-                        />
+                        {selectionEnable ? (
+                          <Checkbox
+                            color="primary"
+                            checked={isItemSelected}
+                            inputProps={{
+                              "aria-labelledby": labelId,
+                            }}
+                          />
+                        ) : null}
                       </TableCell>
 
                       {headCells.map((headCell, index) =>

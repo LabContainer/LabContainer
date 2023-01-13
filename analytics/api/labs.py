@@ -23,9 +23,13 @@ def create_lab(
     if not payload["is_student"]:
         # create unique lab id for each lab
         lab_id = hash(lab.course + lab.instructor + lab.name) 
-        
-        crud.create_lab(db, lab, lab_id)
-        return
+
+        try:
+            crud.create_lab(db, lab, lab_id)
+        except:
+            traceback.print_exc()
+            response.status_code = status.HTTP_409_CONFLICT
+            return "Lab already exists"
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
     return
@@ -76,8 +80,9 @@ def add_lab_user(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"]:
-        crud.add_user_to_lab(db, username, lab_id)
-        return
+        if not crud.add_user_to_lab(db, username, lab_id):
+            response.status_code = status.HTTP_404_NOT_FOUND
+        return "Invalid Lab"
     response.status_code = status.HTTP_403_FORBIDDEN
 
 

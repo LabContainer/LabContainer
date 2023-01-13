@@ -6,6 +6,11 @@ import { AuthContext, IUser } from "../../components/App/AuthContext";
 import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
 import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
 import FormDialogUsersAdd from "../../components/FormDialogUsersAdd/FormDialogUsersAdd";
+import {
+  errorMessage,
+  successMessage,
+  MessageContainer,
+} from "../../components/App/message";
 
 const headCellsUsers: IHeadCell[] = [
   {
@@ -90,6 +95,7 @@ function InstructorDashboard() {
         alignContent: "center",
       }}
     >
+      <MessageContainer />
       <Stack>
         <Typography variant="h3" sx={{ textAlign: "center" }}>
           Instructor Dashboard
@@ -104,16 +110,19 @@ function InstructorDashboard() {
           <Box sx={{ margin: "20px" }}>
             <DataTable
               onSelect={setSelectedUsers}
-              title="Users"
+              title="Students"
               rows={
                 users
-                  ? users.map((user, i) => ({
-                      values: user as any,
-                      key: i,
-                    }))
+                  ? users
+                      .filter((u) => u.is_student)
+                      .map((user, i) => ({
+                        values: user as any,
+                        key: i,
+                      }))
                   : []
               }
               headCells={headCellsUsers}
+              selectionEnable={true}
             />
             <Button variant="contained" onClick={() => setUserAddOpen(true)}>
               {" "}
@@ -124,13 +133,20 @@ function InstructorDashboard() {
                 setUserAddOpen(false);
               }}
               open={usersAddOpen}
-              handleSubmit={(event) => {
+              labs={labs}
+              handleSubmit={async (event) => {
                 event.preventDefault();
                 const data = new FormData(event.currentTarget);
-                const labid = data.get("id") as string;
+                const labid = data.get("labid") as string;
                 for (const user_index of selectedUsers) {
                   const user = users[parseInt(user_index)];
-                  LabsApi.labsAddLabUser(labid, user.username);
+                  console.log(labid);
+                  try {
+                    await LabsApi.labsAddLabUser(labid, user.username);
+                    successMessage("User added to lab!");
+                  } catch (error) {
+                    errorMessage("Unable to add user!");
+                  }
                 }
               }}
             />
@@ -147,6 +163,7 @@ function InstructorDashboard() {
                   : []
               }
               headCells={headCellsLabs}
+              selectionEnable={false}
             />
             <Button
               variant="contained"
@@ -172,13 +189,18 @@ function InstructorDashboard() {
                 const environment_init_script = data.get(
                   "environment_init_script"
                 ) as string;
-                LabsApi.labsCreateLab({
-                  name,
-                  course,
-                  instructor,
-                  description,
-                  environment_init_script,
-                });
+                try {
+                  LabsApi.labsCreateLab({
+                    name,
+                    course,
+                    instructor,
+                    description,
+                    environment_init_script,
+                  });
+                  successMessage("Lab created!");
+                } catch (error) {
+                  errorMessage("Unable to create lab!");
+                }
               }}
             />
           </Box>
