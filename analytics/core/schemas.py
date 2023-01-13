@@ -7,11 +7,16 @@ class TeamCreate(BaseModel):
 
 
 class LabCreate(BaseModel):
-    id: str
+    name: str
     course: str
     instructor: str
     description: str
     environment_init_script: str
+class Lab(LabCreate):
+    id: str
+
+    class Config:
+        orm_mode = True
 
 
 class EnvCreate(BaseModel):

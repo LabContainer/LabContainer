@@ -1,7 +1,7 @@
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import React from "react";
 import useAPI from "../../api";
-import { LabCreate } from "../../clients/AnalyticsClient";
+import { Lab } from "../../clients/AnalyticsClient";
 import { AuthContext, IUser } from "../../components/App/AuthContext";
 import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
 import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
@@ -35,10 +35,10 @@ const headCellsUsers: IHeadCell[] = [
 ];
 const headCellsLabs: IHeadCell[] = [
   {
-    id: "id",
+    id: "name",
     numeric: false,
     disablePadding: true,
-    label: "Lab ID",
+    label: "Name",
   },
   {
     id: "course",
@@ -53,17 +53,17 @@ const headCellsLabs: IHeadCell[] = [
     label: "Instructor",
   },
   {
-    id: "info",
+    id: "description",
     numeric: true,
     disablePadding: false,
-    label: "More Info",
+    label: "Description",
   },
 ];
 
 function InstructorDashboard() {
   const { token, refresh_token, setToken } = React.useContext(AuthContext);
   const [users, setUsers] = React.useState<IUser[]>([]);
-  const [labs, setLabs] = React.useState<LabCreate[]>([]);
+  const [labs, setLabs] = React.useState<Lab[]>([]);
   const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
   const [usersAddOpen, setUserAddOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
@@ -165,13 +165,19 @@ function InstructorDashboard() {
               handleSubmit={(event) => {
                 event.preventDefault();
                 const data = new FormData(event.currentTarget);
-                const labid = data.get("id") as string;
+                const name = data.get("name") as string;
                 const course = data.get("course") as string;
                 const instructor = data.get("instructor") as string;
+                const description = data.get("description") as string;
+                const environment_init_script = data.get(
+                  "environment_init_script"
+                ) as string;
                 LabsApi.labsCreateLab({
-                  id: labid,
-                  course: course,
-                  instructor: instructor,
+                  name,
+                  course,
+                  instructor,
+                  description,
+                  environment_init_script,
                 });
               }}
             />

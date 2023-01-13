@@ -6,8 +6,8 @@ from analytics.core.db import Envionment, Lab, Team, User, Milestone
 import analytics.core.schemas as schemas
 
 
-def create_lab(db: Session, lab: schemas.LabCreate):
-    new_lab = Lab(**lab.dict())
+def create_lab(db: Session, lab: schemas.LabCreate, lab_id: str):
+    new_lab = Lab(**lab.dict(), id=lab_id)
     db.add(new_lab)
     db.commit()
 

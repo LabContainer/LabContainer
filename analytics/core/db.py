@@ -39,6 +39,7 @@ class Lab(Base):
     __tablename__ = "labs"
     id = Column(String, primary_key=True, index=True)
     course = Column(String)
+    name = Column(String)
     instructor = Column(String)
     description = Column(String)
     environment_init_script = Column(String)

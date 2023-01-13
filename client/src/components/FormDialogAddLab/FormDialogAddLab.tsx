@@ -18,16 +18,16 @@ export default function FormDialogAddLab({
   handleSubmit: React.FormEventHandler<HTMLFormElement>;
 }) {
   return (
-    <div>
+    <div style={{ display: "flex", justifyContent: "center", width: "50%" }}>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Create Lab</DialogTitle>
         <DialogContent>
-          <DialogContentText>Please Enter Lab ID</DialogContentText>
+          <DialogContentText>Lab Information</DialogContentText>
           <form onSubmit={handleSubmit} id="dialog_form">
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: "column",
                 padding: "10px",
               }}
             >
@@ -35,8 +35,8 @@ export default function FormDialogAddLab({
                 autoFocus
                 margin="dense"
                 id="name"
-                label="Lab ID"
-                name="id"
+                label="Lab Name"
+                name="name"
                 type="name"
                 fullWidth
                 variant="standard"
@@ -64,6 +64,34 @@ export default function FormDialogAddLab({
                 label="Instructor"
                 name="instructor"
                 type="name"
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+              />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="description"
+                label="Description"
+                name="description"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+              />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="environment_init_script"
+                label="Environment Init Script"
+                name="environment_init_script"
+                type="name"
+                multiline
                 fullWidth
                 variant="standard"
                 sx={{

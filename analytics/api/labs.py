@@ -21,7 +21,10 @@ def create_lab(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"]:
-        crud.create_lab(db, lab)
+        # create unique lab id for each lab
+        lab_id = hash(lab.course + lab.instructor + lab.name) 
+        
+        crud.create_lab(db, lab, lab_id)
         return
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
@@ -91,7 +94,7 @@ def delete_lab_user(
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("", response_model=List[schemas.LabCreate], tags=["labs"])
+@router.get("", response_model=List[schemas.Lab], tags=["labs"])
 def get_labs(
     response: Response,
     username: Optional[str] = None,
@@ -109,7 +112,7 @@ def get_labs(
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
         return
-    return [schemas.LabCreate(**lab.__dict__) for lab in labs]
+    return [schemas.Lab(**lab.__dict__) for lab in labs]
 
 
 @router.get("/{lab_id}/teams", response_model=List[schemas.TeamCreate], tags=["labs"])
