@@ -18,21 +18,23 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
     }),
     [server]
   );
+  // const [, forceUpdate] = React.useReducer((x: any) => x + 1, 0);
   // Bug : Filemanager only works if loaded for first time with correct server.
   // Rendering false ui unless server is ready
   // TODO : Need a proper test / Solution to render filemanager skeleton UI properly
-  if (server.includes("undefined") || !server.includes("http")) {
-    return (
-      <div>
-        <CircularIndeterminate />
-        Waiting for file server
-      </div>
-    );
-  }
+  // if (server.includes("undefined") || !server.includes("http")) {
+  //   return (
+  //     <div>
+  //       <CircularIndeterminate />
+  //       Waiting for file server
+  //     </div>
+  //   );
+  // }
   return (
     <div className="file-explorer-container">
       <FileManager>
         <FileNavigator
+          // key={server}
           api={connectorNodeV1.api}
           apiOptions={apiOptions}
           capabilities={(apiOptions: any, actions: any) => [
@@ -45,7 +47,9 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
               label: "Custom Button",
               shouldBeAvailable: () => true,
               availableInContexts: ["toolbar"],
-              handler: () => alert("Custom button click"),
+              handler: () => {
+                console.log("Custom button clicked");
+              },
             },
           ]}
           //   initialResourceId={_scope.state.nodeInitId}
@@ -90,7 +94,6 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
         />
       </FileManager>
     </div>
-    // {/* </div> */}
   );
 }
 

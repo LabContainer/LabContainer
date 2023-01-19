@@ -29,6 +29,11 @@ app.use(cors({
 }));
 app.use('/filemanager/', middleware(fileManagerConfig));
 
+// create health endpoint
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 server.listen(serverPort, '0.0.0.0', () => {
     const socketservice = new SocketService();
     socketservice.attach(server);

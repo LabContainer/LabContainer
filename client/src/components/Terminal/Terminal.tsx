@@ -55,12 +55,15 @@ function Term({
     };
     const onConnectError = async (err: Error) => {
       setStatus(EnvStatus.disconnected);
+      console.log("Error connecting to backend");
       if (err.message === INVALID_TOKEN) {
         toggleRefresh(!refresh);
-      }
-      else if (err.message === NO_ADDITIONAL_SESSIONS)
+      } else if (err.message === NO_ADDITIONAL_SESSIONS)
         xtermRef.current?.terminal.writeln("***Connection limit reached***");
-      else console.error(err.message);
+      else {
+        setStatus(EnvStatus.connecting);
+        console.error(err.message);
+      }
     };
     const onError = (err: string) => {
       if (err === NO_USER_TEAMS) {

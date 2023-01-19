@@ -15,6 +15,12 @@ const Term = React.lazy(async () => {
   return import("../../components/Terminal/Terminal");
 });
 
+// server status enum
+enum ServerStatus {
+  Available,
+  Unavailable,
+}
+
 // const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 export default function Environment() {
   const { user, team } = useParams();
@@ -24,7 +30,10 @@ export default function Environment() {
     name: "",
     id: "",
   });
-  // const server = "http://0.0.0.0:39627";
+  const [serverStatus, setServerStatus] = React.useState(
+    ServerStatus.Unavailable
+  );
+  const [childKey, setChildKey] = React.useState(1);
   //Fetch Server
   React.useEffect(() => {
     fetch(AnalyticsServiceAPI + `/environment/${team}/${user}`, {
@@ -39,7 +48,33 @@ export default function Environment() {
         setServer(`http://localhost:${env?.port}`);
       });
   }, [setServer, team, user, token]);
+  React.useEffect(() => {
+    if (serverStatus === ServerStatus.Available) {
+      setChildKey((prev: number) => prev + 1);
+    }
+    // window.location.reload();
+  }, [serverStatus]);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (server) {
+        // fetch /health endpoint
+        fetch(server + "/health", {
+          method: "GET",
+        }).then((r) => {
+          if (r.status === 200) {
+            setServerStatus(ServerStatus.Available);
+          } else {
+            setServerStatus(ServerStatus.Unavailable);
+          }
+        });
+      }
+    }, 2000);
 
+    return () => {
+      // cleanup
+      clearTimeout(timer);
+    };
+  }, [server]);
   return (
     <>
       {team && user ? (
@@ -49,6 +84,7 @@ export default function Environment() {
               <FileExplorer
                 server={server}
                 addToDoubleQuickQueue={setLoadFile}
+                key={childKey}
               />
             </Box>
             <Stack
