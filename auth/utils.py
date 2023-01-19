@@ -6,9 +6,15 @@ import jwt
 import dotenv
 import datetime
 import auth.core.schemas as schemas
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+
 
 env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
+
 
 
 def find_free_port():
@@ -38,3 +44,42 @@ def gen_access_token(auth_user: schemas.UserCreate):
 def gen_internal_token(payload_fields: Dict[str, str]):
     payload = {**payload_fields, "internal": "AuthService", "exp": expTime(seconds=10)}
     return jwt.encode(payload, key=os.environ["SECRET_TOKEN"])
+
+
+def gen_reset_token(auth_user: schemas.UserCreate):
+    payload = {
+        "reset_user": auth_user.username,
+        "purpose": "reset",
+        # Keep logged in for 5 mins before refresh
+        "exp": expTime(seconds=3000),
+    }
+    return jwt.encode(payload, key=os.environ["SECRET_TOKEN"])
+    
+
+def verify_access_token(token: str, credential_exception: Dict):
+    try:
+        payload = jwt.decode(token, SECRET_TOKEN, algorithms=[ALGORITHM])
+
+        id: str = payload.get("id")
+
+        if not id:
+            raise credential_exception
+
+        token_data = TokenData(id=id)
+        return token_data
+    except JWTError:
+        raise credential_exception
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credential_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not verify token, token expired",
+        headers={"WWW-AUTHENTICATE": "Bearer", }
+    )
+
+    current_user_id = verify_access_token(
+        token=token, credential_exception=credential_exception).id
+
+    current_user = db["users"].find_one({"_id": current_user_id})
+
+    return current_user

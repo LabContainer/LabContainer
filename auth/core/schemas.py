@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
@@ -52,7 +52,7 @@ class passwordUpdate(UserBase):
     """
 
     newPassword : str
-    confirmNewPassword: str
+
 
 
 class UserCreate(UserLogin, UserInfo):
