@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import CircularIndeterminate from "../../components/common/CircularInderminate";
 
 import "./Environment.css";
+import "../../components/Editor/Editor.css";
 
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
@@ -102,12 +103,36 @@ export default function Environment() {
               direction="column"
               justifyContent={"center"}
             >
-              <Editor
-                team={team}
-                user={user}
-                loadFile={loadFile}
-                server={server}
-              ></Editor>
+              {serverStatus === ServerStatus.Unavailable ? (
+                <div className="editor-container">
+                  {/* center div */}
+                  <div
+                    style={{
+                      position: "relative",
+                      top: "50%",
+                      // left: "50%",
+                      textAlign: "center",
+                    }}
+                  >
+                    <h2>Loading Environment, please wait...</h2>
+                    <div
+                      style={{
+                        position: "relative",
+                        left: "50%",
+                      }}
+                    >
+                      <CircularIndeterminate />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Editor
+                  team={team}
+                  user={user}
+                  loadFile={loadFile}
+                  server={server}
+                ></Editor>
+              )}
               <Stack flex={1}>
                 <Suspense fallback={<CircularIndeterminate />}>
                   <Term team={team} user={user} server={server} />

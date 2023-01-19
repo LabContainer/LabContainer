@@ -18,18 +18,6 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
     }),
     [server]
   );
-  // const [, forceUpdate] = React.useReducer((x: any) => x + 1, 0);
-  // Bug : Filemanager only works if loaded for first time with correct server.
-  // Rendering false ui unless server is ready
-  // TODO : Need a proper test / Solution to render filemanager skeleton UI properly
-  // if (server.includes("undefined") || !server.includes("http")) {
-  //   return (
-  //     <div>
-  //       <CircularIndeterminate />
-  //       Waiting for file server
-  //     </div>
-  //   );
-  // }
   return (
     <div className="file-explorer-container">
       <FileManager>
