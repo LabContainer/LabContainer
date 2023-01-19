@@ -3,7 +3,7 @@ import subprocess
 import os
 
 
-def create_new_container(user: str, team: str, password: str, port: int):
+def create_new_container(user: str, team: str, password: str, port: int, init_script : str):
     # TODO: use kubernetes here
     # Build container image for user
     wd = os.getcwd()
@@ -17,6 +17,8 @@ def create_new_container(user: str, team: str, password: str, port: int):
             f"ssh_user={user}",
             "--build-arg",
             f"ssh_pass={password}",
+            "--build-arg",
+            f"init_script={init_script}",
             "-t",
             f"studentenv:{user}",
             ".",

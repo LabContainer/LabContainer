@@ -21,8 +21,15 @@ def create_lab(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"]:
-        crud.create_lab(db, lab)
-        return
+        # create unique lab id for each lab
+        lab_id = hash(lab.course + lab.instructor + lab.name) 
+
+        try:
+            crud.create_lab(db, lab, lab_id)
+        except:
+            traceback.print_exc()
+            response.status_code = status.HTTP_409_CONFLICT
+            return "Lab already exists"
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
     return
@@ -73,8 +80,9 @@ def add_lab_user(
     db: SessionLocal = Depends(get_db),
 ):
     if not payload["is_student"]:
-        crud.add_user_to_lab(db, username, lab_id)
-        return
+        if not crud.add_user_to_lab(db, username, lab_id):
+            response.status_code = status.HTTP_404_NOT_FOUND
+        return "Invalid Lab"
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
@@ -91,7 +99,7 @@ def delete_lab_user(
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("", response_model=List[schemas.LabCreate], tags=["labs"])
+@router.get("", response_model=List[schemas.Lab], tags=["labs"])
 def get_labs(
     response: Response,
     username: Optional[str] = None,
@@ -109,7 +117,7 @@ def get_labs(
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
         return
-    return [schemas.LabCreate(**lab.__dict__) for lab in labs]
+    return [schemas.Lab(**lab.__dict__) for lab in labs]
 
 
 @router.get("/{lab_id}/teams", response_model=List[schemas.TeamCreate], tags=["labs"])
