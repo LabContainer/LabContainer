@@ -9,12 +9,14 @@ import "../../components/Editor/Editor.css";
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
+import ResizablePane from "../../components/ResizablePane/ResizablePane";
 import { AnalyticsServiceAPI } from "../../constants";
 import { AuthContext } from "../../components/App/AuthContext";
+import Term from "../../components/Terminal/Terminal";
 
-const Term = React.lazy(async () => {
-  return import("../../components/Terminal/Terminal");
-});
+// const Term = React.lazy(async () => {
+//   return import("../../components/Terminal/Terminal");
+// });
 
 // server status enum
 enum ServerStatus {
@@ -80,65 +82,85 @@ export default function Environment() {
     <>
       {team && user ? (
         <>
-          <Stack direction="row" sx={{ height: "100%" }}>
-            <Box flex={1} sx={{ display: "flex" }}>
-              <FileExplorer
-                server={server}
-                addToDoubleQuickQueue={setLoadFile}
-                key={childKey}
+          <Stack direction="row">
+            <Box>
+              <ResizablePane
+                childrenComponent={
+                  <FileExplorer
+                    server={server}
+                    addToDoubleQuickQueue={setLoadFile}
+                    key={childKey}
+                  />
+                }
+                initialWidth={500}
+                minX={260}
+                initialHeight={"100%"}
               />
             </Box>
-            <Stack
-              flex={3}
-              sx={{
-                margin: "auto",
-                padding: 0,
-                // width: "80%",
-                height: "100%",
-                justifyContent: "center",
-                // marginTop: "80px",
-                // marginBottom: "80px",
-                display: "flex",
-              }}
-              direction="column"
-              justifyContent={"center"}
-            >
-              {serverStatus === ServerStatus.Unavailable ? (
-                <div className="editor-container">
-                  {/* center div */}
-                  <div
-                    style={{
-                      position: "relative",
-                      top: "50%",
-                      // left: "50%",
-                      textAlign: "center",
-                    }}
-                  >
-                    <h2>Loading Environment, please wait...</h2>
-                    <div
-                      style={{
-                        position: "relative",
-                        left: "50%",
-                      }}
-                    >
-                      <CircularIndeterminate />
+            <Stack>
+              <ResizablePane
+                childrenComponent={
+                  serverStatus === ServerStatus.Unavailable ? (
+                    <div className="editor-container">
+                      {/* center div */}
+                      <div
+                        style={{
+                          position: "relative",
+                          top: "50%",
+                          // left: "50%",
+                          textAlign: "center",
+                        }}
+                      >
+                        <h2>Loading Environment, please wait...</h2>
+                        <div
+                          style={{
+                            position: "relative",
+                            left: "50%",
+                          }}
+                        >
+                          <CircularIndeterminate />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <Editor
-                  team={team}
-                  user={user}
-                  loadFile={loadFile}
-                  server={server}
-                ></Editor>
-              )}
-              <Stack flex={1}>
-                <Suspense fallback={<CircularIndeterminate />}>
-                  <Term team={team} user={user} server={server} />
-                </Suspense>
+                  ) : (
+                    <Editor
+                      team={team}
+                      user={user}
+                      loadFile={loadFile}
+                      server={server}
+                    ></Editor>
+                  )
+                }
+                initialWidth={500}
+                initialHeight={500}
+                type="vertical"
+              />
+              <Stack>
+                <ResizablePane
+                  childrenComponent={
+                    <Term team={team} user={user} server={server} />
+                  }
+                  type="vertical"
+                  // YfixedSide=""
+                />
               </Stack>
             </Stack>
+            <Box>
+              <ResizablePane
+                childrenComponent={
+                  <div
+                    style={{
+                      height: "100%",
+                      backgroundColor: "yellow",
+                    }}
+                  ></div>
+                }
+                initialWidth={500}
+                minX={260}
+                initialHeight={"100%"}
+                XfixedSide="right"
+              />
+            </Box>
           </Stack>
         </>
       ) : null}

@@ -22,23 +22,10 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
     <div className="file-explorer-container">
       <FileManager>
         <FileNavigator
-          // key={server}
           api={connectorNodeV1.api}
           apiOptions={apiOptions}
           capabilities={(apiOptions: any, actions: any) => [
             ...connectorNodeV1.capabilities(apiOptions, actions),
-            {
-              id: "custom-button",
-              icon: {
-                svg: '<svg viewBox="0 0 120 120" version="1.1"><circle cx="60" cy="60" r="50"></circle></svg>',
-              },
-              label: "Custom Button",
-              shouldBeAvailable: () => true,
-              availableInContexts: ["toolbar"],
-              handler: () => {
-                console.log("Custom button clicked");
-              },
-            },
           ]}
           //   initialResourceId={_scope.state.nodeInitId}
           listViewLayout={connectorNodeV1.listViewLayout}
