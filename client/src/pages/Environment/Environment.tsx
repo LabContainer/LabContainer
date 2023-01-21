@@ -82,6 +82,10 @@ export default function Environment() {
   const [editorHeight, setEditorHeight] = React.useState(300);
   const editorMinHeight = 45;
   const editorMaxHeight = 700;
+  const filemanagerMinWidth = 270;
+  const filemanagerMaxWidth = 800;
+  const rightPaneMinWidth = 40;
+  const rightPaneMaxWidth = 300;
 
   const leftPanelRef = React.useRef<HTMLDivElement | null>(null);
   const rightPanelRef = React.useRef<HTMLDivElement | null>(null);
@@ -108,18 +112,19 @@ export default function Environment() {
 
   const resize = React.useCallback(
     (mouseMoveEvent) => {
+      const val =
+        mouseMoveEvent.clientX -
+        (leftPanelRef.current?.getBoundingClientRect().left || 0);
       if (isResizingLeftPanel) {
-        setLeftPaneWidth(
-          mouseMoveEvent.clientX -
-            (leftPanelRef.current?.getBoundingClientRect().left || 0)
-        );
+        if (val > filemanagerMinWidth && val < filemanagerMaxWidth)
+          setLeftPaneWidth(val);
       }
       if (isResizingRightPanel) {
-        setRightPaneWidth(
+        const val =
           (rightPanelRef.current?.getBoundingClientRect().right || 0) -
-            mouseMoveEvent.clientX
-        );
-        console.log("yes w");
+          mouseMoveEvent.clientX;
+        if (val > rightPaneMinWidth && val < rightPaneMaxWidth)
+          setRightPaneWidth(val);
       }
       if (isResizingEditor) {
         const val =
@@ -169,7 +174,7 @@ export default function Environment() {
           className="sidebar"
           style={{
             width: leftPaneWidth,
-            minWidth: "270px",
+            minWidth: filemanagerMinWidth + "px",
           }}
         >
           <FileExplorer
@@ -263,7 +268,7 @@ export default function Environment() {
           className="sidebar"
           style={{
             width: rightPaneWidth,
-            minWidth: "40px",
+            minWidth: rightPaneMinWidth + "px",
           }}
         ></div>
       </div>
