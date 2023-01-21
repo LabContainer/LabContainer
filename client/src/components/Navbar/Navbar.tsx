@@ -3,11 +3,11 @@ import "./Navbar.css";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { Button, Grid } from "@mui/material";
+import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App/AuthContext";
 import { Settings } from "@mui/icons-material";
-import Logo from '../../static/Cube.png';
+import Logo from "../../static/Cube.png";
 
 const api_url = "http://localhost:5000";
 
@@ -30,44 +30,70 @@ function Navbar() {
   const { token, refresh_token, setToken, setRefreshToken } =
     useContext(AuthContext);
   return (
-    <div>
-      <h1 className="nav-header">
-        <Grid container spacing={3}>
-          <Grid className="nav-logo" item xs={5}>
-            <img className="nav-logo-size" src={Logo} />
-          </Grid>
-          <Grid item xs={3}>
-            <div className="nav-title">
-              Lab Container
-            </div>
-          </Grid>
-          <Grid item xs={4}>
-            {!!token ? (
-              <Grid container spacing={1}>
-                <Grid className="dashboard-navbar" item xs={10}>
-                    <Button variant="outlined" onClick={() => {
-                      navigate("/dashboard");
-                    }} sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Dashboard</Button>
-                </Grid>
-                <Grid item xs={2}>
-                  <Button variant="outlined" onClick={() => {
-                        logoutUser(refresh_token);
-                        setToken("");
-                        setRefreshToken("");
-                        navigate("/dashboard");
-                      }} sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Logout</Button>
-                </Grid>
-              </Grid>
-            ) :
-              ( <div className="nav-sign-in">
-                  <Button variant="outlined" onClick={() => {
-                    navigate("/login");
-                  }} sx={{backgroundColor: 'white', borderRadius: '10px', "&:hover": {background: "white"}}} size="medium">Sign In</Button>
-                </div>
-              )}
-          </Grid>
-        </Grid>
-      </h1>
+    // <div style={{ height: "100%" }}>
+    <div className="nav-header">
+      <div className="nav-logo">
+        <img className="nav-logo-size" src={Logo} />
+      </div>
+      <div className="nav-title">Lab Container</div>
+      {!!token ? (
+        <>
+          <div className="dashboard-navbar">
+            <Button
+              variant="outlined"
+              onClick={() => {
+                navigate("/dashboard");
+              }}
+              sx={{
+                backgroundColor: "white",
+                borderRadius: "10px",
+                "&:hover": { background: "white" },
+              }}
+              size="medium"
+            >
+              Dashboard
+            </Button>
+          </div>
+          <div className="logout-navbar">
+            <Button
+              variant="outlined"
+              onClick={() => {
+                logoutUser(refresh_token);
+                setToken("");
+                setRefreshToken("");
+                navigate("/dashboard");
+              }}
+              sx={{
+                backgroundColor: "white",
+                borderRadius: "10px",
+                "&:hover": { background: "white" },
+              }}
+              size="medium"
+            >
+              Logout
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="nav-sign-in">
+          <Button
+            variant="outlined"
+            onClick={() => {
+              navigate("/login");
+            }}
+            sx={{
+              backgroundColor: "white",
+              borderRadius: "10px",
+              "&:hover": { background: "white" },
+            }}
+            size="medium"
+          >
+            Sign In
+          </Button>
+        </div>
+      )}
+      {/* </div> */}
+      {/* </div> */}
     </div>
   );
 }

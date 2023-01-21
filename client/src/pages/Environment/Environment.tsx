@@ -78,92 +78,96 @@ export default function Environment() {
       clearTimeout(timer);
     };
   }, [server]);
+
+  // States for resizing
+  const [leftPaneWidth, setLeftPaneWidth] = React.useState(300);
+  const [rightPaneWidth, setRightPaneWidth] = React.useState(300);
+
+  // false ui if invalid team or user
+  if (!team || !user) {
+    return (
+      <div
+        style={{
+          position: "relative",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <h1>Invalid Team or User</h1>
+      </div>
+    );
+  }
+
   return (
-    <>
-      {team && user ? (
-        <>
-          <Stack direction="row">
-            <Box>
-              <ResizablePane
-                childrenComponent={
-                  <FileExplorer
-                    server={server}
-                    addToDoubleQuickQueue={setLoadFile}
-                    key={childKey}
-                  />
-                }
-                initialWidth={500}
-                minX={260}
-                initialHeight={"100%"}
-              />
-            </Box>
-            <Stack>
-              <ResizablePane
-                childrenComponent={
-                  serverStatus === ServerStatus.Unavailable ? (
-                    <div className="editor-container">
-                      {/* center div */}
-                      <div
-                        style={{
-                          position: "relative",
-                          top: "50%",
-                          // left: "50%",
-                          textAlign: "center",
-                        }}
-                      >
-                        <h2>Loading Environment, please wait...</h2>
-                        <div
-                          style={{
-                            position: "relative",
-                            left: "50%",
-                          }}
-                        >
-                          <CircularIndeterminate />
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <Editor
-                      team={team}
-                      user={user}
-                      loadFile={loadFile}
-                      server={server}
-                    ></Editor>
-                  )
-                }
-                initialWidth={500}
-                initialHeight={500}
-                type="vertical"
-              />
-              <Stack>
-                <ResizablePane
-                  childrenComponent={
-                    <Term team={team} user={user} server={server} />
-                  }
-                  type="vertical"
-                  // YfixedSide=""
-                />
-              </Stack>
-            </Stack>
-            <Box>
-              <ResizablePane
-                childrenComponent={
-                  <div
-                    style={{
-                      height: "100%",
-                      backgroundColor: "yellow",
-                    }}
-                  ></div>
-                }
-                initialWidth={500}
-                minX={260}
-                initialHeight={"100%"}
-                XfixedSide="right"
-              />
-            </Box>
-          </Stack>
-        </>
-      ) : null}
-    </>
+    <div
+      className="environment-container"
+      style={{
+        height: "100%",
+      }}
+    >
+      <div
+        className="sidebar"
+        style={{
+          width: leftPaneWidth,
+        }}
+      ></div>
+      <div
+        className="sidebar"
+        style={{
+          width: rightPaneWidth,
+          position: "absolute",
+          right: 0,
+          top: 0,
+        }}
+      ></div>
+      {/* <FileExplorer
+            server={server{team && user ? (}
+            addToDoubleQuickQueue={setLoadFile}
+            key={childKey}
+          /> */}
+
+      {
+        // serverStatus === ServerStatus.Unavailable ? (
+        //   <div className="editor-container">
+        //     {/* center div */}
+        //     <div
+        //       style={{
+        //         position: "relative",
+        //         top: "50%",
+        //         // left: "50%",
+        //         textAlign: "center",
+        //       }}
+        //     >
+        //       <h2>Loading Environment, please wait...</h2>
+        //       <div
+        //         style={{
+        //           position: "relative",
+        //           left: "50%",
+        //         }}
+        //       >
+        //         <CircularIndeterminate />
+        //       </div>
+        //     </div>
+        //   </div>
+        // ) : (
+        //   <Editor
+        //     team={team}
+        //     user={user}
+        //     loadFile={loadFile}
+        //     server={server}
+        //   ></Editor>
+        // )
+      }
+
+      {/* <Term team={team} user={user} server={server} /> */}
+
+      {/* <div
+        style={{
+          height: "100%",
+          backgroundColor: "yellow",
+        }}
+      ></div> */}
+    </div>
   );
 }
