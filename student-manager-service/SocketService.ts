@@ -40,6 +40,9 @@ export default class SocketService {
                 socket.on("disconnect", () => {
                     const ateam = socket.handshake.query.team;
                     const auser = socket.data.decoded?.user;
+                    // TODO need to check if user is authorized to access this container
+                    // Correct team is stored, but no way to check is user is in that team
+                    // would need to query analytics service here
                     this.active_users = this.active_users.filter(
                         ({ user, team }) => !(team === ateam && user === auser)
                     );
@@ -52,6 +55,13 @@ export default class SocketService {
                 // ready
                 socket.on("data", (data: string) => {
                     this.terminal?.write(data)
+                });
+                // Resize properly
+                socket.on("resize", (size: { cols: number, rows: number }) => {
+                    this.terminal?.ptyProcess?.resize(size.cols, size.rows);
+                });
+                socket.on("disconnect", () => {
+                    this.terminal?.ptyProcess?.kill();
                 });
             });
     }

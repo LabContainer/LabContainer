@@ -395,8 +395,8 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   }
   render() {
     return (
-      <Stack flex={1} direction="column">
-        <Stack direction={"row"}>
+      <Stack flex={1} direction="column" style={{ width: "100%" }}>
+        <Stack direction={"row"} style={{ width: "100%" }}>
           <ScrollTabs
             tabList={this.state.fileList}
             setChosen={this.setChosenFile}
@@ -448,11 +448,12 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
             name="aceeditor"
             ref={this.ref}
             onLoad={(editorInstance) => {
-              editorInstance.resize();
-              editorInstance.container.style.resize = "both";
+              // TODO: This was put here ti fix a bug, but currently not required. dont remove comment
+              // editorInstance.resize();
+              // editorInstance.container.style.resize = "both";
               // mouseup = css resize end
               document.addEventListener("mouseup", (e) => {
-                editorInstance.resize();
+                // editorInstance.resize();
               });
             }}
             showPrintMargin={true}

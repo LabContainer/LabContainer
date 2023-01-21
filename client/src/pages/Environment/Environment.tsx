@@ -82,7 +82,67 @@ export default function Environment() {
   // States for resizing
   const [leftPaneWidth, setLeftPaneWidth] = React.useState(300);
   const [rightPaneWidth, setRightPaneWidth] = React.useState(300);
+  const [editorHeight, setEditorHeight] = React.useState(300);
+  const editorMinHeight = 45;
+  const editorMaxHeight = 700;
 
+  const leftPanelRef = React.useRef<HTMLDivElement | null>(null);
+  const rightPanelRef = React.useRef<HTMLDivElement | null>(null);
+  const editorRef = React.useRef<HTMLDivElement | null>(null);
+  const [isResizingLeftPanel, setIsResizingLeftPanel] = React.useState(false);
+  const [isResizingRightPanel, setIsResizingRightPanel] = React.useState(false);
+  const [isResizingEditor, setIsResizingEditor] = React.useState(false);
+
+  const startResizingLeftPanel = React.useCallback((mouseDownEvent) => {
+    setIsResizingLeftPanel(true);
+  }, []);
+  const startResizingRightPanel = React.useCallback((mouseDownEvent) => {
+    setIsResizingRightPanel(true);
+  }, []);
+  const startResizingEditor = React.useCallback((mouseDownEvent) => {
+    setIsResizingEditor(true);
+  }, []);
+
+  const stopResizing = React.useCallback(() => {
+    setIsResizingLeftPanel(false);
+    setIsResizingRightPanel(false);
+    setIsResizingEditor(false);
+  }, []);
+
+  const resize = React.useCallback(
+    (mouseMoveEvent) => {
+      if (isResizingLeftPanel) {
+        setLeftPaneWidth(
+          mouseMoveEvent.clientX -
+            (leftPanelRef.current?.getBoundingClientRect().left || 0)
+        );
+      }
+      if (isResizingRightPanel) {
+        setRightPaneWidth(
+          (rightPanelRef.current?.getBoundingClientRect().right || 0) -
+            mouseMoveEvent.clientX
+        );
+        console.log("yes w");
+      }
+      if (isResizingEditor) {
+        const val =
+          mouseMoveEvent.clientY -
+          (editorRef.current?.getBoundingClientRect().top || 0);
+        if (val > editorMinHeight && val < editorMaxHeight)
+          setEditorHeight(val);
+      }
+    },
+    [isResizingLeftPanel, isResizingRightPanel, isResizingEditor]
+  );
+
+  React.useEffect(() => {
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
+    return () => {
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [resize, stopResizing]);
   // false ui if invalid team or user
   if (!team || !user) {
     return (
@@ -106,68 +166,110 @@ export default function Environment() {
         height: "100%",
       }}
     >
+      <div className="flexbox-container">
+        <div
+          ref={leftPanelRef}
+          className="sidebar"
+          style={{
+            width: leftPaneWidth,
+            minWidth: "270px",
+          }}
+        >
+          <FileExplorer
+            server={server}
+            addToDoubleQuickQueue={setLoadFile}
+            key={childKey}
+          />
+        </div>
+        <div
+          className="x-resizer end"
+          onMouseDown={startResizingLeftPanel}
+        ></div>
+      </div>
       <div
-        className="sidebar"
+        className="central-container"
         style={{
-          width: leftPaneWidth,
+          left: leftPaneWidth,
+          width: `calc(100% - ${leftPaneWidth + rightPaneWidth + 20}px)`,
         }}
-      ></div>
+      >
+        <div
+          ref={editorRef}
+          className="editor-resizer"
+          style={{
+            height: editorHeight,
+            width: "100%",
+            display: "flex",
+          }}
+        >
+          {serverStatus === ServerStatus.Unavailable ? (
+            <div className="editor-container">
+              {/* center div */}
+              <div
+                style={{
+                  position: "relative",
+                  top: "50%",
+                  // left: "50%",
+                  textAlign: "center",
+                }}
+              >
+                <h2>Loading Environment, please wait...</h2>
+                <div
+                  style={{
+                    position: "relative",
+                    left: "50%",
+                  }}
+                >
+                  <CircularIndeterminate />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Editor
+              team={team}
+              user={user}
+              loadFile={loadFile}
+              server={server}
+            ></Editor>
+          )}
+        </div>
+        <div className="y-resizer end" onMouseDown={startResizingEditor}></div>
+        <div
+          className="terminal-resizer"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            backgroundColor: "lightblue",
+            height: `calc(100% - ${editorHeight + 8}px)`,
+            width: "100%",
+            minHeight: "100px",
+          }}
+        >
+          <Term team={team} user={user} server={server} />
+        </div>
+      </div>
       <div
-        className="sidebar"
+        className="flexbox-container"
         style={{
-          width: rightPaneWidth,
           position: "absolute",
           right: 0,
           top: 0,
         }}
-      ></div>
-      {/* <FileExplorer
-            server={server{team && user ? (}
-            addToDoubleQuickQueue={setLoadFile}
-            key={childKey}
-          /> */}
-
-      {
-        // serverStatus === ServerStatus.Unavailable ? (
-        //   <div className="editor-container">
-        //     {/* center div */}
-        //     <div
-        //       style={{
-        //         position: "relative",
-        //         top: "50%",
-        //         // left: "50%",
-        //         textAlign: "center",
-        //       }}
-        //     >
-        //       <h2>Loading Environment, please wait...</h2>
-        //       <div
-        //         style={{
-        //           position: "relative",
-        //           left: "50%",
-        //         }}
-        //       >
-        //         <CircularIndeterminate />
-        //       </div>
-        //     </div>
-        //   </div>
-        // ) : (
-        //   <Editor
-        //     team={team}
-        //     user={user}
-        //     loadFile={loadFile}
-        //     server={server}
-        //   ></Editor>
-        // )
-      }
-
-      {/* <Term team={team} user={user} server={server} /> */}
-
-      {/* <div
-        style={{
-          height: "100%",
-          backgroundColor: "yellow",
-        }}
-      ></div> */}
+      >
+        <div
+          className="x-resizer begin"
+          onMouseDown={startResizingRightPanel}
+        ></div>
+        <div
+          ref={rightPanelRef}
+          className="sidebar"
+          style={{
+            width: rightPaneWidth,
+            minWidth: "40px",
+          }}
+        ></div>
+      </div>
     </div>
   );
 }
