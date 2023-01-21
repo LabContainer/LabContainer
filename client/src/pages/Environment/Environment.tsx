@@ -1,6 +1,4 @@
-import { Box, Stack } from "@mui/material";
 import React from "react";
-import { Suspense } from "react";
 import CircularIndeterminate from "../../components/common/CircularInderminate";
 
 import "./Environment.css";
@@ -9,7 +7,6 @@ import "../../components/Editor/Editor.css";
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
-import ResizablePane from "../../components/ResizablePane/ResizablePane";
 import { AnalyticsServiceAPI } from "../../constants";
 import { AuthContext } from "../../components/App/AuthContext";
 import Term from "../../components/Terminal/Terminal";

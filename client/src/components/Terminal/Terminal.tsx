@@ -11,8 +11,6 @@ import { AuthContext } from "../App/AuthContext";
 import { Pending } from "@mui/icons-material";
 import { Container } from "@mui/system";
 import useRefresh from "../App/useRefresh";
-import useAPI from "../../api";
-import Xterm from "xterm-for-react/dist/src/XTerm";
 
 enum EnvStatus {
   disconnected,
