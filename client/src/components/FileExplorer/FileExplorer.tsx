@@ -18,17 +18,6 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
     }),
     [server]
   );
-  // Bug : Filemanager only works if loaded for first time with correct server.
-  // Rendering false ui unless server is ready
-  // TODO : Need a proper test / Solution to render filemanager skeleton UI properly
-  if (server.includes("undefined") || !server.includes("http")) {
-    return (
-      <div>
-        <CircularIndeterminate />
-        Waiting for file server
-      </div>
-    );
-  }
   return (
     <div className="file-explorer-container">
       <FileManager>
@@ -37,16 +26,6 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
           apiOptions={apiOptions}
           capabilities={(apiOptions: any, actions: any) => [
             ...connectorNodeV1.capabilities(apiOptions, actions),
-            {
-              id: "custom-button",
-              icon: {
-                svg: '<svg viewBox="0 0 120 120" version="1.1"><circle cx="60" cy="60" r="50"></circle></svg>',
-              },
-              label: "Custom Button",
-              shouldBeAvailable: () => true,
-              availableInContexts: ["toolbar"],
-              handler: () => alert("Custom button click"),
-            },
           ]}
           //   initialResourceId={_scope.state.nodeInitId}
           listViewLayout={connectorNodeV1.listViewLayout}
@@ -90,7 +69,6 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
         />
       </FileManager>
     </div>
-    // {/* </div> */}
   );
 }
 

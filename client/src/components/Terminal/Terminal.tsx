@@ -2,7 +2,6 @@
 import { XTerm } from "xterm-for-react";
 import { io, Socket } from "socket.io-client";
 import { useContext, useEffect, useRef, useState } from "react";
-import { useImmer } from "use-immer";
 import { FitAddon } from "xterm-addon-fit";
 import { Chip, Stack, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
@@ -12,7 +11,6 @@ import { AuthContext } from "../App/AuthContext";
 import { Pending } from "@mui/icons-material";
 import { Container } from "@mui/system";
 import useRefresh from "../App/useRefresh";
-import useAPI from "../../api";
 
 enum EnvStatus {
   disconnected,
@@ -33,8 +31,7 @@ function Term({
   user: string;
   server: string;
 }) {
-  const { token, refresh_token, setToken } = useContext(AuthContext);
-  const [data, setData] = useImmer("");
+  const { token } = useContext(AuthContext);
   const xtermRef = useRef<XTerm>(null);
   const socketRef = useRef<Socket>();
   const commandRef = useRef<string>("");
@@ -55,12 +52,15 @@ function Term({
     };
     const onConnectError = async (err: Error) => {
       setStatus(EnvStatus.disconnected);
+      console.log("Error connecting to backend");
       if (err.message === INVALID_TOKEN) {
         toggleRefresh(!refresh);
-      }
-      else if (err.message === NO_ADDITIONAL_SESSIONS)
+      } else if (err.message === NO_ADDITIONAL_SESSIONS)
         xtermRef.current?.terminal.writeln("***Connection limit reached***");
-      else console.error(err.message);
+      else {
+        setStatus(EnvStatus.connecting);
+        console.error(err.message);
+      }
     };
     const onError = (err: string) => {
       if (err === NO_USER_TEAMS) {
@@ -70,7 +70,8 @@ function Term({
       setStatus(EnvStatus.disconnected);
     };
     const onData = (msg: string) => {
-      setData(msg);
+      // setData(msg);
+      xtermRef.current?.terminal.write(msg);
     };
     // Initial load
     setStatus(EnvStatus.disconnected);
@@ -86,7 +87,20 @@ function Term({
 
     let fitaddon = new FitAddon();
     xtermRef.current?.terminal.loadAddon(fitaddon);
+    xtermRef.current?.terminal.onResize((size) => {
+      socketRef.current?.emit("resize", size);
+    });
     fitaddon.fit();
+
+    // start observing a DOM node
+    const terminal_container = document.querySelector(".terminal-container");
+    if (terminal_container) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        fitaddon.fit();
+        console.log("Resized");
+      });
+      resizeObserver.observe(terminal_container);
+    }
 
     // Allow copy and paste in terminal
     xtermRef.current?.terminal.attachCustomKeyEventHandler(
@@ -125,14 +139,11 @@ function Term({
     };
   }, [team, server, token]);
 
-  useEffect(() => {
-    xtermRef.current?.terminal.write(data);
-  }, [data]);
-
   return (
-    <Stack sx={{}} flex={1}>
+    <Stack sx={{ height: "100%", width: "100%" }} flex={1}>
       <Stack sx={{ width: "100%" }} direction="row" spacing={1}>
         <Container
+          maxWidth={false}
           sx={{
             backgroundColor: "white",
             flexDirection: "row",
@@ -140,6 +151,7 @@ function Term({
             alignItems: "center",
             borderLeft: "1px solid",
             padding: "7px",
+            width: "100%",
           }}
         >
           <Typography sx={{ width: "fit-content", paddingRight: "10px" }}>

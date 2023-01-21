@@ -29,6 +29,10 @@ export default class TerminalService {
         this.ptyProcess.onData((data) => {
             this.sendToClient(data);
         });
+
+        this.ptyProcess.onExit((code) => {
+            this.socket.disconnect();
+        });
     }
 
     write(data: string) {
