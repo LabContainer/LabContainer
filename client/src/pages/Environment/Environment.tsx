@@ -80,6 +80,8 @@ export default function Environment() {
   const [leftPaneWidth, setLeftPaneWidth] = React.useState(300);
   const [rightPaneWidth, setRightPaneWidth] = React.useState(300);
   const [editorHeight, setEditorHeight] = React.useState(300);
+  const [labSectionHeight, setLabSectionHeight] = React.useState(300);
+  const [progressTrackHeight, setProgressTrackHeight] = React.useState(300);
   const editorMinHeight = 45;
   const editorMaxHeight = 700;
   const filemanagerMinWidth = 270;
@@ -87,12 +89,22 @@ export default function Environment() {
   const rightPaneMinWidth = 40;
   const rightPaneMaxWidth = 300;
 
+  const labMinHeight = 100;
+  const labMaxHeight = 700;
+  const progressTrackMinHeight = 100;
+  const progressTrackMaxHeight = 700;
+
   const leftPanelRef = React.useRef<HTMLDivElement | null>(null);
   const rightPanelRef = React.useRef<HTMLDivElement | null>(null);
   const editorRef = React.useRef<HTMLDivElement | null>(null);
+  const labRef = React.useRef<HTMLDivElement | null>(null);
+  const progressTrackRef = React.useRef<HTMLDivElement | null>(null);
   const [isResizingLeftPanel, setIsResizingLeftPanel] = React.useState(false);
   const [isResizingRightPanel, setIsResizingRightPanel] = React.useState(false);
   const [isResizingEditor, setIsResizingEditor] = React.useState(false);
+  const [isResizingLabSection, setIsResizingLabSection] = React.useState(false);
+  const [isResizingProgressTracking, setIsResizingProgressTracking] =
+    React.useState(false);
 
   const startResizingLeftPanel = React.useCallback((mouseDownEvent) => {
     setIsResizingLeftPanel(true);
@@ -103,11 +115,19 @@ export default function Environment() {
   const startResizingEditor = React.useCallback((mouseDownEvent) => {
     setIsResizingEditor(true);
   }, []);
+  const startResizingLabSection = React.useCallback((mouseDownEvent) => {
+    setIsResizingLabSection(true);
+  }, []);
+  const startResizingProgressTracking = React.useCallback((mouseDownEvent) => {
+    setIsResizingProgressTracking(true);
+  }, []);
 
   const stopResizing = React.useCallback(() => {
     setIsResizingLeftPanel(false);
     setIsResizingRightPanel(false);
     setIsResizingEditor(false);
+    setIsResizingLabSection(false);
+    setIsResizingProgressTracking(false);
   }, []);
 
   const resize = React.useCallback(
@@ -133,8 +153,27 @@ export default function Environment() {
         if (val > editorMinHeight && val < editorMaxHeight)
           setEditorHeight(val);
       }
+      if (isResizingLabSection) {
+        const val =
+          mouseMoveEvent.clientY -
+          (labRef.current?.getBoundingClientRect().top || 0);
+        if (val > labMinHeight && val < labMaxHeight) setLabSectionHeight(val);
+      }
+      if (isResizingProgressTracking) {
+        const val =
+          mouseMoveEvent.clientY -
+          (progressTrackRef.current?.getBoundingClientRect().top || 0);
+        if (val > progressTrackMinHeight && val < progressTrackMaxHeight)
+          setProgressTrackHeight(val);
+      }
     },
-    [isResizingLeftPanel, isResizingRightPanel, isResizingEditor]
+    [
+      isResizingLeftPanel,
+      isResizingRightPanel,
+      isResizingEditor,
+      isResizingLabSection,
+      isResizingProgressTracking,
+    ]
   );
 
   React.useEffect(() => {
@@ -242,7 +281,7 @@ export default function Environment() {
             position: "absolute",
             bottom: 0,
             left: 0,
-            backgroundColor: "lightblue",
+            backgroundColor: "#151942",
             height: `calc(100% - ${editorHeight + 8}px)`,
             width: "100%",
             minHeight: "100px",
@@ -269,8 +308,44 @@ export default function Environment() {
           style={{
             width: rightPaneWidth,
             minWidth: rightPaneMinWidth + "px",
+            display: "flex",
+            flexDirection: "column",
           }}
-        ></div>
+        >
+          <div
+            className="lab-section"
+            ref={labRef}
+            style={{
+              height: labSectionHeight,
+              minHeight: labMinHeight + "px",
+              backgroundColor: "white",
+            }}
+          >
+            <h3>Lab Information</h3>
+          </div>
+          <div
+            className="y-resizer begin"
+            onMouseDown={startResizingLabSection}
+          />
+          <div
+            className="progress-tracking"
+            ref={progressTrackRef}
+            style={{
+              height: progressTrackHeight,
+              minHeight: progressTrackMinHeight + "px",
+              backgroundColor: "white",
+            }}
+          >
+            <h3>Progress Tracking</h3>
+          </div>
+          <div
+            className="y-resizer begin"
+            onMouseDown={startResizingProgressTracking}
+          />
+          <div className="feedback">
+            <h3>Feedback</h3>
+          </div>
+        </div>
       </div>
     </div>
   );
