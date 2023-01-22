@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Environment from "./pages/Environment/Environment";
 import Login from "./pages/Login/Login";
 import Home from "./pages/Home/home";
+import StudentDashboardNew from "./pages/StudentDashboard/StudentDashboardNew";
 
 import { Navigate, Route, Routes } from "react-router-dom";
 import useToken from "./components/App/useToken";

@@ -1,0 +1,9 @@
+.dashboard-box {
+    width: 90vw;
+    height: 85vh;
+    background-color: white;
+}
+
+.dashboard-column {
+    padding-top: 1.5%;
+}
