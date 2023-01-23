@@ -1,18 +1,18 @@
-import "./NotificationCard.css";
+import "./LabCard.css";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
-import File from '../../static/File.png';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 function NotificationCard() {
     return (
-        <div className="notification-card">
+        <div className="lab-card">
             <Card sx={{ height: 70 }} variant="outlined">
                 <CardContent>
-                    <Grid container spacing={0} className="notification-card-content">
+                    <Grid container spacing={0} className="lab-card-content">
                         <Grid item xs={1}>
-                            <img className="notification-file-image" src={File}></img>
+                            <UploadFileIcon className="file-image" color="primary"></UploadFileIcon>
                         </Grid>
                         <Grid item xs={11}>
-                            <Typography className="notification-title">
+                            <Typography className="lab-title">
                                 Assignment A
                             </Typography>
                         </Grid>

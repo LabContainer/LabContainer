@@ -1,5 +1,6 @@
 import "./Teams.css";
 import TeamCard from "./TeamCard";
+import { DashBoardData } from "./LabCard";
 
 function Teams() {
     return (

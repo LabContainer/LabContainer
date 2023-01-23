@@ -1,6 +1,7 @@
 import "./TeamCard.css";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
 import GroupIcon from '@mui/icons-material/Group';
+import { DashBoardData } from "./LabCard";
 
 function TeamCard() {
     return (

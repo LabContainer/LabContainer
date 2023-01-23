@@ -1,16 +1,16 @@
-import "./Notifications.css";
+import "./Labs.css";
 import NotificationCard from "./NotificationCard";
 
 function Notifications() {
     return (
-        <div className="notifications">
-            <div className="notifications-title"> 
+        <div className="labs">
+            <div className="labs-title"> 
                 Upcoming Labs
             </div>
             <div>
                 <NotificationCard></NotificationCard>  
             </div>
-            <div className="notifications-title past"> 
+            <div className="labs-title past"> 
                 Past Labs
             </div>
             <div>

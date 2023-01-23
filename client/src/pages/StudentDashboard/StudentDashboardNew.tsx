@@ -1,13 +1,13 @@
 import "./StudentDashboardNew.css";
 import DashboardPage from "../../components/DashboardPage/DashboardPage";
 import { Grid, Typography, Tabs, Tab, Box } from "@mui/material";
-import { DashBoardData } from "./DashboardCard";
 import { AuthContext } from "../../components/App/AuthContext";
 import useAPI from "../../api";
 import React, { useEffect, useState } from "react";
 import Labs from "./Labs";
 import Teams from "./Teams";
 import Notifications from "./Notifications";
+import { DashBoardData } from "./LabCard";
 
 function StudentDashboardNew() {
     const { user } = React.useContext(AuthContext);
@@ -94,7 +94,7 @@ function StudentDashboardNew() {
                     </Grid>
                     <Grid item xs={9}>
                         <TabPanel value={section} index={0}>
-                            <Labs></Labs>
+                            <Labs data={data}></Labs>
                         </TabPanel>
                         <TabPanel value={section} index={1}>
                             <Teams></Teams>
