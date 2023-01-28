@@ -2,10 +2,11 @@ FROM node:16
 
 RUN apt update
 
-ARG ssh_user=test
-ARG ssh_pass=test
-RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1001 ${ssh_user} 
-RUN  echo $ssh_user:$ssh_pass | chpasswd
+ARG user=ubuntu
+ARG init_script="echo Test Script"
+
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1001 ${user} 
+RUN  echo $user:toor | chpasswd
 
 SHELL ["/bin/bash", "-c"] 
 
@@ -21,7 +22,9 @@ COPY . .
 # COPY .env .
 RUN tsc
 
-USER ${ssh_user}
+RUN ${init_script}
+
+USER ${user}
 
 # CMD [ "nodemon" , "dist/server.js"]  
 CMD [ "node" , "dist/server.js"]  

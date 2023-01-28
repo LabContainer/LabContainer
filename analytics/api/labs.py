@@ -7,6 +7,7 @@ import analytics.crud.crud as crud
 from analytics.dependencies import has_access, get_db
 from analytics.core import schemas
 import traceback
+from analytics.logger import logger
 
 router = APIRouter(prefix="/labs")
 

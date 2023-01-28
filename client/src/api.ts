@@ -19,18 +19,17 @@ export default function useAPI() {
     const UserApi = auth.users;
     const WebappApi = auth.webapp;
     // // 
-    // axios.interceptors.request.use(
-    //     request => {
-    //         if(request.url?.includes('/webapp/refresh')){
-    //             (request as any)._retry = true;
-    //             console.log('caught')
-    //             return request;
-    //         }
-    //         console.log('not caught');
-    //         return request;
-    //     },
-    //     error => error
-    // )
+    axios.interceptors.request.use(
+        request => {
+            if (request.url?.includes('/webapp/refresh')) {
+                (request as any)._retry = true;
+                console.log('caught')
+                return request;
+            }
+            return request;
+        },
+        error => error
+    )
 
     // Add refresh token interceptor in axios
     axios.interceptors.response.use(
@@ -42,7 +41,8 @@ export default function useAPI() {
                 originalRequest._retry = true;
                 // Set token to refresh token
                 WebappApi.httpRequest.config.TOKEN = refresh_token;
-                return WebappApi.webappRefresh().then(res => {
+                const refreshPromise = WebappApi.webappRefresh();
+                return refreshPromise.then(res => {
                     console.log("Refreshed token")
 
                     // Set token to access token

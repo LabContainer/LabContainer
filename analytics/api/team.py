@@ -7,6 +7,7 @@ import analytics.crud.crud as crud
 from analytics.dependencies import has_access, get_db
 from analytics.core import schemas
 import traceback
+from analytics.logger import logger
 
 router = APIRouter(prefix="/teams")
 
@@ -21,9 +22,9 @@ def get_team(
     team = crud.get_team(db, team_name)
     if not payload["is_student"]:
         return team
-    print(team.users)
+    logger.info(team.users)
     users = crud.get_users_in_team(db, team.name)
-    print(users)
+    logger.info(users)
     for user in users:
         if user.name == payload["user"]:
             return schemas.TeamCreate(

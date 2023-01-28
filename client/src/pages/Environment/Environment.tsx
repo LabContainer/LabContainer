@@ -7,13 +7,8 @@ import "../../components/Editor/Editor.css";
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
-import { AnalyticsServiceAPI } from "../../constants";
-import { AuthContext } from "../../components/App/AuthContext";
 import Term from "../../components/Terminal/Terminal";
-
-// const Term = React.lazy(async () => {
-//   return import("../../components/Terminal/Terminal");
-// });
+import useAPI from "../../api";
 
 // server status enum
 enum ServerStatus {
@@ -24,42 +19,44 @@ enum ServerStatus {
 // const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 export default function Environment() {
   const { user, team } = useParams();
-  const { token } = React.useContext(AuthContext);
   const [server, setServer] = React.useState("");
   const [loadFile, setLoadFile] = React.useState({
     name: "",
     id: "",
   });
+  const { EnvironmentApi } = useAPI();
   const [serverStatus, setServerStatus] = React.useState(
     ServerStatus.Unavailable
   );
   const [childKey, setChildKey] = React.useState(1);
   //Fetch Server
   React.useEffect(() => {
-    fetch(AnalyticsServiceAPI + `/environment/${team}/${user}`, {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then((r) => r.json())
-      .then((env) => {
-        console.log("Received Environment from analytics service: ", env);
-        setServer(`http://localhost:${env?.port}`);
-      });
-  }, [setServer, team, user, token]);
+    if (!team || !user) return;
+    const envPromise = EnvironmentApi.environmentGetEnvironment(team, user);
+
+    envPromise.then((env) => {
+      console.log("Received Environment from analytics service: ", env);
+      setServer(env.url);
+    });
+
+    return () => {
+      envPromise.cancel();
+    };
+  }, [setServer, team, user]);
   React.useEffect(() => {
     if (serverStatus === ServerStatus.Available) {
       setChildKey((prev: number) => prev + 1);
     }
-    // window.location.reload();
   }, [serverStatus]);
   React.useEffect(() => {
-    const timer = setTimeout(() => {
+    // abort signal
+    const controller = new AbortController();
+    const timer = setInterval(() => {
       if (server) {
         // fetch /health endpoint
         fetch(server + "/health", {
           method: "GET",
+          signal: controller.signal,
         }).then((r) => {
           if (r.status === 200) {
             setServerStatus(ServerStatus.Available);
@@ -68,27 +65,61 @@ export default function Environment() {
           }
         });
       }
-    }, 2000);
+    }, 4000);
 
     return () => {
       // cleanup
       clearTimeout(timer);
+      controller.abort();
     };
   }, [server]);
+
+  // Report user presence to backend
+  React.useEffect(() => {
+    if (!team || !user) return;
+    const reportingTimer = setInterval(() => {
+      const presencePromise = EnvironmentApi.environmentReportActiveEnvironment(
+        team,
+        user
+      );
+      presencePromise.then((r) => {
+        console.log("Reported presence to analytics service: ", r);
+      });
+    }, 60000);
+    return () => {
+      clearInterval(reportingTimer);
+    };
+  }, [team, user]);
 
   // States for resizing
   const [leftPaneWidth, setLeftPaneWidth] = React.useState(300);
   const [rightPaneWidth, setRightPaneWidth] = React.useState(300);
   const [editorHeight, setEditorHeight] = React.useState(300);
+  const [labSectionHeight, setLabSectionHeight] = React.useState(300);
+  const [progressTrackHeight, setProgressTrackHeight] = React.useState(300);
   const editorMinHeight = 45;
   const editorMaxHeight = 700;
+  const filemanagerMinWidth = 270;
+  const filemanagerMaxWidth = 800;
+  const rightPaneMinWidth = 40;
+  const rightPaneMaxWidth = 300;
+
+  const labMinHeight = 100;
+  const labMaxHeight = 700;
+  const progressTrackMinHeight = 100;
+  const progressTrackMaxHeight = 700;
 
   const leftPanelRef = React.useRef<HTMLDivElement | null>(null);
   const rightPanelRef = React.useRef<HTMLDivElement | null>(null);
   const editorRef = React.useRef<HTMLDivElement | null>(null);
+  const labRef = React.useRef<HTMLDivElement | null>(null);
+  const progressTrackRef = React.useRef<HTMLDivElement | null>(null);
   const [isResizingLeftPanel, setIsResizingLeftPanel] = React.useState(false);
   const [isResizingRightPanel, setIsResizingRightPanel] = React.useState(false);
   const [isResizingEditor, setIsResizingEditor] = React.useState(false);
+  const [isResizingLabSection, setIsResizingLabSection] = React.useState(false);
+  const [isResizingProgressTracking, setIsResizingProgressTracking] =
+    React.useState(false);
 
   const startResizingLeftPanel = React.useCallback((mouseDownEvent) => {
     setIsResizingLeftPanel(true);
@@ -99,27 +130,36 @@ export default function Environment() {
   const startResizingEditor = React.useCallback((mouseDownEvent) => {
     setIsResizingEditor(true);
   }, []);
+  const startResizingLabSection = React.useCallback((mouseDownEvent) => {
+    setIsResizingLabSection(true);
+  }, []);
+  const startResizingProgressTracking = React.useCallback((mouseDownEvent) => {
+    setIsResizingProgressTracking(true);
+  }, []);
 
   const stopResizing = React.useCallback(() => {
     setIsResizingLeftPanel(false);
     setIsResizingRightPanel(false);
     setIsResizingEditor(false);
+    setIsResizingLabSection(false);
+    setIsResizingProgressTracking(false);
   }, []);
 
   const resize = React.useCallback(
     (mouseMoveEvent) => {
+      const val =
+        mouseMoveEvent.clientX -
+        (leftPanelRef.current?.getBoundingClientRect().left || 0);
       if (isResizingLeftPanel) {
-        setLeftPaneWidth(
-          mouseMoveEvent.clientX -
-            (leftPanelRef.current?.getBoundingClientRect().left || 0)
-        );
+        if (val > filemanagerMinWidth && val < filemanagerMaxWidth)
+          setLeftPaneWidth(val);
       }
       if (isResizingRightPanel) {
-        setRightPaneWidth(
+        const val =
           (rightPanelRef.current?.getBoundingClientRect().right || 0) -
-            mouseMoveEvent.clientX
-        );
-        console.log("yes w");
+          mouseMoveEvent.clientX;
+        if (val > rightPaneMinWidth && val < rightPaneMaxWidth)
+          setRightPaneWidth(val);
       }
       if (isResizingEditor) {
         const val =
@@ -128,8 +168,27 @@ export default function Environment() {
         if (val > editorMinHeight && val < editorMaxHeight)
           setEditorHeight(val);
       }
+      if (isResizingLabSection) {
+        const val =
+          mouseMoveEvent.clientY -
+          (labRef.current?.getBoundingClientRect().top || 0);
+        if (val > labMinHeight && val < labMaxHeight) setLabSectionHeight(val);
+      }
+      if (isResizingProgressTracking) {
+        const val =
+          mouseMoveEvent.clientY -
+          (progressTrackRef.current?.getBoundingClientRect().top || 0);
+        if (val > progressTrackMinHeight && val < progressTrackMaxHeight)
+          setProgressTrackHeight(val);
+      }
     },
-    [isResizingLeftPanel, isResizingRightPanel, isResizingEditor]
+    [
+      isResizingLeftPanel,
+      isResizingRightPanel,
+      isResizingEditor,
+      isResizingLabSection,
+      isResizingProgressTracking,
+    ]
   );
 
   React.useEffect(() => {
@@ -169,7 +228,7 @@ export default function Environment() {
           className="sidebar"
           style={{
             width: leftPaneWidth,
-            minWidth: "270px",
+            minWidth: filemanagerMinWidth + "px",
           }}
         >
           <FileExplorer
@@ -237,7 +296,7 @@ export default function Environment() {
             position: "absolute",
             bottom: 0,
             left: 0,
-            backgroundColor: "lightblue",
+            backgroundColor: "#151942",
             height: `calc(100% - ${editorHeight + 8}px)`,
             width: "100%",
             minHeight: "100px",
@@ -263,9 +322,45 @@ export default function Environment() {
           className="sidebar"
           style={{
             width: rightPaneWidth,
-            minWidth: "40px",
+            minWidth: rightPaneMinWidth + "px",
+            display: "flex",
+            flexDirection: "column",
           }}
-        ></div>
+        >
+          <div
+            className="lab-section"
+            ref={labRef}
+            style={{
+              height: labSectionHeight,
+              minHeight: labMinHeight + "px",
+              backgroundColor: "white",
+            }}
+          >
+            <h3>Lab Information</h3>
+          </div>
+          <div
+            className="y-resizer begin"
+            onMouseDown={startResizingLabSection}
+          />
+          <div
+            className="progress-tracking"
+            ref={progressTrackRef}
+            style={{
+              height: progressTrackHeight,
+              minHeight: progressTrackMinHeight + "px",
+              backgroundColor: "white",
+            }}
+          >
+            <h3>Progress Tracking</h3>
+          </div>
+          <div
+            className="y-resizer begin"
+            onMouseDown={startResizingProgressTracking}
+          />
+          <div className="feedback">
+            <h3>Feedback</h3>
+          </div>
+        </div>
       </div>
     </div>
   );

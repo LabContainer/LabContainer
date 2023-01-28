@@ -1,12 +1,8 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import "./Navbar.css";
-import IconButton from "@mui/material/IconButton";
-import Badge from "@mui/material/Badge";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App/AuthContext";
-import { Settings } from "@mui/icons-material";
 import Logo from "../../static/Cube.png";
 
 const api_url = "http://localhost:5000";
