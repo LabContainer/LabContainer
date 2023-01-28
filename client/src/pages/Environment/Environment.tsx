@@ -10,10 +10,7 @@ import FileExplorer from "../../components/FileExplorer/FileExplorer";
 import { AnalyticsServiceAPI } from "../../constants";
 import { AuthContext } from "../../components/App/AuthContext";
 import Term from "../../components/Terminal/Terminal";
-
-// const Term = React.lazy(async () => {
-//   return import("../../components/Terminal/Terminal");
-// });
+import useAPI from "../../api";
 
 // server status enum
 enum ServerStatus {
@@ -24,42 +21,44 @@ enum ServerStatus {
 // const sleep = (ms:  number) => new Promise( resolve => setTimeout(resolve, ms))
 export default function Environment() {
   const { user, team } = useParams();
-  const { token } = React.useContext(AuthContext);
   const [server, setServer] = React.useState("");
   const [loadFile, setLoadFile] = React.useState({
     name: "",
     id: "",
   });
+  const { EnvironmentApi } = useAPI();
   const [serverStatus, setServerStatus] = React.useState(
     ServerStatus.Unavailable
   );
   const [childKey, setChildKey] = React.useState(1);
   //Fetch Server
   React.useEffect(() => {
-    fetch(AnalyticsServiceAPI + `/environment/${team}/${user}`, {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then((r) => r.json())
-      .then((env) => {
-        console.log("Received Environment from analytics service: ", env);
-        setServer(`http://localhost:${env?.port}`);
-      });
-  }, [setServer, team, user, token]);
+    if (!team || !user) return;
+    const envPromise = EnvironmentApi.environmentGetEnvironment(team, user);
+
+    envPromise.then((env) => {
+      console.log("Received Environment from analytics service: ", env);
+      setServer(`http://localhost:${env?.port}`);
+    });
+
+    return () => {
+      envPromise.cancel();
+    };
+  }, [setServer, team, user]);
   React.useEffect(() => {
     if (serverStatus === ServerStatus.Available) {
       setChildKey((prev: number) => prev + 1);
     }
-    // window.location.reload();
   }, [serverStatus]);
   React.useEffect(() => {
-    const timer = setTimeout(() => {
+    // abort signal
+    const controller = new AbortController();
+    const timer = setInterval(() => {
       if (server) {
         // fetch /health endpoint
         fetch(server + "/health", {
           method: "GET",
+          signal: controller.signal,
         }).then((r) => {
           if (r.status === 200) {
             setServerStatus(ServerStatus.Available);
@@ -68,13 +67,31 @@ export default function Environment() {
           }
         });
       }
-    }, 2000);
+    }, 4000);
 
     return () => {
       // cleanup
       clearTimeout(timer);
+      controller.abort();
     };
   }, [server]);
+
+  // Report user presence to backend
+  React.useEffect(() => {
+    if (!team || !user) return;
+    const reportingTimer = setInterval(() => {
+      const presencePromise = EnvironmentApi.environmentReportActiveEnvironment(
+        team,
+        user
+      );
+      presencePromise.then((r) => {
+        console.log("Reported presence to analytics service: ", r);
+      });
+    }, 60000);
+    return () => {
+      clearInterval(reportingTimer);
+    };
+  }, [team, user]);
 
   // States for resizing
   const [leftPaneWidth, setLeftPaneWidth] = React.useState(300);

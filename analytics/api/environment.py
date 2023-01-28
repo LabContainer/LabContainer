@@ -1,4 +1,3 @@
-import imp
 from typing import Dict
 from fastapi import APIRouter, status, Response, Header, Depends
 
@@ -8,6 +7,7 @@ from analytics.dependencies import has_access, get_db
 from analytics.env_manager import check_env, create_new_container, kill_env
 from analytics.core import schemas
 import traceback
+from datetime import datetime, timedelta
 
 import asyncio
 import fcntl
@@ -33,6 +33,13 @@ async def lock():
         yield
     finally:
         f.close()
+
+
+"""
+Dict of active environments, expiry time
+"""
+active_environments = {}
+env_expiry_time = 100
 
 
 @router.get("/{team_name}/{username}", response_model=schemas.Environment, tags=["environment"])
@@ -61,7 +68,12 @@ async def get_environment(
     async with lock():
         env = crud.get_env_for_user_team(db, username, team_name)
         if env:
-            if check_env(env.host):
+            check = check_env(env.host)
+            if check:
+                # add to active if not exist
+                key = f"{team_name}_{username}_{len(team_name)}"
+                active_environments[key] = datetime.now() + \
+                    timedelta(seconds=env_expiry_time)
                 return schemas.Environment(
                     host=env.host,
                     port=env.port,
@@ -71,6 +83,8 @@ async def get_environment(
                 )
             # Non running env, remove
             crud.remove_user_env(db, username, team_name)
+            if check is False:
+                kill_env(env.host)
 
         # TODO make secure with username and hashed password
         temp_pass = f"{username}#envpass"
@@ -83,6 +97,10 @@ async def get_environment(
         )
         try:
             env = crud.create_user_env(db, new_env, username, team_name)
+            # add to active if not exist
+            key = f"{team_name}_{username}_{len(team_name)}"
+            active_environments[key] = datetime.now(
+            ) + timedelta(seconds=env_expiry_time)
             return schemas.Environment(
                 host=env.host,
                 port=env.port,
@@ -115,12 +133,81 @@ def delete_env(
             print("Removing env:", env.host, "id:", env.env_id)
             kill_env(env.host)
         crud.remove_user_env(db, payload["user"], team_name)
+        # remove from active environments
+        key = f"{team_name}_{username}_{len(team_name)}"
+        if key in active_environments:
+            del active_environments[key]
     else:
         print(f"No env found for user {payload['user']} :", env)
         response.status_code = status.HTTP_404_NOT_FOUND
 
 
-@router.post("/{username}/save", tags=["environment"])
-def save_environment():
-    # TODO: Save Environment
-    pass
+@router.post("/{team_name}/{username}/active", tags=["environment"])
+def report_active_environment(
+    team_name: str,
+    username: str,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db: SessionLocal = Depends(get_db),
+):
+    """
+    Endpoint for frontend to report active status of environment
+    If not reported within a time limit, env automatically deleted
+    On active reports, time limit is reset and env is saved
+    """
+    if payload["user"] != username:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return
+
+    env = crud.get_env_for_user_team(db, username, team_name)
+
+    if not env:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    if not check_env(env.host):
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    # env is running, and active set expiry time as current time + limit
+
+    # create key with retreivable team_name and username
+    key = f"{team_name}_{username}_{len(team_name)}"
+    active_environments[key] = datetime.utcnow(
+    ) + timedelta(seconds=env_expiry_time)
+
+# Run checking active environments every 10 seconds
+
+
+async def check_active_environments():
+    while True:
+        await asyncio.sleep(env_expiry_time)
+        check_active_envs()
+
+asyncio.create_task(check_active_environments())
+
+
+def del_user_team(username, team_name):
+    db_gen = get_db()
+    db = next(db_gen)
+    env = crud.get_env_for_user_team(db, username, team_name)
+    if env:
+        kill_env(env.host)
+        crud.remove_user_env(db, username, team_name)
+
+
+def check_active_envs():
+    # save dict items to list to avoid runtime error
+    for key, value in list(active_environments.items()):
+        if value < datetime.utcnow():
+            # env has expired, delete
+            del active_environments[key]
+
+            # fetch user, team from key
+            team_name_len = key.split("_")[-1]
+            team_name = key[:int(team_name_len)]
+            username = '_'.join(key[int(team_name_len)+1:].split('_')[:-1])
+
+            # TODO delete env from db
+            print("Deleting env for user:", username, "team:", team_name)
+            del_user_team(username, team_name)

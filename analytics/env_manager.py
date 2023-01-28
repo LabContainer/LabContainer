@@ -1,9 +1,10 @@
 # Manages docker env
 import subprocess
 import os
+import json
 
 
-def create_new_container(user: str, team: str, password: str, port: int, init_script : str):
+def create_new_container(user: str, team: str, password: str, port: int, init_script: str):
     # TODO: use kubernetes here
     # Build container image for user
     wd = os.getcwd()
@@ -62,10 +63,14 @@ def create_new_container(user: str, team: str, password: str, port: int, init_sc
     return [container_id, network, name]
 
 
-def check_env(name: str) -> bool:
+def check_env(name: str):
     cont = subprocess.run(
         ["docker", "container", "inspect", name], capture_output=True)
-    return cont.stdout.decode("utf8").strip() != "[]"
+    string = cont.stdout.decode("utf8").strip()
+    if string == "[]":
+        return None
+    status = json.loads(string)
+    return status[0]["State"]["Running"]
 
 
 def check_env_id(conatiner_id: str) -> bool:

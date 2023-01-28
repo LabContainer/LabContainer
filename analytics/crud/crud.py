@@ -54,7 +54,7 @@ def add_user_to_lab(db: Session, username: str, lab_id: str):
         db.commit()
     else:
         return False
-    
+
     return True
 
 
