@@ -1,67 +1,157 @@
-import React, { useState } from "react";
-import {Table, TableBody, TableCell,TableContainer,TableHead,TableRow,Paper } from "@mui/material";
-import SearchBar from "material-ui-search-bar";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import React from "react";
+import useAPI from "../../api";
+import { Lab } from "../../clients/AnalyticsClient";
+import { AuthContext, IUser } from "../../components/App/AuthContext";
+import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
+import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
+import FormDialogUsersAdd from "../../components/FormDialogUsersAdd/FormDialogUsersAdd";
+import {
+  errorMessage,
+  successMessage,
+  MessageContainer,
+} from "../../components/App/message";
 
-
-
-interface students {
-  name: string;
-  Grade: number;
-}
-
-const originalRows: students[] = [
-  { name: "Ani", Grade: 100},
-  { name: "Sam", Grade: 100},
-  { name: "Sowrov", Grade: 100},
-  { name: "Parth", Grade: 100 },
+const headCellsUsers: IHeadCell[] = [
+  {
+    id: "username",
+    numeric: false,
+    disablePadding: true,
+    label: "Username",
+  },
+  {
+    id: "email",
+    numeric: false,
+    disablePadding: true,
+    label: "Email",
+  },
+  {
+    id: "lab",
+    numeric: true,
+    disablePadding: false,
+    label: "Labs",
+  },
+  {
+    id: "info",
+    numeric: true,
+    disablePadding: false,
+    label: "More Info",
+  },
+];
+const headCellsLabs: IHeadCell[] = [
+  {
+    id: "name",
+    numeric: false,
+    disablePadding: true,
+    label: "Name",
+  },
+  {
+    id: "course",
+    numeric: false,
+    disablePadding: true,
+    label: "Course",
+  },
+  {
+    id: "instructor",
+    numeric: true,
+    disablePadding: false,
+    label: "Instructor",
+  },
+  {
+    id: "description",
+    numeric: true,
+    disablePadding: false,
+    label: "Description",
+  },
 ];
 
-export default function BasicTable() {
-  const [rows, setRows] = useState<students[]>(originalRows);
-  const [searched, setSearched] = useState<string>("");
+function InstructorDashboard() {
+  const { token, refresh_token, setToken } = React.useContext(AuthContext);
+  const [users, setUsers] = React.useState<IUser[]>([]);
+  const [labs, setLabs] = React.useState<Lab[]>([]);
+  const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
+  const [usersAddOpen, setUserAddOpen] = React.useState(false);
+  const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
+    []
+  );
+  const { UserApi, LabsApi } = useAPI();
+  React.useEffect(() => {
+    const user_promise = UserApi.usersGetUsers();
+    const lab_promise = LabsApi.labsGetLabs();
 
-  const requestSearch = (searchedVal: string) => {
-    const filteredRows = originalRows.filter((row) => {
-      return row.name.toLowerCase().includes(searchedVal.toLowerCase());
-    });
-    setRows(filteredRows);
-  };
+    user_promise.then(setUsers);
+    lab_promise.then(setLabs);
 
-  const cancelSearch = () => {
-    setSearched("");
-    requestSearch(searched);
-  };
-
+    return () => {
+      user_promise.cancel();
+      lab_promise.cancel();
+    };
+  }, []);
   return (
-    <>
-      <Paper>
-        <SearchBar
-          value={searched}
-          onChange={(searchVal) => requestSearch(searchVal)}
-          onCancelSearch={() => cancelSearch()}
-        />
-        <TableContainer>
-          <Table className="new" aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell align="right">Grade</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.name}>
-                  <TableCell component="th" scope="row">
-                    {row.name}
-                  </TableCell>
-                  <TableCell align="right">{row.Grade}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-      <br />
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
+      }}
+    >
+      <MessageContainer />
+      <Stack>
+        <Container
+          sx={{
+            flexDirection: "row",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Box sx={{ margin: "20px" }}>
+            <DataTable
+              onSelect={setSelectedUsers}
+              title="Students"
+              rows={
+                users
+                  ? users
+                      .filter((u) => u.is_student)
+                      .map((user, i) => ({
+                        values: user as any,
+                        key: i,
+                      }))
+                  : []
+              }
+              headCells={headCellsUsers}
+              selectionEnable={true}
+            />
+            <Button variant="contained" onClick={() => setUserAddOpen(true)}>
+              {" "}
+              Add to Lab{" "}
+            </Button>
+            <FormDialogUsersAdd
+              handleClose={() => {
+                setUserAddOpen(false);
+              }}
+              open={usersAddOpen}
+              labs={labs}
+              handleSubmit={async (event) => {
+                event.preventDefault();
+                const data = new FormData(event.currentTarget);
+                const labid = data.get("labid") as string;
+                for (const user_index of selectedUsers) {
+                  const user = users[parseInt(user_index)];
+                  console.log(labid);
+                  try {
+                    await LabsApi.labsAddLabUser(labid, user.username);
+                    successMessage("User added to lab!");
+                  } catch (error) {
+                    errorMessage("Unable to add user!");
+                  }
+                }
+              }}
+            />
+          </Box>
+        </Container>
+      </Stack>
+    </Box>
   );
 }
+
+export default InstructorDashboard;

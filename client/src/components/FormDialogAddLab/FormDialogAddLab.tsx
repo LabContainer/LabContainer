@@ -26,13 +26,14 @@ export default function FormDialogAddLab({
           <form onSubmit={handleSubmit} id="dialog_form">
             <Box
               sx={{
-                display: "flex",
+                display: "inline",
                 flexDirection: "column",
-                padding: "10px",
+            
               }}
             >
               <TextField
                 autoFocus
+                multiline
                 margin="dense"
                 id="name"
                 label="Lab Name"
@@ -46,6 +47,7 @@ export default function FormDialogAddLab({
               />
               <TextField
                 autoFocus
+                multiline
                 margin="dense"
                 id="course_name"
                 label="Course"
