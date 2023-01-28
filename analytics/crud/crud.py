@@ -4,7 +4,7 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 from analytics.core.db import Envionment, Lab, Team, User, Milestone
 import analytics.core.schemas as schemas
-
+from analytics.logger import logger
 
 def create_lab(db: Session, lab: schemas.LabCreate, lab_id: str):
     new_lab = Lab(**lab.dict(), id=lab_id)
@@ -156,15 +156,7 @@ def create_user_env(
     db: Session, env: schemas.EnvCreate, username: str, team_name: str
 ) -> Envionment:
 
-    db_env = Envionment(
-        host=env.host,
-        env_id=env.id,
-        network=env.network,
-        ssh_password=env.ssh_password,
-        port=env.port,
-        ssh_user=username,
-        ssh_user_team=team_name,
-    )
+    db_env = Envionment(**env.dict())
     db.add(db_env)
     db.commit()
     db.refresh(db_env)
@@ -177,7 +169,7 @@ def remove_user_env(db: Session, username: str, team_name: str):
         db.delete(db_env)
         db.commit()
     else:
-        print(f"No Env for user {username}")
+        logger.info(f"No Env for user {username}")
     return
 
 

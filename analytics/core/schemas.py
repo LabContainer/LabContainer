@@ -12,6 +12,8 @@ class LabCreate(BaseModel):
     instructor: str
     description: str
     environment_init_script: str
+
+
 class Lab(LabCreate):
     id: str
 
@@ -24,11 +26,12 @@ class EnvCreate(BaseModel):
     Schema for creating an environment
     TODO: Communicate with kubernetes controller to spin and keep track of running environments 
     """
-    id: str
-    host: str
-    network: str
-    ssh_password: str  # Plain string , security concern ?
-    port: int
+    env_id: str
+    url: str
+    image: str
+    name: str
+    user: str
+    team: str
 
     class Config:
         orm_mode = True
@@ -45,11 +48,7 @@ class Environment(BaseModel):
     """
     Schema for Environment
     """
-    host: str
-    network: str
-    ssh_password: str  # Plain string , security concern ?
-    port: int
-    ssh_user: str
+    url: str
 
     class Config:
         orm_mode = True

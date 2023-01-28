@@ -7,8 +7,6 @@ import "../../components/Editor/Editor.css";
 import Editor from "../../components/Editor/Editor";
 import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
-import { AnalyticsServiceAPI } from "../../constants";
-import { AuthContext } from "../../components/App/AuthContext";
 import Term from "../../components/Terminal/Terminal";
 import useAPI from "../../api";
 
@@ -38,7 +36,7 @@ export default function Environment() {
 
     envPromise.then((env) => {
       console.log("Received Environment from analytics service: ", env);
-      setServer(`http://localhost:${env?.port}`);
+      setServer(env.url);
     });
 
     return () => {

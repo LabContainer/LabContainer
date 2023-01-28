@@ -5,6 +5,7 @@ from analytics.core.db import SessionLocal
 import analytics.crud.crud as crud
 from analytics.dependencies import has_access, get_db
 from analytics.core import schemas
+from analytics.logger import logger
 
 router = APIRouter(prefix="/milestones")
 

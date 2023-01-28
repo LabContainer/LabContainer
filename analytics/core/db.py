@@ -85,16 +85,17 @@ class User(Base):
 class Envionment(Base):
     __tablename__ = "environment"
     env_id = Column(String, primary_key=True, index=True)
-    host = Column(String, index=True)
-    network = Column(String, index=True)
-    port = Column(String)
-    ssh_password = Column(String)
-    ssh_user_team = Column(String, ForeignKey("teams.name"))
-    ssh_user = Column(String, ForeignKey("users.name"))
+    url = Column(String, index=True)
+    image = Column(String)
+    name = Column(String)
+    team = Column(String, ForeignKey("teams.name"))
+    user = Column(String, ForeignKey("users.name"))
     owning_user = relationship("User", back_populates="environments")
     owning_team = relationship("Team", back_populates="environments")
 
-#Need to make milestone connection for team
+# Need to make milestone connection for team
+
+
 class Milestone(Base):
     __tablename__ = "milestone"
     milestone_id = Column(String, primary_key=True, index=True)
@@ -103,5 +104,6 @@ class Milestone(Base):
     deadline = Column(Date)
     description = Column(String)
     test_script = Column(String)
+
 
 Base.metadata.create_all()
