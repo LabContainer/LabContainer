@@ -80,13 +80,14 @@ function Term({
 
     const base_server = server.split("/").slice(0, 3).join("/");
     const path = server.split("/").slice(3).join("/");
+    console.log(base_server);
+    console.log(path);
     socketRef.current = io(base_server, {
       query: {
         token,
         team,
       },
-
-      path: path + "/socket.io",
+      path: "/" + path + "/socket.io",
       rejectUnauthorized: false,
       // server.includes("localhost")
       //   ? "/socket.io"
