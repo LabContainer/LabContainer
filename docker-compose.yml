@@ -94,7 +94,6 @@ services:
 networks:
   envnet:
     name: envnet
-    driver: bridge
   backend:
     driver: bridge
   authdb:
