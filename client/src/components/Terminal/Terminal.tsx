@@ -83,7 +83,7 @@ function Term({
       },
       path: server.includes("localhost")
         ? "/socket.io"
-        : server.split(".dev")[1],
+        : server.split(".dev")[1] + "/socket.io",
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
     console.log(token);
