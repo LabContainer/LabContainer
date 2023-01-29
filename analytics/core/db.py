@@ -42,6 +42,7 @@ class Lab(Base):
     name = Column(String)
     instructor = Column(String)
     description = Column(String)
+    deadline = Column(Date)
     environment_init_script = Column(String)
     teams = relationship("Team", back_populates="lab")
     milestones = relationship("Milestone", back_populates="lab")

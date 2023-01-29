@@ -1,0 +1,23 @@
+.team-card {
+    padding-top: 2%;
+}
+
+.team-title {
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.15000000596046448px;
+    text-align: left;
+    color: #000000DE;
+    padding-top: 5%;
+}
+
+.team-card-content{
+    width: 80%;
+}
+
+.group-image {
+    padding-top: 9%;
+    padding-left: 25%;
+}

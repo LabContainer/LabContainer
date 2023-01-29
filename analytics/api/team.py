@@ -12,7 +12,7 @@ from analytics.logger import logger
 router = APIRouter(prefix="/teams")
 
 
-@router.get("/{team_name}", response_model=schemas.TeamCreate, tags=["teams"])
+@router.get("/{team_name}", response_model=schemas.Team, tags=["teams"])
 def get_team(
     team_name: str,
     response: Response,
@@ -27,9 +27,11 @@ def get_team(
     logger.info(users)
     for user in users:
         if user.name == payload["user"]:
-            return schemas.TeamCreate(
+            return schemas.Team(
                 name=team.name,
-                lab_id=team.lab_id
+                lab_id=team.lab_id,
+                current_milestone=team.current_milestone,
+                users=team.users
             )
     response.status_code = status.HTTP_403_FORBIDDEN
 
@@ -65,6 +67,7 @@ def create_new_team(
             crud.delete_team(db, team.name)
         return team
     except:
+        print("Here")
         response.status_code = status.HTTP_409_CONFLICT
 
 
