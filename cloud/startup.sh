@@ -1,5 +1,5 @@
 #!/bin/sh
-sleep 3600s
+sleep 3h
 export NAME=$(curl -X GET http://metadata.google.internal/computeMetadata/v1/instance/name -H 'Metadata-Flavor: Google')
 export ZONE=$(curl -X GET http://metadata.google.internal/computeMetadata/v1/instance/zone -H 'Metadata-Flavor: Google')
-gcloud --quiet compute instances delete $NAME --zone=$ZONE
+gcloud --quiet compute instances stop $NAME --zone=$ZONE
