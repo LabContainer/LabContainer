@@ -10,6 +10,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/ssl/
+      - ./nginx-entrypoint.sh:/docker-entrypoint.d/nginx-entrypoint.sh:ro
     networks:
       - envnet
       - backend
