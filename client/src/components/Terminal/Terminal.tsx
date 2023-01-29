@@ -82,6 +82,7 @@ function Term({
         team,
       },
       path: server.split(".dev")[1] + "/socket.io",
+      rejectUnauthorized: false,
       // server.includes("localhost")
       //   ? "/socket.io"
       //   : server.split(".dev")[1] + "/socket.io",
