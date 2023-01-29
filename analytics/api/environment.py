@@ -78,7 +78,7 @@ async def get_environment(
             # No env, remove
             crud.remove_user_env(db, username, team_name)
             if check is False:
-                kill_env(env.host)
+                kill_env(env.name)
         # env does not exist, build
         image = get_image_name(username, team_name)
         if not check_image(image):
