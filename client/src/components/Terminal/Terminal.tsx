@@ -81,9 +81,10 @@ function Term({
         token,
         team,
       },
-      path: server.includes("localhost")
-        ? "/socket.io"
-        : server.split(".dev")[1],
+      path: server.split(".dev")[1] + "/socket.io",
+      // server.includes("localhost")
+      //   ? "/socket.io"
+      //   : server.split(".dev")[1] + "/socket.io",
       // transports: ["websocket"],
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
