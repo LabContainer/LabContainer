@@ -30,7 +30,8 @@ function Labs({data}: { data: DataInterfaceItems }) {
             <div>
                 {data.length ? (
                     data.map((d) => (
-                    <div onClick={()=>handleClick(d.data)}>
+                    new Date(String(d.data.TimeLeft)) > new Date() &&
+                    <div key={d.id} onClick={()=>handleClick(d.data)}>
                     <LabCard
                         data={d.data}
                         key={d.id}
@@ -45,12 +46,13 @@ function Labs({data}: { data: DataInterfaceItems }) {
                 Past Labs
             </div>
                 {data.length ? (
-                        data.map((d) => (
+                        data.map((d) => 
+                        new Date(String(d.data.TimeLeft)) < new Date() &&
                         <LabCard
                             data={d.data}
                             key={d.id}
                         />
-                        ))
+                    )
                     ) : (
                         <p> No Labs Available for user</p>
                 )}
@@ -68,9 +70,10 @@ function Labs({data}: { data: DataInterfaceItems }) {
                     <DialogContentText>Course: {dashboardData?.Course}</DialogContentText>
                     <DialogContentText>Instructor: {dashboardData?.Instructor}</DialogContentText>
                     <DialogContentText className='popup-lab-description'>
-                        Hello, this is a test. When I was a young boy I ran into the city to find the love of my life. When I was a young boy my father took me into the city to see a marching band. He said son when you grow up a fire lead me to the broken to see the marching band. He said son when you grow up a fire to lead me into the city to see a marching band. Son when you grow up a fire to lead e to the broken to see a marching band. I hate everything about you why do Iiiiiii love you.
+                        {dashboardData?.Description}
                     </DialogContentText>
-                    {dashboardData?.Team ? (
+                </DialogContent>
+                {dashboardData?.Team ? (
                         <DialogActions>
                             <Button href={`/environment/${dashboardData?.Team}/${user.username}`}>Coding Environment</Button>
                         </DialogActions>
@@ -79,7 +82,6 @@ function Labs({data}: { data: DataInterfaceItems }) {
                             <Button>Join a Team to Access Environment</Button>
                         </DialogActions>
                     )}
-                </DialogContent>
             </Dialog>
         </div>
     );

@@ -9,6 +9,7 @@ interface User {
 
 export interface DashBoardData {
     LabName: string;
+    LabId: string;
     Description: string;
     Course: string;
     Progress: number;
@@ -19,7 +20,7 @@ export interface DashBoardData {
     id: string;
   }
 
-function LabCard({ data, key }: {data: DashBoardData, key: number}) {
+function LabCard({ data }: {data: DashBoardData}) {
     return (
         <div className="lab-card">
             <Card sx={{ height: 70 }} variant="outlined">

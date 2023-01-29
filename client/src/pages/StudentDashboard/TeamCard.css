@@ -13,8 +13,8 @@
     padding-top: 5%;
 }
 
-.team-card-content {
-    margin: auto;
+.team-card-content{
+    width: 80%;
 }
 
 .group-image {

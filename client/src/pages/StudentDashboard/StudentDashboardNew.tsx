@@ -32,19 +32,34 @@ function StudentDashboardNew() {
             let promise_list = [];
             for (let lab of labs) {
                 const team = teams.filter((team: any) => team.lab_id === lab.id);
-                promise_list.push(TeamsApi.teamsGetTeam(team[0]?.name).then((user_team) => {
+                promise_list.push(team[0] ? TeamsApi.teamsGetTeam(team[0].name).then((user_team) => {
                   return data_list.push({
                     Course: lab.course,
                     Description: lab.description,
                     Instructor: lab.instructor,
                     LabName: lab.name,
+                    LabId: lab.id,
                     Progress: 30,
                     Team: user_team.name,
                     TimeLeft: lab.deadline,
                     Team_Users: user_team.users,
                     id: lab.id,
                   });
-                }))
+                }) :
+                  ( data_list.push({
+                      Course: lab.course,
+                      Description: lab.description,
+                      Instructor: lab.instructor,
+                      LabName: lab.name,
+                      LabId: lab.id,
+                      Progress: 30,
+                      Team: "",
+                      TimeLeft: lab.deadline,
+                      Team_Users: [],
+                      id: lab.id,
+                  })
+                  )
+                )
             }
             Promise.all(promise_list).then(() =>
               setData(
