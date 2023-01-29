@@ -23,10 +23,11 @@ export default class SocketService {
 
     attach(server: http.Server) {
         //socket.io instantiation
-        const io: ServerType = new Server(server, { cors: { origin: "*" } , path : "socket.io"});
+        const io: ServerType = new Server(server, { cors: { origin: "*" }, path: "socket.io" });
         console.log("Waiting for Connections....");
         const addActiveList: SocketIOMiddleware = (socket, next) => {
             socket.data.active_users = this.active_users;
+            console.log("HEre")
             next();
         }
         io

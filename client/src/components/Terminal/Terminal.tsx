@@ -84,6 +84,7 @@ function Term({
       path: server.includes("localhost")
         ? "/socket.io"
         : server.split(".dev")[1] + "/socket.io",
+      // transports: ["websocket"],
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
     console.log(token);
