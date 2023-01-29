@@ -87,6 +87,19 @@ export default function FormDialogAddLab({
               <TextField
                 autoFocus
                 margin="dense"
+                id="deadline"
+                label="Deadline"
+                name="deadline"
+                type="name"
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+              />
+              <TextField
+                autoFocus
+                margin="dense"
                 id="environment_init_script"
                 label="Environment Init Script"
                 name="environment_init_script"

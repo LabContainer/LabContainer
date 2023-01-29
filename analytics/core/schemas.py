@@ -1,16 +1,23 @@
 from pydantic import BaseModel
-
+from pydantic.schema import Optional
+from datetime import date
 
 class TeamCreate(BaseModel):
     name: str
     lab_id: str
 
+class Team(BaseModel):
+    name: str
+    lab_id: str
+    current_milestone: Optional[str]
+    users: Optional[list]
 
 class LabCreate(BaseModel):
     name: str
     course: str
     instructor: str
     description: str
+    deadline: date
     environment_init_script: str
 
 
@@ -40,7 +47,7 @@ class EnvCreate(BaseModel):
 class MilestoneCreate(BaseModel):
     milestone_id: str
     lab_id: str
-    deadline: str
+    deadline: date
     description: str
 
 

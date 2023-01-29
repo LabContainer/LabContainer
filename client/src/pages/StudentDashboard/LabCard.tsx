@@ -2,13 +2,20 @@ import "./LabCard.css";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 
+// If time left = 0 put it in past labs
+interface User {
+    name: string
+}
+
 export interface DashBoardData {
     LabName: string;
+    Description: string;
     Course: string;
     Progress: number;
     Instructor: string;
     TimeLeft: string;
     Team?: string;
+    Team_Users?: User[];
     id: string;
   }
 

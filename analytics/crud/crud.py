@@ -7,7 +7,8 @@ import analytics.core.schemas as schemas
 from analytics.logger import logger
 
 def create_lab(db: Session, lab: schemas.LabCreate, lab_id: str):
-    new_lab = Lab(**lab.dict(), id=lab_id)
+    lab_dict = lab.dict()
+    new_lab = Lab(**lab_dict, id=lab_id)
     db.add(new_lab)
     db.commit()
 
@@ -32,6 +33,7 @@ def create_team(db: Session, team: schemas.TeamCreate):
     exists = db.query(Lab).filter(Lab.id == team.lab_id).first() is not None
     if not exists:
         raise Exception("Invalid lab id")
+    print(Team(**team.dict()))
     new_team = Team(**team.dict())
     db.add(new_team)
     db.commit()
@@ -204,9 +206,6 @@ def delete_milestone(db: Session, milestone_id: str):
 
 def update_milestone(db: Session, milestone_id: str, milestone: schemas.MilestoneCreate):
     new_milestone_dict = milestone.dict()
-    new_milestone_dict["deadline"] = datetime.strptime(
-        new_milestone_dict["deadline"], "%Y-%m-%d").date()
-
     old_milestone = get_milestone(db, milestone_id)
     if old_milestone:
         stmt = (

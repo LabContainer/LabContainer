@@ -29,24 +29,31 @@ function StudentDashboardNew() {
         const data_list: DashBoardData[] = [];
         labs_promise.then((labs) => {
           teams_promise.then((teams) => {
+            let promise_list = [];
             for (let lab of labs) {
-              const team = teams.filter((team) => team.lab_id === lab.id);
-              data_list.push({
-                Course: lab.course,
-                Instructor: lab.instructor,
-                LabName: lab.name,
-                Progress: 30,
-                Team: team[0]?.name,
-                TimeLeft: "10",
-                id: lab.id,
-              });
+                const team = teams.filter((team: any) => team.lab_id === lab.id);
+                promise_list.push(TeamsApi.teamsGetTeam(team[0]?.name).then((user_team) => {
+                  return data_list.push({
+                    Course: lab.course,
+                    Description: lab.description,
+                    Instructor: lab.instructor,
+                    LabName: lab.name,
+                    Progress: 30,
+                    Team: user_team.name,
+                    TimeLeft: lab.deadline,
+                    Team_Users: user_team.users,
+                    id: lab.id,
+                  });
+                }))
             }
-            setData(
-              data_list.map((d, i) => ({
-                data: d,
-                id: i,
-              }))
-            );
+            Promise.all(promise_list).then(() =>
+              setData(
+                data_list.map((d, i) => ({
+                  data: d,
+                  id: i,
+                }))
+              )
+            )
           });
         });
         return () => {
@@ -97,7 +104,7 @@ function StudentDashboardNew() {
                             <Labs data={data}></Labs>
                         </TabPanel>
                         <TabPanel value={section} index={1}>
-                            <Teams></Teams>
+                            <Teams data={data}></Teams>
                         </TabPanel>
                         <TabPanel value={section} index={2}>
                             <Notifications></Notifications>

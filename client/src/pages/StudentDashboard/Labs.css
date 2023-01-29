@@ -14,3 +14,12 @@
 .past {
     padding-top: 5%;
 }
+
+.popup-lab-description {
+    color: black;
+    font-size: 20px;
+}
+
+.popup-lab-title {
+    font-size: 35px;
+}

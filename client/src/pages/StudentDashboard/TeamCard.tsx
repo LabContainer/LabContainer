@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, Grid } from "@mui/material";
 import GroupIcon from '@mui/icons-material/Group';
 import { DashBoardData } from "./LabCard";
 
-function TeamCard() {
+function TeamCard({ data, key }: {data: DashBoardData, key: number}) {
     return (
         <div className="team-card">
             <Card sx={{ height: 70 }} variant="outlined">
@@ -14,23 +14,15 @@ function TeamCard() {
                         </Grid>
                         <Grid item xs={2}>
                             <Typography className="team-title">
-                                Team A
+                                {data.Team}
                             </Typography>
                         </Grid>
                         <Grid item xs={2}>
-                            <Typography className="team-title">
-                                Sam
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Typography className="team-title">
-                                Sowrov
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Typography className="team-title">
-                                Ani
-                            </Typography>
+                            {data.Team_Users?.map((d) => (   
+                                <Typography className="team-title">
+                                    {d.name}
+                                </Typography>
+                            ))}
                         </Grid>
                     </Grid>
                 </CardContent>
