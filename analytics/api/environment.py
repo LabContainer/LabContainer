@@ -89,7 +89,7 @@ async def get_environment(
             username, team_name, port, image
         )
         url = f"http://localhost:{port}"
-        url = f"https://api.labcontainer.dev/env/{port}"
+        url = f"https://api.labcontainer.dev/env/{name}"
         new_env = schemas.EnvCreate(
 
             env_id=container_id, url=url, image=image, name=name, user=username, team=team_name

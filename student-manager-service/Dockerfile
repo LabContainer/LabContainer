@@ -22,6 +22,8 @@ COPY . .
 # COPY .env .
 RUN tsc
 
+EXPOSE 6000
+
 RUN ${init_script}
 
 USER ${user}
