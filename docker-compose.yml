@@ -11,7 +11,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/ssl/
     extra_hosts:
-      - "host.docker.internal:127.0.0.1"
+      - "host.docker.internal:host-gateway"
       # - ./nginx/nginx-entrypoint.sh:/docker-entrypoint.d/nginx-entrypoint.sh:ro
     networks:
       - envnet
