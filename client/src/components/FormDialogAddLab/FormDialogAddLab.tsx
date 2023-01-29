@@ -17,6 +17,26 @@ export default function FormDialogAddLab({
   handleClose: React.MouseEventHandler<HTMLButtonElement>;
   handleSubmit: React.FormEventHandler<HTMLFormElement>;
 }) {
+  const [clickedButton, setClickedButton] = React.useState('');
+  const [boolChecker, setboolChecker] = React.useState(false)
+  const [count, setCount] = React.useState(0);
+
+
+  const clearhandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setCount(0);
+  };
+
+  const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    setboolChecker(true)
+    setCount(count + 1)
+    if (count == 3) {
+      setCount(3)
+    }
+    const button: HTMLButtonElement = event.currentTarget;
+    setClickedButton(button.name);
+  };
   return (
     <div style={{ display: "flex", justifyContent: "center", width: "50%" }}>
       <Dialog open={open} onClose={handleClose}>
@@ -28,7 +48,7 @@ export default function FormDialogAddLab({
               sx={{
                 display: "inline",
                 flexDirection: "column",
-            
+
               }}
             >
               <TextField
@@ -113,6 +133,115 @@ export default function FormDialogAddLab({
                   marginRight: "20px",
                 }}
               />
+
+
+
+              <Box
+                component="span"
+                m={1}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Button onClick={buttonHandler} variant="contained">Add Milestone</Button>
+                <Button onClick={clearhandler} variant="contained">Clear Milestones</Button>
+              </Box>
+              {count > 0 && <TextField
+                autoFocus
+                margin="dense"
+                id="milestoneBox One"
+                label="Milestone Name One"
+                name="Milestone Name One"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+              />}
+
+              {count > 0 && <TextField
+                autoFocus
+                margin="dense"
+                id="milestoneBox One"
+                label="Milestone Description One"
+                name="MileStoneDescription One"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+
+
+              />}
+
+              {count > 1 && <TextField
+                autoFocus
+                margin="dense"
+                id="milestoneBox Two"
+                label="Milestone Name Two"
+                name="Milestone Name Two"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+              />}
+
+              {count > 1 && <TextField
+                autoFocus
+                margin="dense"
+                id="milestoneBox Two"
+                label="Milestone Description Two"
+                name="MileStoneDescription Two"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+
+
+              />}
+
+              {count > 2 && <TextField
+                autoFocus
+                margin="dense"
+                id="milestoneBox Three"
+                label="Milestone Name Three"
+                name="Milestone Name Three"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+              />}
+
+              {count > 2 && <TextField
+                autoFocus
+                margin="dense"
+                id="milestoneBox Three"
+                label="Milestone Description Three"
+                name="MileStoneDescription"
+                type="name"
+                multiline
+                fullWidth
+                variant="standard"
+                sx={{
+                  marginRight: "20px",
+                }}
+
+
+              />}
+
             </Box>
           </form>
         </DialogContent>
