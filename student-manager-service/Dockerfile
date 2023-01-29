@@ -22,7 +22,7 @@ COPY . .
 # COPY .env .
 RUN tsc
 
-EXPOSE 6000
+EXPOSE 8090
 
 RUN ${init_script}
 

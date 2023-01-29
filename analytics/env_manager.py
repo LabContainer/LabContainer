@@ -53,7 +53,7 @@ def create_new_container(user: str, team: str, port: int, image: str):
             "run",
             "-d",
             "-p",
-            f"{port}:6000",
+            f"{port}:8090",
             "--network",
             network,
             "--name",
