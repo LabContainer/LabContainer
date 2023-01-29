@@ -30,7 +30,7 @@ def gen_access_token(auth_user: schemas.UserCreate):
         "email": auth_user.email,
         "is_student": auth_user.is_student,
         # Keep logged in for 5 mins before refresh
-        "exp": expTime(seconds=10),
+        "exp": expTime(seconds=300),
     }
     return jwt.encode(payload, key=os.environ["SECRET_TOKEN"])
 
