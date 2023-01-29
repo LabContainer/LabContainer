@@ -88,8 +88,11 @@ async def get_environment(
         container_id, network, name = create_new_container(
             username, team_name, port, image
         )
+        url = f"http://localhost:{port}"
+        url = f"https://api.labcontainer.dev/env/{port}"
         new_env = schemas.EnvCreate(
-            env_id=container_id, url=f"http://localhost:{port}", image=image, name=name, user=username, team=team_name
+
+            env_id=container_id, url=url, image=image, name=name, user=username, team=team_name
         )
         try:
             env = crud.create_user_env(db, new_env, username, team_name)
