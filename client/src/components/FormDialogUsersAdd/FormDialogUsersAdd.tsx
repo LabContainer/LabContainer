@@ -6,7 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Box, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import { Box, Select, MenuItem, SelectChangeEvent, InputLabel } from "@mui/material";
 import { Lab } from "../../clients/AnalyticsClient";
 
 export default function FormDialogUsersAdd({
@@ -30,15 +30,9 @@ export default function FormDialogUsersAdd({
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add Selected Users to Lab</DialogTitle>
         <DialogContent>
-          <DialogContentText>Select Lab</DialogContentText>
-          <form onSubmit={handleSubmit} id="dialog_form">
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                padding: "10px",
-              }}
-            >
+          <DialogContentText>Select a Lab to Add Users To</DialogContentText>
+          <form onSubmit={handleSubmit} id="dialog_form" style={{paddingTop: "5%"}}>
+              <InputLabel>Lab</InputLabel>
               <Select
                 id="labid"
                 name="labid"
@@ -46,6 +40,7 @@ export default function FormDialogUsersAdd({
                 label="Lab"
                 onChange={handleChange}
                 autoWidth
+                sx={{width: "100%"}}
               >
                 {labs.map((lab) => (
                   <MenuItem value={lab.id}>
@@ -53,7 +48,6 @@ export default function FormDialogUsersAdd({
                   </MenuItem>
                 ))}
               </Select>
-            </Box>
           </form>
         </DialogContent>
         <DialogActions>

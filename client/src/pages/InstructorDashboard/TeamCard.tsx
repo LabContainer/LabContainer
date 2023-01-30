@@ -4,7 +4,6 @@ import useAPI from "../../api";
 import { Lab } from "../../clients/AnalyticsClient";
 import { AuthContext, IUser } from "../../components/App/AuthContext";
 import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
-import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
 import FormDialogUsersAdd from "../../components/FormDialogUsersAdd/FormDialogUsersAdd";
 import {
   errorMessage,
@@ -22,54 +21,21 @@ const headCellsUsers: IHeadCell[] = [
   {
     id: "email",
     numeric: false,
-    disablePadding: true,
+    disablePadding: false,
     label: "Email",
   },
   {
     id: "lab",
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: "Labs",
-  },
-  {
-    id: "info",
-    numeric: true,
-    disablePadding: false,
-    label: "More Info",
-  },
-];
-const headCellsLabs: IHeadCell[] = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: true,
-    label: "Name",
-  },
-  {
-    id: "course",
-    numeric: false,
-    disablePadding: true,
-    label: "Course",
-  },
-  {
-    id: "instructor",
-    numeric: true,
-    disablePadding: false,
-    label: "Instructor",
-  },
-  {
-    id: "description",
-    numeric: true,
-    disablePadding: false,
-    label: "Description",
-  },
+  }
 ];
 
 function InstructorDashboard() {
   const { token, refresh_token, setToken } = React.useContext(AuthContext);
   const [users, setUsers] = React.useState<IUser[]>([]);
   const [labs, setLabs] = React.useState<Lab[]>([]);
-  const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
   const [usersAddOpen, setUserAddOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
     []
