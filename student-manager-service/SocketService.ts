@@ -26,9 +26,11 @@ export default class SocketService {
         const container_name = process.env.CONTAINER_NAME as string;
         const environment = process.env.ENVIRONMENT as string
         let path = `/env/${container_name}/socket.io`;
+        path = `/socket.io`;
         if (environment !== "production") {
             path = ""
         }
+        console.log(path)
         const io: ServerType = new Server(server, {
             cors: { origin: "*" },
             path: path,
