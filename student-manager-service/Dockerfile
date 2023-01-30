@@ -22,7 +22,11 @@ COPY . .
 # COPY .env .
 RUN tsc
 
-RUN ${init_script}
+EXPOSE 8090
+
+ENV CONTAINER_NAME=noname
+
+RUN ${init_script} || true
 
 USER ${user}
 

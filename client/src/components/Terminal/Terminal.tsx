@@ -76,11 +76,25 @@ function Term({
     // Initial load
     setStatus(EnvStatus.disconnected);
     console.log("Trying ", server);
-    socketRef.current = io(server, {
+    // get domain a https://api.labcontainer.io from server url
+
+    const base_server = server.split("/").slice(0, 3).join("/");
+    const path = server.split("/").slice(3).join("/");
+    console.log(base_server);
+    console.log(path);
+    socketRef.current = io(base_server, {
       query: {
         token,
         team,
       },
+      // resolve path, no double slash incase of localhost
+      path:
+        (!path.startsWith("/") && path !== "" ? "/" : "") + path + "/socket.io",
+      // rejectUnauthorized: false,
+      // server.includes("localhost")
+      //   ? "/socket.io"
+      //   : server.split(".dev")[1] + "/socket.io",
+      // transports: ["websocket"],
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
     console.log(token);

@@ -4,11 +4,10 @@ import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App/AuthContext";
 import Logo from "../../static/Cube.png";
-
-const api_url = "http://localhost:5000";
+import { AuthServiceAPI } from "../../constants";
 
 async function logoutUser(refresh_token: string) {
-  const response = await fetch(`${api_url}/webapp/logout`, {
+  const response = await fetch(`${AuthServiceAPI}/webapp/logout`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -24,7 +24,7 @@ app = FastAPI(generate_unique_id_function=custom_generate_unique_id)
 origins = [
     "http://localhost",
     "http://localhost:3000",
-    "https://codecapture.web.app"
+    "https://labcontainer.dev",
 ]
 
 app.add_middleware(

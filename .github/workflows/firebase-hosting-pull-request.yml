@@ -12,9 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cd client && npm ci -f && npm run build
+      - run: cd client && npm ci --legacy-peer-deps
+      - run: cd client && npm run generate-clients-prod
+      - run: cd client && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CODECAPTURE }}'
-          projectId: codecapture
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_LAB_CONTAINER_375418 }}'
+          projectId: lab-container-375418

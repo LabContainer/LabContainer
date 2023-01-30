@@ -9,6 +9,7 @@ from analytics.core import schemas
 import traceback
 from datetime import datetime, timedelta
 from analytics.logger import logger
+import os
 
 import asyncio
 import fcntl
@@ -78,7 +79,7 @@ async def get_environment(
             # No env, remove
             crud.remove_user_env(db, username, team_name)
             if check is False:
-                kill_env(env.host)
+                kill_env(env.name)
         # env does not exist, build
         image = get_image_name(username, team_name)
         if not check_image(image):
@@ -88,8 +89,12 @@ async def get_environment(
         container_id, network, name = create_new_container(
             username, team_name, port, image
         )
+        url = f"http://localhost:{port}"
+        if os.getenv('ENVIRONMENT') == 'production':
+            url = f"https://api.labcontainer.dev/env/{name}"
         new_env = schemas.EnvCreate(
-            env_id=container_id, url=f"http://localhost:{port}", image=image, name=name, user=username, team=team_name
+
+            env_id=container_id, url=url, image=image, name=name, user=username, team=team_name
         )
         try:
             env = crud.create_user_env(db, new_env, username, team_name)
