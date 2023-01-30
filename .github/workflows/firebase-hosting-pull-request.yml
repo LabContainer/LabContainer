@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cd client && npm ci -f && npm run build
+      - run: cd client && npm ci --legacy-peer-deps
+      - run: cd client && npm run generate-clients
+      - run: cd client && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

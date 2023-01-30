@@ -25,7 +25,7 @@ config({
 let serverPort = 8090;
 let server = http.createServer(app);
 app.use(cors({
-    origin: "*" //["http://localhost:3000", "https://codecapture.web.app"]
+    origin: ["http://localhost:3000", "https://labcontainer.dev"]
 }));
 app.use('/filemanager/', middleware(fileManagerConfig));
 
