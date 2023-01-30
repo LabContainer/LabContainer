@@ -291,7 +291,7 @@ export default function DataTable({
         <EnhancedTableToolbar numSelected={selected.length} title={title} />
         <TableContainer>
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{ width: 1000 }}
             aria-labelledby="tableTitle"
             size={dense ? "small" : "medium"}
           >
@@ -353,7 +353,7 @@ export default function DataTable({
                             {row[headCell.id]}
                           </TableCell>
                         ) : (
-                          <TableCell align="right" key={index}>
+                          <TableCell align="left" key={index}>
                             {row[headCell.id]}
                           </TableCell>
                         )

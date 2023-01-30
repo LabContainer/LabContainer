@@ -12,32 +12,6 @@ import {
   MessageContainer,
 } from "../../components/App/message";
 
-const headCellsUsers: IHeadCell[] = [
-  {
-    id: "username",
-    numeric: false,
-    disablePadding: true,
-    label: "Username",
-  },
-  {
-    id: "email",
-    numeric: false,
-    disablePadding: true,
-    label: "Email",
-  },
-  {
-    id: "lab",
-    numeric: true,
-    disablePadding: false,
-    label: "Labs",
-  },
-  {
-    id: "info",
-    numeric: true,
-    disablePadding: false,
-    label: "More Info",
-  },
-];
 const headCellsLabs: IHeadCell[] = [
   {
     id: "name",
@@ -48,18 +22,18 @@ const headCellsLabs: IHeadCell[] = [
   {
     id: "course",
     numeric: false,
-    disablePadding: true,
+    disablePadding: false,
     label: "Course",
   },
   {
     id: "instructor",
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: "Instructor",
   },
   {
     id: "description",
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: "Description",
   },
@@ -104,12 +78,8 @@ function InstructorDashboard() {
             justifyContent: "center",
           }}
         >
-
           <Box sx={{ margin: "20px" }}>
-
-            
             <DataTable
-            
               title="Labs"
               rows={
                 labs
@@ -122,8 +92,6 @@ function InstructorDashboard() {
               headCells={headCellsLabs}
               selectionEnable={false}
             />
-
-
             <Button
               variant="contained"
               onClick={() => {
