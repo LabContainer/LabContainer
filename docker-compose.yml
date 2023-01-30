@@ -87,6 +87,7 @@ services:
     networks:
       - authdb
       - analyticsdb
+      - backend
     logging:
       driver: none
     restart: unless-stopped
