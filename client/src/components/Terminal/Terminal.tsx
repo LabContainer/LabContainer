@@ -87,7 +87,9 @@ function Term({
         token,
         team,
       },
-      path: "/" + path + "/socket.io",
+      // resolve path, no double slash incase of localhost
+      path:
+        (!path.startsWith("/") && path !== "" ? "/" : "") + path + "/socket.io",
       // rejectUnauthorized: false,
       // server.includes("localhost")
       //   ? "/socket.io"

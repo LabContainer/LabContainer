@@ -9,6 +9,7 @@ from analytics.core import schemas
 import traceback
 from datetime import datetime, timedelta
 from analytics.logger import logger
+import os
 
 import asyncio
 import fcntl
@@ -88,10 +89,9 @@ async def get_environment(
         container_id, network, name = create_new_container(
             username, team_name, port, image
         )
-        # url = f"http://localhost:{port}"
-        url = f"https://api.labcontainer.dev/env/{name}"
-        # url = f"https://api.labcontainer.dev/"
-        # url = f"http://localhost:80/env/{name}"
+        url = f"http://localhost:{port}"
+        if os.getenv('ENVIRONMENT') == 'production':
+            url = f"https://api.labcontainer.dev/env/{name}"
         new_env = schemas.EnvCreate(
 
             env_id=container_id, url=url, image=image, name=name, user=username, team=team_name

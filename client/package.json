@@ -50,8 +50,8 @@
     "generate-client-prod-analytics": "openapi --input https://api.labcontainer.dev/analytics/openapi.json --output ./src/clients/AnalyticsClient --client axios --name AnalyticsService",
     "generate-client-prod-auth": "openapi --input https://api.labcontainer.dev/auth/openapi.json --output ./src/clients/AuthClient --client axios --name AuthService ",
     "generate-clients-prod": "npm run generate-client-prod-analytics && npm run generate-client-prod-auth",
-    "generate-client-analytics": "openapi --input http://localhost:8000/analytics/openapi.json --output ./src/clients/AnalyticsClient --client axios --name AnalyticsService",
-    "generate-client-auth": "openapi --input http://localhost:5000/auth/openapi.json --output ./src/clients/AuthClient --client axios --name AuthService ",
+    "generate-client-analytics": "openapi --input http://localhost:8000/openapi.json --output ./src/clients/AnalyticsClient --client axios --name AnalyticsService",
+    "generate-client-auth": "openapi --input http://localhost:5000/openapi.json --output ./src/clients/AuthClient --client axios --name AuthService ",
     "generate-clients": "npm run generate-client-analytics && npm run generate-client-auth"
   },
   "eslintConfig": {

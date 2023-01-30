@@ -24,15 +24,18 @@ export default class SocketService {
     attach(server: http.Server) {
         //socket.io instantiation
         const container_name = process.env.CONTAINER_NAME as string;
-        console.log("name: " + container_name);
+        const environment = process.env.ENVIRONMENT as string
+        let path = `/env/${container_name}/socket.io`;
+        if (environment !== "production") {
+            path = ""
+        }
         const io: ServerType = new Server(server, {
             cors: { origin: "*" },
-            path: `/env/${container_name}/socket.io`,
+            path: path,
         });
         console.log("Waiting for Connections....");
         const addActiveList: SocketIOMiddleware = (socket, next) => {
             socket.data.active_users = this.active_users;
-            console.log("HEre")
             next();
         }
         io

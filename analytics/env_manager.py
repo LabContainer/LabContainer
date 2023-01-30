@@ -60,6 +60,9 @@ def create_new_container(user: str, team: str, port: int, image: str):
             name,
             "-e",
             f"CONTAINER_NAME={name}",
+            # pass env
+            "-e",
+            f"ENVIRONMENT={os.getenv('ENVIRONMENT')}",
             # debuging volume
             # "-v",
             # f"/home/parth/Documents/Github/CodeCapture/student-manager-service/dist:/app/dist",
