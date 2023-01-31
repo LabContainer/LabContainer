@@ -27,14 +27,12 @@ def create_milestone(
 @router.get("", response_model=List[schemas.MilestoneCreate], tags=["milestones"])
 def get_milestones(
     response: Response,
+    lab_id: str,
     payload: Dict[str, str] = Depends(has_access),
     db: SessionLocal = Depends(get_db)
 ):
-    if not payload["is_student"]:
-        milestones = crud.get_milestones(db)
-        return [schemas.MilestoneCreate(**milestone.__dict__) for milestone in milestones]
-    else:
-        response.status_code = status.HTTP_403_FORBIDDEN
+    milestones = crud.get_milestones(db, lab_id)
+    return [schemas.MilestoneCreate(**milestone.__dict__) for milestone in milestones]
 
 
 @router.get("/{milestone_id}", response_model=schemas.MilestoneCreate, tags=["milestones"])
@@ -44,11 +42,8 @@ def get_milestone(
     payload: Dict[str, str] = Depends(has_access),
     db: SessionLocal = Depends(get_db)
 ):
-    if not payload["is_student"]:
-        m = crud.get_milestone(db, milestone_id)
-        return schemas.MilestoneCreate(**m.__dict__)
-    else:
-        response.status_code = status.HTTP_403_FORBIDDEN
+    m = crud.get_milestone(db, milestone_id)
+    return schemas.MilestoneCreate(**m.__dict__)
 
 
 @router.delete("/{milestone_id}", tags=["milestones"])

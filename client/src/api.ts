@@ -77,12 +77,13 @@ export default function useAPI() {
     const TeamsApi = analytics.teams;
     const LabsApi = analytics.labs;
     const EnvironmentApi = analytics.environment;
-
+    const MilestonesApi = analytics.milestones
     return {
         UserApi,
         WebappApi,
         TeamsApi,
         LabsApi,
-        EnvironmentApi
+        EnvironmentApi,
+        MilestonesApi
     }
 }

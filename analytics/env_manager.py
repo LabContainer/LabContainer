@@ -40,7 +40,7 @@ def build_env(user: str, team: str, init_script: str):
 
 def create_new_container(user: str, team: str, port: int, image: str):
     # To debug student-manager-service, run tsc -w in student-manager-service
-    debug_container = Fasle
+    debug_container = False
     # Start container
     name = f"env_{user}_{team}"
     network = "envnet"
