@@ -113,6 +113,7 @@ function InstructorDashboard() {
                 const course = data.get("course") as string;
                 const instructor = data.get("instructor") as string;
                 const description = data.get("description") as string;
+                const deadline = data.get("deadline") as string;
                 const environment_init_script = data.get(
                   "environment_init_script"
                 ) as string;
@@ -122,6 +123,7 @@ function InstructorDashboard() {
                     course,
                     instructor,
                     description,
+                    deadline,
                     environment_init_script,
                   });
                   successMessage("Lab created!");

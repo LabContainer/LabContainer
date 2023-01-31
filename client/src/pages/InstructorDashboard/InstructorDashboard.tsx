@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import Labs from "./Labs";
 import Teams from "./Teams";
 import Notifications from "./Notifications";
+import { MessageContainer } from "../../components/App/message";
 
 function StudentDashboardNew() {
     const { user } = React.useContext(AuthContext);
