@@ -6,6 +6,7 @@ from analytics.core.db import Envionment, Lab, Team, User, Milestone
 import analytics.core.schemas as schemas
 from analytics.logger import logger
 
+
 def create_lab(db: Session, lab: schemas.LabCreate, lab_id: str):
     lab_dict = lab.dict()
     new_lab = Lab(**lab_dict, id=lab_id)
@@ -185,8 +186,8 @@ def create_milestone(db: Session, milestone: schemas.MilestoneCreate):
     return new_milestone
 
 
-def get_milestones(db: Session) -> List[Milestone]:
-    return db.query(Milestone).all()
+def get_milestones(db: Session, lab_id: str) -> List[Milestone]:
+    return db.query(Milestone).join(Milestone.lab).filter(Lab.id == lab_id).all()
 
 
 def get_milestone(db: Session, milestone_id: str) -> Union[Milestone, None]:

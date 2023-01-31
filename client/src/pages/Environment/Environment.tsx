@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
 import Term from "../../components/Terminal/Terminal";
 import useAPI from "../../api";
+import { Lab, LabCreate } from "../../clients/AnalyticsClient";
+import { CancelablePromise } from "../../clients/AuthClient";
 
 // server status enum
 enum ServerStatus {
@@ -24,7 +26,7 @@ export default function Environment() {
     name: "",
     id: "",
   });
-  const { EnvironmentApi } = useAPI();
+  const { EnvironmentApi, TeamsApi, LabsApi, MilestonesApi } = useAPI();
   const [serverStatus, setServerStatus] = React.useState(
     ServerStatus.Unavailable
   );
@@ -88,6 +90,22 @@ export default function Environment() {
     }, 60000);
     return () => {
       clearInterval(reportingTimer);
+    };
+  }, [team, user]);
+
+  // fetch Lab, Milestone information
+  const [lab, setLab] = React.useState<Lab>();
+  React.useEffect(() => {
+    if (!team || !user) return;
+    const teamsPromise = TeamsApi.teamsGetTeam(team);
+    teamsPromise.then((t) => {
+      return LabsApi.labsGetLab(t.lab_id).then((l) => {
+        setLab({ ...l, ...{ id: t.lab_id } });
+        // MilestonesApi.milestonesGetMilestones;
+      });
+    });
+    return () => {
+      teamsPromise.cancel();
     };
   }, [team, user]);
 
@@ -334,9 +352,25 @@ export default function Environment() {
               height: labSectionHeight,
               minHeight: labMinHeight + "px",
               backgroundColor: "white",
+              overflowX: "hidden",
+              overflowY: "auto",
             }}
           >
             <h3>Lab Information</h3>
+            {lab ? (
+              <>
+                <h4>{lab.name}</h4>
+                <h6>
+                  Course Name: {lab.course} | Instructor:{lab.instructor}
+                </h6>
+                <p style={{ width: "100%" }}>
+                  <b>Lab Description:</b> {lab.description}
+                </p>
+                <p>
+                  <b>Due:</b> {lab.deadline}
+                </p>
+              </>
+            ) : null}
           </div>
           <div
             className="y-resizer begin"

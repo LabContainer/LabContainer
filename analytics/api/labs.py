@@ -23,7 +23,7 @@ def create_lab(
 ):
     if not payload["is_student"]:
         # create unique lab id for each lab
-        lab_id = hash(lab.course + lab.instructor + lab.name) 
+        lab_id = hash(lab.course + lab.instructor + lab.name)
 
         try:
             crud.create_lab(db, lab, lab_id)
@@ -51,9 +51,7 @@ def get_lab(
             # User in lab
             lab = crud.get_lab(db, lab_id)
             return schemas.LabCreate(
-                course=lab.course,
-                id=lab.id,
-                instructor=lab.instructor,
+                **lab.__dict__
             )
 
     response.status_code = status.HTTP_403_FORBIDDEN
