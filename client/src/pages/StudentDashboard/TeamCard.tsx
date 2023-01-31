@@ -6,7 +6,7 @@ import { DashBoardData } from "./LabCard";
 import { AuthContext } from "../../components/App/AuthContext";
 import useAPI from "../../api";
 
-function TeamCard({ data }: {data: DashBoardData }) {
+function TeamCard({ data , refreshData }: {data: DashBoardData , refreshData: () => void}) {
     const {TeamsApi } = useAPI();
     const { user } = React.useContext(AuthContext);
     return (
@@ -35,8 +35,8 @@ function TeamCard({ data }: {data: DashBoardData }) {
                         size="small"
                         className="team-card-button"
                         onClick={() => {
-                            data.Team ? TeamsApi.teamsLeaveTeam(data.Team, user?.username || "").then(
-                            ) : console.log("ERROR")
+                            data.Team ? TeamsApi.teamsLeaveTeam(data.Team, user?.username || "").then(refreshData) 
+                            : console.log("ERROR")
                         }}
                     >
                         Leave Team

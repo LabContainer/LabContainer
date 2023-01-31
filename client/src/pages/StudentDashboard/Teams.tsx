@@ -15,7 +15,7 @@ interface DataInterface {
 
 interface DataInterfaceItems extends Array<DataInterface>{};
 
-function Teams({data}: { data: DataInterfaceItems }) {
+function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () => void }) {
     const { user } = React.useContext(AuthContext);
     const [createTeamOpen, setCreateTeamOpen] = React.useState(false);
     const [joinTeamOpen, setJoinTeamOpen] = React.useState(false);
@@ -55,7 +55,7 @@ function Teams({data}: { data: DataInterfaceItems }) {
                         TeamsApi.teamsCreateNewTeam({
                         lab_id: id_lab,
                         name: team as string,
-                        }).then();
+                        }).then(refreshData);
                     } else {
                         console.log("Incorrect Lab Name.")
                     }
@@ -70,7 +70,7 @@ function Teams({data}: { data: DataInterfaceItems }) {
                     const team = String(form_data.get("teamSelect"));
 
                     if (team) {
-                        TeamsApi.teamsJoinTeam(team, user?.username || "").then();
+                        TeamsApi.teamsJoinTeam(team, user?.username || "").then(refreshData);
                     } else {
                         console.log("Incorrect Team Name.")
                     }
@@ -84,6 +84,7 @@ function Teams({data}: { data: DataInterfaceItems }) {
                             <TeamCard
                                 data={d.data}
                                 key={d.id}
+                                refreshData={refreshData}
                             />
                         : <div key={d.id}></div>
                         ))

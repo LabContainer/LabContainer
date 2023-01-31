@@ -22,6 +22,8 @@ function StudentDashboardNew() {
         id: number;
       }[]
     >([]);
+    // create a state to trigger re fetching of data
+    const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
       if (user) {
         const teams_promise = TeamsApi.teamsGetUserTeams(user.username);
@@ -76,7 +78,7 @@ function StudentDashboardNew() {
           labs_promise.cancel();
         };
       }
-    }, [user]);
+    }, [user ? user.username : "", refresh]);
 
     interface TabPanelProps {
         children?: React.ReactNode;
@@ -119,7 +121,7 @@ function StudentDashboardNew() {
                             <Labs data={data}></Labs>
                         </TabPanel>
                         <TabPanel value={section} index={1}>
-                            <Teams data={data}></Teams>
+                            <Teams data={data} refreshData={()=>setRefresh(r => !r)}></Teams>
                         </TabPanel>
                         <TabPanel value={section} index={2}>
                             <Notifications></Notifications>

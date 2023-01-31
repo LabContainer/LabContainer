@@ -102,9 +102,10 @@ function InstructorDashboard() {
         </Typography>
         <Container
           sx={{
-            flexDirection: "row",
+            flexDirection: "column",
             display: "flex",
             justifyContent: "center",
+            overflow: "visible"
           }}
         >
           <Box sx={{ margin: "20px" }}>
