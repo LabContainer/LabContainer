@@ -45,13 +45,18 @@ export const checkMultipleSesions: SocketIOMiddleware = (socket, next) => {
 }
 
 // Middleware to check if the user has a valid token
-export const authenticateUser: SocketIOMiddleware = (socket, next) => {
+export const authenticateUser = (valid_user: string): SocketIOMiddleware => (socket, next) => {
     // Authenticate User
     if (socket.handshake.query && socket.handshake.query.token) {
         try {
-            const decoded = jwt.verify(socket.handshake.query.token as string, process.env.SECRET_TOKEN as string)
-            socket.data.decoded = decoded as jwt.JwtPayload;
+            const decoded = jwt.verify(socket.handshake.query.token as string, process.env.SECRET_TOKEN as string) as jwt.JwtPayload;
+            socket.data.decoded = decoded;
             console.log('Connected to user: ', decoded)
+            // check user
+            if (decoded.user !== valid_user) {
+                next(new Error('Invalid User'))
+                return;
+            }
             next();
             return;
         } catch (err) {
@@ -79,4 +84,30 @@ export const checkTokenExpiry: SocketIOMiddleware = (socket, next) => {
     }, expiresIn);
 
     next()
+}
+
+// Create Middleware for filemanager authentiation (http express middleware)
+export const fileManagerAuth = (valid_user: string) => (req: any, res: any, next: any) => {
+    if (req.headers.authorization) {
+        try {
+            const token = req.headers.authorization.split(' ')[1]
+            console.log("File Manager Auth", token)
+            const decoded = jwt.verify(token, process.env.SECRET_TOKEN as string) as jwt.JwtPayload
+            console.log(decoded)
+            if (decoded) {
+                const user = decoded["user"] as string
+                if (user === valid_user) {
+                    next()
+                    return;
+                }
+            }
+        } catch (err) {
+            console.log("File Manager Auth Error", err)
+            res.status(401).send('Unauthorized')
+            return;
+        }
+    }
+    console.log("File Manager Auth Error", req.headers)
+    res.status(401).send('Unauthorized')
+    return;
 }

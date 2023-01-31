@@ -15,8 +15,10 @@ import TerminalService from "./TerminalService.js";
 export default class SocketService {
     active_users: activeList;
     terminal: TerminalService | null;
+    valid_user: string;
 
-    constructor() {
+    constructor(valid_user: string) {
+        this.valid_user = valid_user;
         this.active_users = [];
         this.terminal = null;
     }
@@ -35,14 +37,14 @@ export default class SocketService {
             cors: { origin: "*" },
             path: path,
         });
-        console.log("Waiting for Connections....");
+        console.log("Waiting for Socket Connections....");
         const addActiveList: SocketIOMiddleware = (socket, next) => {
             socket.data.active_users = this.active_users;
             next();
         }
         io
             .use(addActiveList)
-            .use(authenticateUser)
+            .use(authenticateUser(this.valid_user))
             .use(checkTokenExpiry)
             .use(checkMultipleSesions)
             .on("connection", (socket: SocketType) => {

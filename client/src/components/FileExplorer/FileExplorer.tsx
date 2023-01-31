@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FileManager, FileNavigator } from "@opuscapita/react-filemanager";
-import connectorNodeV1 from "@opuscapita/react-filemanager-connector-node-v1";
+// import connectorNodeV1 from "@opuscapita/react-filemanager-connector-node-v1";
+import connectorNodeV1 from "../../packages/connector-node-v1/src/index";
 import CircularIndeterminate from "../common/CircularInderminate";
 
 import "./FileExplorer.css";
+import { AuthContext } from "../App/AuthContext";
 
 interface IFileExplorerProps {
   server: string;
@@ -11,12 +13,16 @@ interface IFileExplorerProps {
 }
 
 function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
+  const { token } = useContext(AuthContext);
   const apiOptions = React.useMemo(
     () => ({
       ...connectorNodeV1.apiOptions,
       apiRoot: `${server}/filemanager`,
+      header: {
+        Authorization: `Bearer ${token}`,
+      },
     }),
-    [server]
+    [server, token]
   );
   return (
     <div className="file-explorer-container">

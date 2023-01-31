@@ -30,5 +30,5 @@ RUN ${init_script} || true
 
 USER ${user}
 
-# CMD [ "nodemon" , "dist/server.js"]  
-CMD [ "node" , "dist/server.js"]  
+CMD [ "nodemon" , "dist/server.js"]  
+# CMD [ "node" , "dist/server.js"]  

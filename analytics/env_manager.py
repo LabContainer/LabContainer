@@ -39,6 +39,8 @@ def build_env(user: str, team: str, init_script: str):
 
 
 def create_new_container(user: str, team: str, port: int, image: str):
+    # To debug student-manager-service, run tsc -w in student-manager-service
+    debug_container = Fasle
     # Start container
     name = f"env_{user}_{team}"
     network = "envnet"
@@ -47,29 +49,34 @@ def create_new_container(user: str, team: str, port: int, image: str):
     if check_env(name):
         kill_env(name)
     wd = os.getcwd()
-    container = subprocess.run(
-        [
-            "docker",
-            "run",
-            "-d",
-            "-p",
-            f"{port}:8090",
-            "--network",
-            network,
-            "--name",
-            name,
-            "-e",
-            f"CONTAINER_NAME={name}",
-            # pass env
-            "-e",
-            f"ENVIRONMENT={os.getenv('ENVIRONMENT')}",
+    start_command = [
+        "docker",
+        "run",
+        "-d",
+        "-p",
+        f"{port}:8090",
+        "--network",
+        network,
+        "--name",
+        name,
+        "-e",
+        f"CONTAINER_NAME={name}",
+        # pass env
+        "-e",
+        f"ENVIRONMENT={os.getenv('ENVIRONMENT')}",
+        image,
+    ]
+    # Add debuging volume if env is dev
+    if os.getenv("ENVIRONMENT") == "development" and debug_container:
+        # student_manager_service_path = os.path.join(wd, "student-manager-service")
+        student_manager_service_path = "/home/parth/work/LabContainer/student-manager-service"
+        debug_args = [
             # debuging volume
-            # "-v",
-            # f"/home/parth/Documents/Github/CodeCapture/student-manager-service/dist:/app/dist",
-            image,
-        ],
-        capture_output=True,
-    )
+            "-v",
+            f"{student_manager_service_path}/dist:/app/dist",
+        ]
+        start_command = start_command[:2] + debug_args + start_command[2:]
+    container = subprocess.run(start_command,capture_output=True)
     if container.stderr:
         raise RuntimeError(container.stderr)
     container_id = container.stdout.decode("utf8").strip()
