@@ -228,9 +228,13 @@ export default function DataTable({
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [boolChecker, setboolChecker] = React.useState(false)
+  var clickedValue = "";
+  
 
   const trueHandler = (event: React.MouseEvent<HTMLTableCellElement>) => {
     event.preventDefault();
+    clickedValue = (event.currentTarget.textContent as string)
+    console.log(clickedValue)
     setboolChecker(true);
   };
 
@@ -367,7 +371,7 @@ export default function DataTable({
                             {row[headCell.id]}
                           </TableCell> /*what goes in title */
                         ) : (
-                          <TableCell onClick={trueHandler} align="left" key={index}>
+                          <TableCell onClick = {trueHandler} align="left" key={index}>
                             {row[headCell.id]} 
                           </TableCell> /*what goes in rows */
 
@@ -378,7 +382,7 @@ export default function DataTable({
                   );
                 })}
 {
-
+boolChecker &&
 (<FormDialogAddLab
 handleClose={() => {
   setboolChecker(false);
@@ -387,11 +391,11 @@ open={boolChecker}
 handleSubmit={(event) => {
   event.preventDefault();
   const data = new FormData(event.currentTarget);
-  const name = data.get("name") as string;
-  const course = data.get("course") as string;
-  const instructor = data.get("instructor") as string;
-  const description = data.get("description") as string;
-  const deadline = data.get("deadline") as string;
+  const name = clickedValue as string;
+  const course = clickedValue as string;
+  const instructor = clickedValue as string;
+  const description = clickedValue as string;
+  const deadline = clickedValue as string;
   const environment_init_script = data.get(
     "environment_init_script"
   ) as string;
