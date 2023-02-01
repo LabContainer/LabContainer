@@ -5,57 +5,70 @@ import { DashBoardData } from "./DashboardCard";
 import { AuthContext } from "../../components/App/AuthContext";
 import useAPI from "../../api";
 import React, { useEffect, useState } from "react";
-import Labs from "./Labs";
-import Teams from "./Teams";
+import Labs from "./Assignments";
+import Teams, { ILabUsers } from "./Students";
 import Notifications from "./Notifications";
 import { MessageContainer } from "../../components/App/message";
+import { Assignment } from "@mui/icons-material";
+import Assignments from "./Assignments";
+import Students from "./Students";
+import { Lab } from "../../clients/AnalyticsClient";
+import { UserInfo } from "../../clients/AuthClient";
 
-function StudentDashboardNew() {
+
+
+function InstructorDashboard() {
     const { user } = React.useContext(AuthContext);
     const [section, setSection ] = useState<number>(0);
     const handleChange = (event: React.SyntheticEvent, newSection: number) => {
         setSection(newSection);
     };
-    const { LabsApi, TeamsApi } = useAPI();
-    const [data, setData] = useState<
-      {
-        data: DashBoardData;
-        id: number;
-      }[]
-    >([]);
-    useEffect(() => {
-      if (user) {
-        const teams_promise = TeamsApi.teamsGetUserTeams(user.username);
-        const labs_promise = LabsApi.labsGetLabs(user.username);
-        const data_list: DashBoardData[] = [];
-        labs_promise.then((labs) => {
-          teams_promise.then((teams) => {
-            for (let lab of labs) {
-              const team = teams.filter((team) => team.lab_id === lab.id);
-              data_list.push({
-                Course: lab.course,
-                Instructor: lab.instructor,
-                LabName: lab.name,
-                Progress: 30,
-                Team: team[0]?.name,
-                TimeLeft: "10",
-                id: lab.id,
-              });
-            }
-            setData(
-              data_list.map((d, i) => ({
-                data: d,
-                id: i,
-              }))
-            );
-          });
-        });
-        return () => {
-          teams_promise.cancel();
-          labs_promise.cancel();
-        };
+
+    const [labUsers, setLabUsers] = React.useState<ILabUsers>({});
+    const [labs, setLabs] = React.useState<Lab[]>([]);
+    const { UserApi, LabsApi } = useAPI();
+
+    const [userInfoMap, setUserInfoMap] = React.useState<{ [key : string] : UserInfo}>({})
+
+    React.useEffect(() => {
+      const lab_promise = LabsApi.labsGetLabs();
+
+      lab_promise.then((labs) => {
+        setLabs(labs);
+        return labs
       }
-    }, [user]);
+      ).then( labs => 
+        Promise.all(
+          labs
+            .map( lab => lab.id)
+            .map( lab_id => 
+              LabsApi.labsGetLabUsers(lab_id).then( 
+                users => users.map( user => {
+                  if(userInfoMap[user.name])
+                    return Promise.resolve(userInfoMap[user.name]);
+                  else{
+                    // fetch user info from server
+                    return UserApi.usersGetUserInfo(user.name).then((user_info) => {
+                      setUserInfoMap({...userInfoMap, [user_info.username] : user_info});
+                      return user_info;
+                    })
+                  }
+                })
+              ).then(us => Promise.all(us)).then(user_infos => ({ [lab_id] : user_infos}))
+            )
+          )
+        ).then((lab_users) => {
+        const lab_users_dict = lab_users.reduce((acc, lab_user) => ({...acc, ...lab_user}), {});
+        setLabUsers(lab_users_dict);
+      }).catch((err) => {
+        console.log(err);
+      });
+
+  
+      return () => {
+        lab_promise.cancel();
+      };
+    }, []);
 
     interface TabPanelProps {
         children?: React.ReactNode;
@@ -96,10 +109,16 @@ function StudentDashboardNew() {
                     </Grid>
                     <Grid item xs={9}>
                         <TabPanel value={section} index={0}>
-                            <Labs></Labs>
+                            <Assignment/>
+                            <Assignments
+                                labs={labs}
+                            />
                         </TabPanel>
                         <TabPanel value={section} index={1}>
-                            <Teams></Teams>
+                            <Students
+                                labs={labs}
+                                labUsers={labUsers}
+                            />
                         </TabPanel>
                         <TabPanel value={section} index={2}>
                             <Notifications></Notifications>
@@ -111,4 +130,4 @@ function StudentDashboardNew() {
     );
 }
 
-export default StudentDashboardNew;
+export default InstructorDashboard;

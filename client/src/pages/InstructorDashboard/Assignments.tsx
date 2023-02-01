@@ -30,55 +30,32 @@ const headCellsLabs: IHeadCell[] = [
     numeric: false,
     disablePadding: false,
     label: "Instructor",
-  },
-  {
-    id: "description",
-    numeric: false,
-    disablePadding: false,
-    label: "Description",
-  },
+  }
 ];
 
-function InstructorDashboard() {
-  const { token, refresh_token, setToken } = React.useContext(AuthContext);
-  const [users, setUsers] = React.useState<IUser[]>([]);
-  const [labs, setLabs] = React.useState<Lab[]>([]);
+function Assignments({ labs }: { labs: Lab[]}) {
   const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
-  const [usersAddOpen, setUserAddOpen] = React.useState(false);
-  const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
-    []
-  );
-  const { UserApi, LabsApi } = useAPI();
-  React.useEffect(() => {
-    const user_promise = UserApi.usersGetUsers();
-    const lab_promise = LabsApi.labsGetLabs();
-
-    user_promise.then(setUsers);
-    lab_promise.then(setLabs);
-
-    return () => {
-      user_promise.cancel();
-      lab_promise.cancel();
-    };
-  }, []);
+  const { LabsApi } = useAPI();
   return (
     <Box
       sx={{
         display: "flex",
         justifyContent: "center",
         alignContent: "center",
+        width: "100%",
       }}
     >
-      <MessageContainer />
-      <Stack>
+      
+      <Stack sx={{ width : "100%"}}>
         <Container
           sx={{
             flexDirection: "row",
             display: "flex",
             justifyContent: "center",
+            width: "100%",
           }}
         >
-          <Box sx={{ margin: "20px" }}>
+          <Box sx={{ margin: "20px" , width: "100%"}}>
             <DataTable
               title="Labs"
               rows={
@@ -139,4 +116,4 @@ function InstructorDashboard() {
   );
 }
 
-export default InstructorDashboard;
+export default Assignments;

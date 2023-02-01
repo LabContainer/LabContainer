@@ -110,7 +110,7 @@ export default function FormDialogAddLab({
                 autoFocus
                 margin="dense"
                 id="deadline"
-                label="Deadline"
+                label="Deadline yyyy-mm-dd"
                 name="deadline"
                 type="name"
                 fullWidth
@@ -161,13 +161,14 @@ export default function FormDialogAddLab({
                 }}
               />}
 
-              {count > 0 && <TextField
+              {count > 0 ? [...Array(count)].map(n => <TextField
                 autoFocus
                 margin="dense"
                 id="milestoneBox One"
                 label="Milestone Description One"
                 name="MileStoneDescription One"
                 type="name"
+                key={"MilestoneKey" + n}
                 multiline
                 fullWidth
                 variant="standard"
@@ -176,71 +177,8 @@ export default function FormDialogAddLab({
                 }}
 
 
-              />}
+              />) : null}
 
-              {count > 1 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Two"
-                label="Milestone Name Two"
-                name="Milestone Name Two"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />}
-
-              {count > 1 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Two"
-                label="Milestone Description Two"
-                name="MileStoneDescription Two"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-
-
-              />}
-
-              {count > 2 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Three"
-                label="Milestone Name Three"
-                name="Milestone Name Three"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />}
-
-              {count > 2 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Three"
-                label="Milestone Description Three"
-                name="MileStoneDescription"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-
-
-              />}
 
             </Box>
           </form>
