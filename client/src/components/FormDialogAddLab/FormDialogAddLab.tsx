@@ -18,7 +18,6 @@ export default function FormDialogAddLab({
   handleSubmit: React.FormEventHandler<HTMLFormElement>;
 }) {
   const [clickedButton, setClickedButton] = React.useState('');
-  const [boolChecker, setboolChecker] = React.useState(false)
   const [count, setCount] = React.useState(0);
 
 
@@ -29,11 +28,7 @@ export default function FormDialogAddLab({
   const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
-    setboolChecker(true)
-    setCount(count + 1)
-    if (count == 3) {
-      setCount(3)
-    }
+    setCount(count + 1);
     const button: HTMLButtonElement = event.currentTarget;
     setClickedButton(button.name);
   };
@@ -110,7 +105,7 @@ export default function FormDialogAddLab({
                 autoFocus
                 margin="dense"
                 id="deadline"
-                label="Deadline"
+                label="Deadline yyyy-mm-dd"
                 name="deadline"
                 type="name"
                 fullWidth
@@ -146,101 +141,43 @@ export default function FormDialogAddLab({
                 <Button onClick={buttonHandler} variant="contained">Add Milestone</Button>
                 <Button onClick={clearhandler} variant="contained">Clear Milestones</Button>
               </Box>
-              {count > 0 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox One"
-                label="Milestone Name One"
-                name="Milestone Name One"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />}
 
-              {count > 0 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox One"
-                label="Milestone Description One"
-                name="MileStoneDescription One"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-
-
-              />}
-
-              {count > 1 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Two"
-                label="Milestone Name Two"
-                name="Milestone Name Two"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />}
-
-              {count > 1 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Two"
-                label="Milestone Description Two"
-                name="MileStoneDescription Two"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-
-
-              />}
-
-              {count > 2 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Three"
-                label="Milestone Name Three"
-                name="Milestone Name Three"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />}
-
-              {count > 2 && <TextField
-                autoFocus
-                margin="dense"
-                id="milestoneBox Three"
-                label="Milestone Description Three"
-                name="MileStoneDescription"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-
-
-              />}
+              {count > 0 ? [...Array(count).keys()].map(n =>
+              <>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="milestoneBox"
+                  label="Milestone Description"
+                  name={"MilestoneDescription" + n}
+                  type="name"
+                  key={"MilestoneKey" + n}
+                  multiline
+                  fullWidth
+                  variant="standard"
+                  sx={{
+                    marginRight: "20px",
+                  }}
+                  />
+                  <TextField
+                  autoFocus
+                  margin="dense"
+                  id="milestoneBox One"
+                  label="Milestone Deadline(YYYY-MM-DD)"
+                  name={"MilestoneDeadline" + n}
+                  type="name"
+                  multiline
+                  fullWidth
+                  variant="standard"
+                  sx={{
+                    marginRight: "20px",
+                  }}
+                  />
+                </>
+                ) : null}
+                {// add hiden input field to store the milestone count
+                }
+                <input type="hidden" name="milestoneCount" value={count} />
 
             </Box>
           </form>

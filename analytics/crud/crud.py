@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from analytics.core.db import Envionment, Lab, Team, User, Milestone
 import analytics.core.schemas as schemas
 from analytics.logger import logger
+import uuid
 
 
 def create_lab(db: Session, lab: schemas.LabCreate, lab_id: str):
@@ -114,6 +115,8 @@ def join_team(db: Session, team_name: str, username: str):
         if team.lab_id == lab.id:
             raise Exception("User already in team for lab")
     team = get_team(db, team_name)
+    if team is None:
+        raise Exception("Invalid team")
     team.users.append(user)
     db.commit()
     return
@@ -148,8 +151,7 @@ def get_env_for_user_team(
         .all()
     )
     if len(env_list) > 1:
-        raise Exception(
-            f"More than one env found for team {team_name} user {username}")
+        raise Exception(f"More than one env found for team {team_name} user {username}")
     if not env_list:
         return None
     return env_list[0]
@@ -158,7 +160,6 @@ def get_env_for_user_team(
 def create_user_env(
     db: Session, env: schemas.EnvCreate, username: str, team_name: str
 ) -> Envionment:
-
     db_env = Envionment(**env.dict())
     db.add(db_env)
     db.commit()
@@ -178,11 +179,13 @@ def remove_user_env(db: Session, username: str, team_name: str):
 
 def create_milestone(db: Session, milestone: schemas.MilestoneCreate):
     milestone_dict = milestone.dict()
-    milestone_dict["deadline"] = datetime.strptime(
-        milestone_dict["deadline"], "%Y-%m-%d").date()
+    milestone_dict["deadline"] = milestone_dict["deadline"]
+    # Create milestone id
+    milestone_dict["milestone_id"] = str(uuid.uuid4())
     new_milestone = Milestone(**milestone_dict)
     db.add(new_milestone)
     db.commit()
+    db.refresh(new_milestone)
     return new_milestone
 
 
@@ -203,9 +206,13 @@ def delete_milestone(db: Session, milestone_id: str):
     if milestone:
         db.delete(milestone)
         db.commit()
+        return True
+    return False
 
 
-def update_milestone(db: Session, milestone_id: str, milestone: schemas.MilestoneCreate):
+def update_milestone(
+    db: Session, milestone_id: str, milestone: schemas.MilestoneCreate
+):
     new_milestone_dict = milestone.dict()
     old_milestone = get_milestone(db, milestone_id)
     if old_milestone:
@@ -216,4 +223,5 @@ def update_milestone(db: Session, milestone_id: str, milestone: schemas.Mileston
         )
         db.execute(stmt)
         db.commit()
-        return
+        return True
+    return False

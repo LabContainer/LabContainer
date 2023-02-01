@@ -10,40 +10,45 @@ from analytics.logger import logger
 router = APIRouter(prefix="/milestones")
 
 
-@router.post("/create", tags=["milestones"])
+@router.post(
+    "/create",
+    tags=["milestones"],
+    status_code=status.HTTP_201_CREATED,
+    response_model=schemas.Milestone,
+)
 def create_milestone(
     milestone: schemas.MilestoneCreate,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
         milestone = crud.create_milestone(db, milestone)
-        return schemas.MilestoneCreate(**milestone.__dict__)
+        return schemas.Milestone(**milestone.__dict__)
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("", response_model=List[schemas.MilestoneCreate], tags=["milestones"])
+@router.get("", response_model=List[schemas.Milestone], tags=["milestones"])
 def get_milestones(
     response: Response,
     lab_id: str,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db)
+    db=Depends(get_db),
 ):
     milestones = crud.get_milestones(db, lab_id)
-    return [schemas.MilestoneCreate(**milestone.__dict__) for milestone in milestones]
+    return [schemas.Milestone(**milestone.__dict__) for milestone in milestones]
 
 
-@router.get("/{milestone_id}", response_model=schemas.MilestoneCreate, tags=["milestones"])
+@router.get("/{milestone_id}", response_model=schemas.Milestone, tags=["milestones"])
 def get_milestone(
     milestone_id: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db)
+    db=Depends(get_db),
 ):
     m = crud.get_milestone(db, milestone_id)
-    return schemas.MilestoneCreate(**m.__dict__)
+    return schemas.Milestone(**m.__dict__)
 
 
 @router.delete("/{milestone_id}", tags=["milestones"])
@@ -51,10 +56,13 @@ def delete_milestone(
     milestone_id: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db)
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
-        crud.delete_milestone(db, milestone_id)
+        if crud.delete_milestone(db, milestone_id):
+            response.status_code = status.HTTP_200_OK
+            return
+        response.status_code = status.HTTP_404_NOT_FOUND
         return
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
@@ -66,12 +74,16 @@ def patch_milestone(
     milestone: schemas.MilestoneCreate,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db)
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
-        crud.update_milestone(db, milestone_id, milestone)
+        if crud.update_milestone(db, milestone_id, milestone):
+            response.status_code = status.HTTP_200_OK
+            return
+        response.status_code = status.HTTP_404_NOT_FOUND
         return
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
+
 
 # Instructor Only Endpoints

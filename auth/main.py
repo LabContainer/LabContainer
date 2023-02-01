@@ -19,8 +19,7 @@ def custom_generate_unique_id(route):
 app = FastAPI(generate_unique_id_function=custom_generate_unique_id)
 
 
-origins = ["http://localhost", "http://localhost:3000",
-           "https://labcontainer.dev"]
+origins = ["http://localhost", "http://localhost:3000", "https://labcontainer.dev"]
 
 app.add_middleware(
     CORSMiddleware,

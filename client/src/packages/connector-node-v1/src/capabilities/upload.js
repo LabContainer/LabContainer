@@ -1,7 +1,7 @@
 import api from '../api';
 import notifUtils from '../utils/notifications';
 import { getIcon } from '../icons';
-import nanoid from 'nanoid';
+import * as nanoid from 'nanoid';
 import onFailError from '../utils/onFailError';
 import { readLocalFile } from '../utils/upload';
 import icons from '../icons-svg';
@@ -85,8 +85,8 @@ async function handler(apiOptions, actions) {
       newNotifications = notifUtils.updateNotification(
         notifications,
         notificationId, {
-          children: notifUtils.removeChild(notification.children, notificationChildId)
-        }
+        children: notifUtils.removeChild(notification.children, notificationChildId)
+      }
       );
     } else {
       newNotifications = notifUtils.removeNotification(notifications, notificationId);

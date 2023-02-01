@@ -8,6 +8,7 @@ import Labs from "./Labs";
 import Teams from "./Teams";
 import Notifications from "./Notifications";
 import { DashBoardData } from "./LabCard";
+import { Assignment, NotificationsOutlined, PeopleAltRounded } from "@mui/icons-material";
 
 function StudentDashboardNew() {
     const { user } = React.useContext(AuthContext);
@@ -111,9 +112,18 @@ function StudentDashboardNew() {
                 <Grid container spacing={0}>
                     <Grid item xs={3}>
                         <Tabs orientation="vertical" value={section} onChange={handleChange} centered sx={{ borderRight: 1, borderColor: 'divider' }}>
-                            <Tab label="Labs" />
-                            <Tab label="Teams" />
-                            <Tab label="Notifications" />
+                            <Tab label="Labs" 
+                                icon={<Assignment/>}
+                                iconPosition="start"
+                            />
+                            <Tab label="Teams" 
+                                icon={<PeopleAltRounded/>}
+                                iconPosition="start"
+                            />
+                            <Tab label="Notifications" 
+                                icon={< NotificationsOutlined />}
+                                iconPosition="start"
+                            />
                         </Tabs>
                     </Grid>
                     <Grid item xs={9}>

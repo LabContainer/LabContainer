@@ -36,6 +36,5 @@ def gen_access_token(auth_user: schemas.UserCreate):
 
 
 def gen_internal_token(payload_fields: Dict[str, str]):
-    payload = {**payload_fields, "internal": "AuthService",
-               "exp": expTime(seconds=10)}
+    payload = {**payload_fields, "internal": "AuthService", "exp": expTime(seconds=10)}
     return jwt.encode(payload, key=os.environ["SECRET_TOKEN"])

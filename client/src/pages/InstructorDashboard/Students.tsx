@@ -10,6 +10,7 @@ import {
   successMessage,
   MessageContainer,
 } from "../../components/App/message";
+import { UserInfo } from "../../clients/AuthClient";
 
 const headCellsUsers: IHeadCell[] = [
   {
@@ -32,63 +33,90 @@ const headCellsUsers: IHeadCell[] = [
   }
 ];
 
-function InstructorDashboard() {
-  const { token, refresh_token, setToken } = React.useContext(AuthContext);
-  const [users, setUsers] = React.useState<IUser[]>([]);
-  const [labs, setLabs] = React.useState<Lab[]>([]);
+export interface ILabUsers { [lab_id : string] : UserInfo[]}
+
+function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: Lab[] , refreshData: () => void}) {
   const [usersAddOpen, setUserAddOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
     []
   );
   const { UserApi, LabsApi } = useAPI();
+  
+  // labs for each user
+  const [userLabs, setUserLabs] = React.useState<{[username : string] : { labs : string[] , info : UserInfo}}>({});
+  
   React.useEffect(() => {
-    const user_promise = UserApi.usersGetUsers();
-    const lab_promise = LabsApi.labsGetLabs();
+    // go through labUsers and create reverse mapping
+    for (const lab_id of Object.keys(labUsers)) {
+      for (const user of labUsers[lab_id]) {
+        if (user.username in userLabs) {
+          const uL = userLabs
+          // only push if not already in labs
+          if (!uL[user.username].labs.includes(lab_id)){
+            uL[user.username].labs.push(lab_id)
+            setUserLabs(uL)
+          }
+        } else {
+          setUserLabs({...userLabs, [user.username] : {labs: [lab_id], info: user}})
+        }
+      }
+    }
 
-    user_promise.then(setUsers);
-    lab_promise.then(setLabs);
+    
+  }, [labUsers, userLabs]);
 
-    return () => {
-      user_promise.cancel();
-      lab_promise.cancel();
-    };
-  }, []);
+  const [rows, setRows] = React.useState<
+    { values: { [key: string]: string }; key: number }[]
+  >([]);
+  React.useEffect(() => {
+    setRows(Object.values(userLabs)
+      .filter(({labs, info}) => info.is_student)
+      .map(({labs : currentUserLabs, info}, i) => { 
+        const p = currentUserLabs.map(lab_id => labs.find(lab => lab.id === lab_id)?.name)//.filter(lab => lab !== undefined);
+        return {
+          values: {
+            username: info.username,
+            email: info.email,
+            // get lab name from lab id using labs
+            lab: p.join(", ")
+          },
+          key: i,
+      }}))
+  }, [userLabs, labs, labUsers]);
+
   return (
     <Box
       sx={{
         display: "flex",
         justifyContent: "center",
         alignContent: "center",
+        width: "100%",
       }}
     >
       <MessageContainer />
-      <Stack>
+      <Stack sx={{
+        width: "100%",
+      }}>
         <Container
           sx={{
             flexDirection: "row",
             display: "flex",
             justifyContent: "center",
+            width: "100%",
           }}
         >
-          <Box sx={{ margin: "20px" }}>
+          <Box sx={{ 
+            margin: "20px",
+            width: "100%",
+          }}>
             <DataTable
               onSelect={setSelectedUsers}
               title="Students"
-              rows={
-                users
-                  ? users
-                      .filter((u) => u.is_student)
-                      .map((user, i) => ({
-                        values: user as any,
-                        key: i,
-                      }))
-                  : []
-              }
+              rows={ rows }
               headCells={headCellsUsers}
               selectionEnable={true}
             />
             <Button variant="contained" onClick={() => setUserAddOpen(true)}>
-              {" "}
               Add to Lab{" "}
             </Button>
             <FormDialogUsersAdd
@@ -102,11 +130,12 @@ function InstructorDashboard() {
                 const data = new FormData(event.currentTarget);
                 const labid = data.get("labid") as string;
                 for (const user_index of selectedUsers) {
-                  const user = users[parseInt(user_index)];
+                  const username = Object.keys(userLabs)[parseInt(user_index)];
                   console.log(labid);
                   try {
-                    await LabsApi.labsAddLabUser(labid, user.username);
+                    await LabsApi.labsAddLabUser(labid, username);
                     successMessage("User added to lab!");
+                    refreshData();
                   } catch (error) {
                     errorMessage("Unable to add user!");
                   }
@@ -120,4 +149,4 @@ function InstructorDashboard() {
   );
 }
 
-export default InstructorDashboard;
+export default Students;

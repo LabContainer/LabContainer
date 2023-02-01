@@ -1,21 +1,5 @@
 version: "3.5"
 services:
-  nginx:
-    image: nginx:latest
-    container_name: webserver
-    restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/ssl/
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
-      # - ./nginx/nginx-entrypoint.sh:/docker-entrypoint.d/nginx-entrypoint.sh:ro
-    networks:
-      - envnet
-      - backend
   auth:
     build: auth
     ports:

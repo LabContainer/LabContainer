@@ -1,16 +1,19 @@
 from pydantic import BaseModel
-from pydantic.schema import Optional
+from typing import Optional
 from datetime import date
+
 
 class TeamCreate(BaseModel):
     name: str
     lab_id: str
+
 
 class Team(BaseModel):
     name: str
     lab_id: str
     current_milestone: Optional[str]
     users: Optional[list]
+
 
 class LabCreate(BaseModel):
     name: str
@@ -19,6 +22,10 @@ class LabCreate(BaseModel):
     description: str
     deadline: date
     environment_init_script: str
+
+
+class String(BaseModel):
+    response: str
 
 
 class Lab(LabCreate):
@@ -31,8 +38,9 @@ class Lab(LabCreate):
 class EnvCreate(BaseModel):
     """
     Schema for creating an environment
-    TODO: Communicate with kubernetes controller to spin and keep track of running environments 
+    TODO: Communicate with kubernetes controller to spin and keep track of running environments
     """
+
     env_id: str
     url: str
     image: str
@@ -45,16 +53,23 @@ class EnvCreate(BaseModel):
 
 
 class MilestoneCreate(BaseModel):
-    milestone_id: str
     lab_id: str
     deadline: date
     description: str
+
+
+class Milestone(MilestoneCreate):
+    milestone_id: str
+
+    class Config:
+        orm_mode = True
 
 
 class Environment(BaseModel):
     """
     Schema for Environment
     """
+
     url: str
 
     class Config:

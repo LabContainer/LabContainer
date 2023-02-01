@@ -9,8 +9,11 @@ import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
 import Term from "../../components/Terminal/Terminal";
 import useAPI from "../../api";
-import { Lab, LabCreate } from "../../clients/AnalyticsClient";
+import { Lab, LabCreate, MilestoneCreate } from "../../clients/AnalyticsClient";
 import { CancelablePromise } from "../../clients/AuthClient";
+import LabInfo from "./LabInfo";
+import ProgressTrack from "./ProgressTrack";
+import Feedback from "./Feedback";
 
 // server status enum
 enum ServerStatus {
@@ -95,13 +98,16 @@ export default function Environment() {
 
   // fetch Lab, Milestone information
   const [lab, setLab] = React.useState<Lab>();
+  const [milestones, setMilestones] = React.useState<MilestoneCreate[]>([]);
   React.useEffect(() => {
     if (!team || !user) return;
     const teamsPromise = TeamsApi.teamsGetTeam(team);
     teamsPromise.then((t) => {
       return LabsApi.labsGetLab(t.lab_id).then((l) => {
         setLab({ ...l, ...{ id: t.lab_id } });
-        // MilestonesApi.milestonesGetMilestones;
+        MilestonesApi.milestonesGetMilestones(t.lab_id).then(m => {
+          setMilestones(m);
+        });
       });
     });
     return () => {
@@ -346,7 +352,6 @@ export default function Environment() {
           }}
         >
           <div
-            className="lab-section"
             ref={labRef}
             style={{
               height: labSectionHeight,
@@ -356,28 +361,13 @@ export default function Environment() {
               overflowY: "auto",
             }}
           >
-            <h3>Lab Information</h3>
-            {lab ? (
-              <>
-                <h4>{lab.name}</h4>
-                <h6>
-                  Course Name: {lab.course} | Instructor:{lab.instructor}
-                </h6>
-                <p style={{ width: "100%" }}>
-                  <b>Lab Description:</b> {lab.description}
-                </p>
-                <p>
-                  <b>Due:</b> {lab.deadline}
-                </p>
-              </>
-            ) : null}
+            {lab ? ( <LabInfo lab={lab}/>) : null}
           </div>
           <div
             className="y-resizer begin"
             onMouseDown={startResizingLabSection}
           />
           <div
-            className="progress-tracking"
             ref={progressTrackRef}
             style={{
               height: progressTrackHeight,
@@ -385,15 +375,13 @@ export default function Environment() {
               backgroundColor: "white",
             }}
           >
-            <h3>Progress Tracking</h3>
+            <ProgressTrack milestones={milestones}/>
           </div>
           <div
             className="y-resizer begin"
             onMouseDown={startResizingProgressTracking}
           />
-          <div className="feedback">
-            <h3>Feedback</h3>
-          </div>
+            <Feedback></Feedback>
         </div>
       </div>
     </div>
