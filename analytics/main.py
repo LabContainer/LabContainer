@@ -8,7 +8,7 @@ from analytics.utils import *
 from analytics.env_manager import *
 from analytics.api import environment, team, labs, milestones
 
-env_path = os.path.abspath(os.path.join(os.getenv('PYTHONPATH'), '..', '.env'))
+env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
 
@@ -46,5 +46,5 @@ def root():
     return "Analytics Service API"
 
 
-if __name__ == '__main__':
-    uvicorn.run(app, port=5000, host='0.0.0.0')
+if __name__ == "__main__":
+    uvicorn.run(app, port=5000, host="0.0.0.0")

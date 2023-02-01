@@ -8,29 +8,36 @@ from analytics.dependencies import has_access, get_db
 from analytics.core import schemas
 import traceback
 from analytics.logger import logger
+import uuid
 
 router = APIRouter(prefix="/labs")
 
 # Instructor only endpoints
 
 
-@router.post("/create", tags=["labs"])
+@router.post(
+    "/create",
+    tags=["labs"],
+    status_code=status.HTTP_201_CREATED,
+    response_model=schemas.String,
+)
 def create_lab(
     lab: schemas.LabCreate,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
-        # create unique lab id for each lab
-        lab_id = hash(lab.course + lab.instructor + lab.name)
+        # create unique lab id for each lab using name + course + instructor using uuid
+        lab_id = uuid.uuid3(uuid.NAMESPACE_DNS, lab.name + lab.course + lab.instructor)
 
         try:
-            crud.create_lab(db, lab, lab_id)
+            crud.create_lab(db, lab, str(lab_id))
+            return schemas.String(response=str(lab_id))
         except:
             traceback.print_exc()
             response.status_code = status.HTTP_409_CONFLICT
-            return "Lab already exists"
+            return schemas.String(response="Lab already exists")
     else:
         response.status_code = status.HTTP_403_FORBIDDEN
     return
@@ -41,18 +48,16 @@ def get_lab(
     lab_id: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
-        return crud.get_lab(db, lab_id)
+        return schemas.LabCreate(**crud.get_lab(db, lab_id).__dict__)
     teams = crud.get_teams_for_user(db, payload["user"])
     for team in teams:
         if team.lab_id == lab_id:
             # User in lab
             lab = crud.get_lab(db, lab_id)
-            return schemas.LabCreate(
-                **lab.__dict__
-            )
+            return schemas.LabCreate(**lab.__dict__)
 
     response.status_code = status.HTTP_403_FORBIDDEN
 
@@ -62,7 +67,7 @@ def get_lab_users(
     lab_id: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
         users = crud.get_users_per_lab(db, lab_id)
@@ -76,7 +81,7 @@ def add_lab_user(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
         if not crud.add_user_to_lab(db, username, lab_id):
@@ -91,7 +96,7 @@ def delete_lab_user(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"]:
         return crud.remove_user_from_lab(db, username, lab_id)
@@ -103,7 +108,7 @@ def get_labs(
     response: Response,
     username: Optional[str] = None,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     labs = []
     if not payload["is_student"]:
@@ -124,7 +129,7 @@ def get_lab_teams(
     lab_id: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] in [
         user.name for user in crud.get_users_per_lab(db, lab_id)
@@ -134,12 +139,14 @@ def get_lab_teams(
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("/{lab_id}/milestones", response_model=List[schemas.MilestoneCreate], tags=["labs"])
+@router.get(
+    "/{lab_id}/milestones", response_model=List[schemas.MilestoneCreate], tags=["labs"]
+)
 def get_lab_milestones(
     lab_id: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] in [
         user.name for user in crud.get_users_per_lab(db, lab_id)

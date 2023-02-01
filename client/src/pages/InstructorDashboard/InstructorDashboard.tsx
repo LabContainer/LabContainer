@@ -9,7 +9,7 @@ import Labs from "./Assignments";
 import Teams, { ILabUsers } from "./Students";
 import Notifications from "./Notifications";
 import { MessageContainer } from "../../components/App/message";
-import { Assignment } from "@mui/icons-material";
+import { Assignment , PeopleAltRounded, NotificationsOutlined } from "@mui/icons-material";
 import Assignments from "./Assignments";
 import Students from "./Students";
 import { Lab } from "../../clients/AnalyticsClient";
@@ -27,6 +27,8 @@ function InstructorDashboard() {
     const [labUsers, setLabUsers] = React.useState<ILabUsers>({});
     const [labs, setLabs] = React.useState<Lab[]>([]);
     const { UserApi, LabsApi } = useAPI();
+    // create a state to trigger re fetching of data
+    const [refresh, setRefresh] = useState<boolean>(false);
 
     const [userInfoMap, setUserInfoMap] = React.useState<{ [key : string] : UserInfo}>({})
 
@@ -68,7 +70,7 @@ function InstructorDashboard() {
       return () => {
         lab_promise.cancel();
       };
-    }, []);
+    }, [refresh]);
 
     interface TabPanelProps {
         children?: React.ReactNode;
@@ -102,22 +104,32 @@ function InstructorDashboard() {
                 <Grid container spacing={0}>
                     <Grid item xs={3}>
                         <Tabs orientation="vertical" value={section} onChange={handleChange} centered sx={{ borderRight: 1, borderColor: 'divider' }}>
-                            <Tab label="Assignments" />
-                            <Tab label="Students" />
-                            <Tab label="Notifications" />
+                            <Tab label="Assignments" 
+                              icon={<Assignment/>}
+                              iconPosition="start"
+                            />
+                            <Tab label="Students" 
+                              icon={<PeopleAltRounded/>}
+                              iconPosition="start"
+                            />
+                            <Tab label="Notifications" 
+                              icon={<NotificationsOutlined/>}
+                              iconPosition="start"
+                            />
                         </Tabs>
                     </Grid>
                     <Grid item xs={9}>
                         <TabPanel value={section} index={0}>
-                            <Assignment/>
+                            
                             <Assignments
-                                labs={labs}
+                                labs={labs} refreshData={() => setRefresh(!refresh)}
                             />
                         </TabPanel>
                         <TabPanel value={section} index={1}>
                             <Students
                                 labs={labs}
                                 labUsers={labUsers}
+                                refreshData={() => setRefresh(!refresh)}
                             />
                         </TabPanel>
                         <TabPanel value={section} index={2}>

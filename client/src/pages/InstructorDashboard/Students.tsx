@@ -35,7 +35,7 @@ const headCellsUsers: IHeadCell[] = [
 
 export interface ILabUsers { [lab_id : string] : UserInfo[]}
 
-function Students({labUsers, labs} : {labUsers: ILabUsers, labs: Lab[]}) {
+function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: Lab[] , refreshData: () => void}) {
   const [usersAddOpen, setUserAddOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
     []
@@ -135,6 +135,7 @@ function Students({labUsers, labs} : {labUsers: ILabUsers, labs: Lab[]}) {
                   try {
                     await LabsApi.labsAddLabUser(labid, username);
                     successMessage("User added to lab!");
+                    refreshData();
                   } catch (error) {
                     errorMessage("Unable to add user!");
                   }

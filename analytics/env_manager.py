@@ -69,14 +69,16 @@ def create_new_container(user: str, team: str, port: int, image: str):
     # Add debuging volume if env is dev
     if os.getenv("ENVIRONMENT") == "development" and debug_container:
         # student_manager_service_path = os.path.join(wd, "student-manager-service")
-        student_manager_service_path = "/home/parth/work/LabContainer/student-manager-service"
+        student_manager_service_path = (
+            "/home/parth/work/LabContainer/student-manager-service"
+        )
         debug_args = [
             # debuging volume
             "-v",
             f"{student_manager_service_path}/dist:/app/dist",
         ]
         start_command = start_command[:2] + debug_args + start_command[2:]
-    container = subprocess.run(start_command,capture_output=True)
+    container = subprocess.run(start_command, capture_output=True)
     if container.stderr:
         raise RuntimeError(container.stderr)
     container_id = container.stdout.decode("utf8").strip()
@@ -85,8 +87,7 @@ def create_new_container(user: str, team: str, port: int, image: str):
 
 
 def check_env(name: str):
-    cont = subprocess.run(
-        ["docker", "container", "inspect", name], capture_output=True)
+    cont = subprocess.run(["docker", "container", "inspect", name], capture_output=True)
     string = cont.stdout.decode("utf8").strip()
     if string == "[]":
         return None
@@ -126,9 +127,7 @@ def check_image(image: str):
     """
     Function to check if docker image already exists based on image name and tag
     """
-    images = subprocess.run(
-        ["docker", "image", "ls", "-q", image], capture_output=True
-    )
+    images = subprocess.run(["docker", "image", "ls", "-q", image], capture_output=True)
     if images.stderr:
         raise RuntimeError(images.stderr)
     if images.stdout.decode("utf8").strip() == "":

@@ -1,7 +1,7 @@
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import React from "react";
 import useAPI from "../../api";
-import { Lab } from "../../clients/AnalyticsClient";
+import { Lab, MilestoneCreate } from "../../clients/AnalyticsClient";
 import { AuthContext, IUser } from "../../components/App/AuthContext";
 import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
 import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
@@ -33,9 +33,9 @@ const headCellsLabs: IHeadCell[] = [
   }
 ];
 
-function Assignments({ labs }: { labs: Lab[]}) {
+function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => void}) {
   const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
-  const { LabsApi } = useAPI();
+  const { LabsApi , MilestonesApi} = useAPI();
   return (
     <Box
       sx={{
@@ -94,6 +94,28 @@ function Assignments({ labs }: { labs: Lab[]}) {
                 const environment_init_script = data.get(
                   "environment_init_script"
                 ) as string;
+                /** Get
+                 * "MilestoneDescription" + n
+              "MilestoneDeadline" + n
+              milestoneCount
+                 */
+                const milestoneCount = data.get("milestoneCount") as string;
+                const n = parseInt(milestoneCount);
+                const milestones : { deadline : string, description : string}[] = [];
+                for (let i = 0; i < n; i++) {
+                  const milestoneDescription = data.get(
+                    "MilestoneDescription" + i
+                  ) as string;
+                  const milestoneDeadline = data.get(
+                    "MilestoneDeadline" + i
+                  ) as string;
+                  console.log(milestoneDescription, milestoneDeadline);
+                  console.log(data)
+                  milestones.push({
+                    description: milestoneDescription,
+                    deadline: milestoneDeadline,
+                  });
+                }
                 try {
                   LabsApi.labsCreateLab({
                     name,
@@ -102,10 +124,28 @@ function Assignments({ labs }: { labs: Lab[]}) {
                     description,
                     deadline,
                     environment_init_script,
-                  });
-                  successMessage("Lab created!");
+                  }).then(res => {
+                    const m_promises : Promise<any>[] = [];
+                    for(const milestone of milestones){
+                      m_promises.push(MilestonesApi.milestonesCreateMilestone({
+                        lab_id : res.response,
+                        deadline : milestone.deadline,
+                        description : milestone.description,
+                      }).then().catch(error => {
+                        errorMessage("Unable to create milestone!");
+                      }))
+                    }
+                    return Promise.all(m_promises)
+                  }).then(() => {
+                    successMessage("Lab created!");
+                    refreshData();
+                  }).catch(error => {
+                    errorMessage("Unable to create lab!");
+                    refreshData();
+                  })
                 } catch (error) {
-                  errorMessage("Unable to create lab!");
+                  errorMessage("Unable to create lab! See Console for details.");
+                  console.error(error);
                 }
               }}
             />
