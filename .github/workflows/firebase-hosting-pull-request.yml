@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+      - run: cd client && npm cache clean --force
       - run: cd client && npm ci
       - run: cd client && npm run generate-clients-prod
       - run: cd client && npm run build
