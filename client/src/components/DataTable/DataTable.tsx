@@ -20,6 +20,9 @@ import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
+import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
+import useAPI from "../../api";
+
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -102,10 +105,13 @@ function EnhancedTableHead(props: IEnhancedTableProps) {
     onRequestSort,
     selectionEnable,
   } = props;
+  
   const createSortHandler =
     (property: string) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
+
+  const { UserApi, LabsApi } = useAPI();
 
   return (
     <TableHead>
@@ -221,6 +227,12 @@ export default function DataTable({
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [boolChecker, setboolChecker] = React.useState(false)
+
+  const trueHandler = (event: React.MouseEvent<HTMLTableCellElement>) => {
+    event.preventDefault();
+    setboolChecker(true);
+  };
 
   React.useEffect(() => {
     if (onSelect && selectionEnable) onSelect(selected);
@@ -305,7 +317,7 @@ export default function DataTable({
               headCells={headCells}
               selectionEnable={selectionEnable}
             />
-            <TableBody>
+            <TableBody >
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
               rows.slice().sort(getComparator(order, orderBy)) */}
               {stableSort(
@@ -330,6 +342,7 @@ export default function DataTable({
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
+                        
                         {selectionEnable ? (
                           <Checkbox
                             color="primary"
@@ -344,6 +357,7 @@ export default function DataTable({
                       {headCells.map((headCell, index) =>
                         index === 0 ? (
                           <TableCell
+                          onClick = {trueHandler}
                             component="th"
                             id={labelId}
                             scope="row"
@@ -351,23 +365,48 @@ export default function DataTable({
                             key={index}
                           >
                             {row[headCell.id]}
-                          </TableCell>
+                          </TableCell> /*what goes in title */
                         ) : (
-                          <TableCell align="left" key={index}>
-                            {row[headCell.id]}
-                          </TableCell>
+                          <TableCell onClick={trueHandler} align="left" key={index}>
+                            {row[headCell.id]} 
+                          </TableCell> /*what goes in rows */
+
+                          
                         )
                       )}
                     </TableRow>
                   );
                 })}
+{
+
+(<FormDialogAddLab
+handleClose={() => {
+  setboolChecker(false);
+}}
+open={boolChecker}
+handleSubmit={(event) => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  const name = data.get("name") as string;
+  const course = data.get("course") as string;
+  const instructor = data.get("instructor") as string;
+  const description = data.get("description") as string;
+  const deadline = data.get("deadline") as string;
+  const environment_init_script = data.get(
+    "environment_init_script"
+  ) as string;
+}}
+/>)
+
+}
+
               {emptyRows > 0 && (
                 <TableRow
                   style={{
                     height: (dense ? 33 : 53) * emptyRows,
                   }}
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell  colSpan={6} />
                 </TableRow>
               )}
             </TableBody>
