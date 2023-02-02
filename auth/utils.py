@@ -7,7 +7,9 @@ import dotenv
 import datetime
 import auth.core.schemas as schemas
 
-env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
+pythonpath = os.getenv("PYTHONPATH")
+pythonpath = pythonpath if pythonpath else os.getcwd()
+env_path = os.path.abspath(os.path.join(pythonpath, "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
 

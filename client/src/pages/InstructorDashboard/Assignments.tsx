@@ -94,14 +94,9 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                 const environment_init_script = data.get(
                   "environment_init_script"
                 ) as string;
-                /** Get
-                 * "MilestoneDescription" + n
-              "MilestoneDeadline" + n
-              milestoneCount
-                 */
                 const milestoneCount = data.get("milestoneCount") as string;
                 const n = parseInt(milestoneCount);
-                const milestones : { deadline : string, description : string}[] = [];
+                const milestones : { deadline : string, description : string, test_script : string}[] = [];
                 for (let i = 0; i < n; i++) {
                   const milestoneDescription = data.get(
                     "MilestoneDescription" + i
@@ -109,11 +104,15 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                   const milestoneDeadline = data.get(
                     "MilestoneDeadline" + i
                   ) as string;
+                  const MilestoneTestScript = data.get(
+                    "MilestoneTestScript" + i
+                  ) as string;
                   console.log(milestoneDescription, milestoneDeadline);
                   console.log(data)
                   milestones.push({
                     description: milestoneDescription,
                     deadline: milestoneDeadline,
+                    test_script: MilestoneTestScript,
                   });
                 }
                 try {
@@ -131,6 +130,7 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                         lab_id : res.response,
                         deadline : milestone.deadline,
                         description : milestone.description,
+                        test_script : milestone.test_script,
                       }).then().catch(error => {
                         errorMessage("Unable to create milestone!");
                       }))

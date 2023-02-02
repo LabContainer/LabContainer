@@ -9,6 +9,7 @@ import Teams from "./Teams";
 import Notifications from "./Notifications";
 import { DashBoardData } from "./LabCard";
 import { Assignment, NotificationsOutlined, PeopleAltRounded } from "@mui/icons-material";
+import { MessageContainer } from "../../components/App/message";
 
 function StudentDashboardNew() {
     const { user } = React.useContext(AuthContext);
@@ -104,9 +105,10 @@ function StudentDashboardNew() {
           </div>
         );
       }
-
+      
     return (
         <DashboardPage>
+          <MessageContainer/>      
             <div>
                 <Typography className="student-dashboard-title">Hello {user?.username}</Typography>
                 <Grid container spacing={0}>

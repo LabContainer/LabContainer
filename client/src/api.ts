@@ -52,10 +52,7 @@ export default function useAPI() {
                     // Set token to access token
                     originalRequest.headers['Authorization'] = `Bearer ${res.access_token}`;
                     originalRequest.headers = JSON.parse(JSON.stringify(originalRequest.headers || {})) as RawAxiosRequestHeaders
-                    console.log("Sending request with new token")
-                    // axios.request(originalRequest);
                     return axios(originalRequest);
-                    // return axios.request(originalRequest);
                 }).catch(err => {
                     console.error(err)
                     // Logout

@@ -17,21 +17,24 @@ def get_team(
     team_name: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     team = crud.get_team(db, team_name)
     if not payload["is_student"]:
         return team
-    logger.info(team.users)
-    users = crud.get_users_in_team(db, team.name)
-    logger.info(users)
+    if not team:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+    users = crud.get_users_in_team(db, str(team.name))
     for user in users:
         if user.name == payload["user"]:
             return schemas.Team(
-                name=team.name,
-                lab_id=team.lab_id,
-                current_milestone=team.current_milestone,
-                users=team.users
+                name=str(team.name),
+                lab_id=str(team.lab_id),
+                current_milestone=str(team.current_milestone)
+                if team.current_milestone
+                else None,
+                users=team.users,
             )
     response.status_code = status.HTTP_403_FORBIDDEN
 
@@ -41,7 +44,7 @@ def get_user_teams(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] == username:
         teams = crud.get_teams_for_user(db, username)
@@ -54,11 +57,11 @@ def create_new_team(
     team: schemas.TeamCreate,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
-    if not payload["is_student"]:
-        return crud.create_team(db, team)
     try:
+        if not payload["is_student"]:
+            return crud.create_team(db, team)
         crud.create_team(db, team)
         try:
             crud.join_team(db, team.name, payload["user"])
@@ -66,8 +69,8 @@ def create_new_team(
             response.status_code = status.HTTP_403_FORBIDDEN
             crud.delete_team(db, team.name)
         return team
-    except:
-        print("Here")
+    except Exception as e:
+        logger.error(traceback.format_exc())
         response.status_code = status.HTTP_409_CONFLICT
 
 
@@ -77,7 +80,7 @@ def join_team(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] == username:
         crud.join_team(db, team_name, username)
@@ -91,7 +94,7 @@ def leave_team(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] == username:
         try:
@@ -109,7 +112,7 @@ def get_team_lab(
     team_name: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     labs = crud.get_lab_for_team(db, team_name)
     return schemas.LabCreate(**labs.__dict__)

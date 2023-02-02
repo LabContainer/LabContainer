@@ -56,6 +56,7 @@ class MilestoneCreate(BaseModel):
     lab_id: str
     deadline: date
     description: str
+    test_script: str
 
 
 class Milestone(MilestoneCreate):

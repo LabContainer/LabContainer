@@ -7,6 +7,8 @@ import { Button, Select } from "@mui/material";
 import FormDialogAddTeam from "../../components/FormDialogAddTeam/FormDialogAddTeam";
 import FormDialogJoinTeam from "../../components/FormDialogJoinTeam/FormDialogJoinTeam";
 import useApi from "../../api";
+import { ApiError } from "../../clients/AnalyticsClient";
+import { errorMessage } from "../../components/App/message";
 
 interface DataInterface {
     data: DashBoardData;
@@ -55,7 +57,14 @@ function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () 
                         TeamsApi.teamsCreateNewTeam({
                         lab_id: id_lab,
                         name: team as string,
-                        }).then(refreshData);
+                        }).then(refreshData).catch((err : ApiError) => {
+                            if(err.status === 409)
+                                errorMessage("Team name already exists")
+                            else{
+                                console.log("Error creating team: ")
+                                console.log(err)
+                            }
+                        });
                     } else {
                         console.log("Incorrect Lab Name.")
                     }
