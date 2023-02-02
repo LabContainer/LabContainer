@@ -23,7 +23,6 @@ export default function useAPI() {
         request => {
             if (request.url?.includes('/webapp/refresh')) {
                 (request as any)._retry = true;
-                console.log('caught')
                 return request;
             }
             return request;
@@ -43,8 +42,6 @@ export default function useAPI() {
                 WebappApi.httpRequest.config.TOKEN = refresh_token;
                 const refreshPromise = WebappApi.webappRefresh();
                 return refreshPromise.then(res => {
-                    console.log("Refreshed token")
-
                     // Set token to access token
                     WebappApi.httpRequest.config.TOKEN = res.access_token;
                     setToken(res.access_token || "");

@@ -75,13 +75,11 @@ function Term({
     };
     // Initial load
     setStatus(EnvStatus.disconnected);
-    console.log("Trying ", server);
+    console.log("Attempting Remote Connection : ", server);
     // get domain a https://api.labcontainer.io from server url
 
     const base_server = server.split("/").slice(0, 3).join("/");
     const path = server.split("/").slice(3).join("/");
-    console.log(base_server);
-    console.log(path);
     socketRef.current = io(base_server, {
       query: {
         token,
@@ -97,8 +95,7 @@ function Term({
       // transports: ["websocket"],
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
-    console.log(token);
-
+    
     let fitaddon = new FitAddon();
     xtermRef.current?.terminal.loadAddon(fitaddon);
     xtermRef.current?.terminal.onResize((size) => {
@@ -111,7 +108,6 @@ function Term({
     if (terminal_container) {
       const resizeObserver = new ResizeObserver((entries) => {
         fitaddon.fit();
-        console.log("Resized");
       });
       resizeObserver.observe(terminal_container);
     }

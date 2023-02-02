@@ -17,8 +17,7 @@ function Home() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("submit");
-
+        
         const data = new FormData(event.currentTarget);
         const username = data.get("username") as string;
         const password = data.get("password") as string;

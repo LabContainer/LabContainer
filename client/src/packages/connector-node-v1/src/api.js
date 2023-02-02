@@ -53,7 +53,7 @@ async function getChildrenForId(options, { id, sortBy = 'name', sortDirection = 
   const route = `${options.apiRoot}/files/${id}/children?orderBy=${sortBy}&orderDirection=${sortDirection}`;
   const method = 'GET';
   const response = await request(method, route).set(requestOptions.header).query(requestOptions.parameters);
-  return response.body.items.map(normalizeResource);
+  return response.body?.items?.map(normalizeResource) || [];
 }
 
 async function getParentsForId(options, id, result = []) {

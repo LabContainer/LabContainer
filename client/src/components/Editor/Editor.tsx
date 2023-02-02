@@ -20,6 +20,7 @@ import FormDialogCreateFile from "../FormDialogCreateFile/FormDialogCreateFile";
 import CircularIndeterminate from "../common/CircularInderminate";
 import { Buffer } from "buffer";
 import path from "path-browserify";
+import { errorMessage, MessageContainer, successMessage } from "../App/message";
 
 interface IEditorProps {
   team: string;
@@ -136,7 +137,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         );
         let mode = "";
         if (language.length === 0) {
-          console.log("Language not supported! Ext: " + fileExt);
+          errorMessage("Language not supported! Ext: " + fileExt);
         } else {
           mode = language[0].lang;
         }
@@ -189,7 +190,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       file.mode
     );
     // check if file was new or was downloaded
-    console.log("changing: ", fileContents.length);
     session.setValue(fileContents);
     session.setMode(`ace/mode/${file.mode}`);
     session.setTabSize(2);
@@ -202,8 +202,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   closeAddFileDialog(
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ): void {
-    console.log("Closing");
-    console.log(event.currentTarget.value);
     this.setState({ fileDialogOpen: false });
   }
   /**
@@ -342,9 +340,10 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       body: data,
     }).then((resp) => {
       if (resp.ok) {
-        console.log("File saved");
-        console.log(resp.json());
+        successMessage("File saved");
       }
+    }).catch((err) => {
+      errorMessage("Failed to save file");
     });
   }
 
@@ -390,12 +389,14 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         return;
       }
     }
+    
     // File does not exist
     await this.createFile(filename, text, parent);
   }
   render() {
     return (
       <Stack flex={1} direction="column" style={{ width: "100%" }}>
+        <MessageContainer/>
         <Stack direction={"row"} style={{ width: "100%" }}>
           <ScrollTabs
             tabList={this.state.fileList}

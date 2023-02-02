@@ -28,7 +28,6 @@ function CreateAccount() {
               password,
               is_student,
             });
-            console.log(JSON.stringify(success))
             setFailedAttempt(false);
             navigate("/login");
           }

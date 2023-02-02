@@ -107,8 +107,6 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                   const MilestoneTestScript = data.get(
                     "MilestoneTestScript" + i
                   ) as string;
-                  console.log(milestoneDescription, milestoneDeadline);
-                  console.log(data)
                   milestones.push({
                     description: milestoneDescription,
                     deadline: milestoneDeadline,
