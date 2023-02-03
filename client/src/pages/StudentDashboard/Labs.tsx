@@ -27,11 +27,12 @@ function Labs({data}: { data: DataInterfaceItems }) {
             <div className="labs-title"> 
                 Upcoming Labs
             </div>
-            <div>
+            
+            <div className='labs-content'>
                 {data.length ? (
                     data.map((d) => (
                     new Date(String(d.data.TimeLeft)) > new Date() &&
-                    <div key={d.id} onClick={()=>handleClick(d.data)}>
+                    <div key={d.id} onClick={()=>handleClick(d.data)} className='lab'>
                     <LabCard
                         data={d.data}
                         key={d.id}
@@ -45,6 +46,7 @@ function Labs({data}: { data: DataInterfaceItems }) {
             <div className="labs-title past"> 
                 Past Labs
             </div>
+            <div className='labs-content'>
                 {data.length ? (
                         data.map((d) => 
                         new Date(String(d.data.TimeLeft)) < new Date() &&
@@ -56,6 +58,7 @@ function Labs({data}: { data: DataInterfaceItems }) {
                     ) : (
                         <p> No Labs Available for user</p>
                 )}
+            </div>
             <Dialog
                 open={open}
                 onClose={() => setOpen(false)}

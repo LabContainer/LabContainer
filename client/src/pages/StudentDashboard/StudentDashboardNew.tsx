@@ -98,9 +98,10 @@ function StudentDashboardNew() {
             hidden={value !== index}
             id={`full-width-tabpanel-${index}`}
             aria-labelledby={`full-width-tab-${index}`}
+            style={{height: "100%"}}
           >
             {value === index && (
-                <div>
+                <div style={{ height: "100%"}}>
                     {children}
                 </div>
             )}
@@ -111,10 +112,9 @@ function StudentDashboardNew() {
     return (
         <DashboardPage>
           <MessageContainer/>      
-            <div>
-                <Typography className="student-dashboard-title">Hello {user?.username}</Typography>
-                <Grid container spacing={0}>
-                    <Grid item xs={3}>
+                <Typography className="student-dashboard-title" sx={{ height: "10%" , boxSizing: "border-box", margin: "auto", padding: "0"}}>Hello {user?.username}</Typography>
+                <Grid container spacing={0} sx={{ height: "90%"}}>
+                    <Grid item xs={3}  sx={{ height: "90%"}}>
                         <Tabs orientation="vertical" value={section} onChange={handleChange} centered sx={{ borderRight: 1, borderColor: 'divider' }}>
                             <Tab label="Labs" 
                                 icon={<Assignment/>}
@@ -130,7 +130,7 @@ function StudentDashboardNew() {
                             />
                         </Tabs>
                     </Grid>
-                    <Grid item xs={9}>
+                    <Grid item xs={9}  sx={{ height: "90%"}}>
                         <TabPanel value={section} index={0}>
                             <Labs data={data}></Labs>
                         </TabPanel>
@@ -142,7 +142,7 @@ function StudentDashboardNew() {
                         </TabPanel>
                     </Grid>
                 </Grid>
-            </div>
+            
         </DashboardPage>
     );
 }

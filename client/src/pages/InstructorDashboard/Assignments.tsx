@@ -55,7 +55,14 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
             width: "100%",
           }}
         >
-          <Box sx={{ margin: "20px" , width: "100%"}}>
+          {
+            // make content scrollable
+          }
+          <Box sx={{
+             margin: "20px", 
+             width: "100%",
+              overflow: "auto"
+          }}>
             <DataTable
               title="Labs"
               rows={
