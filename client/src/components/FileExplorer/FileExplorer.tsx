@@ -6,6 +6,7 @@ import CircularIndeterminate from "../common/CircularInderminate";
 
 import "./FileExplorer.css";
 import { AuthContext } from "../App/AuthContext";
+import ErrorBoundary from "../App/ErrorBoundary";
 
 interface IFileExplorerProps {
   server: string;
@@ -25,6 +26,7 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
     [server, token]
   );
   return (
+    <ErrorBoundary>
     <div className="file-explorer-container">
       <FileManager>
         <FileNavigator
@@ -36,20 +38,25 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
           //   initialResourceId={_scope.state.nodeInitId}
           listViewLayout={connectorNodeV1.listViewLayout}
           viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
-          onResourceChange={(resource: any) =>
-            console.log("onResourceChange", resource)
+          onResourceChange={(resource: any) =>{
+            // console.log("onResourceChange", resource)
           }
-          onResourceChildrenChange={(resourceChildren: any) =>
-            console.log("onResourceChildrenChange", resourceChildren)
           }
-          onResourceLocationChange={(resourceLocation: any) =>
-            console.log("onResourceLocationChange", resourceLocation)
+          onResourceChildrenChange={(resourceChildren: any) => {
+            // console.log("onResourceChildrenChange", resourceChildren)
+          } 
           }
-          onSelectionChange={(selection: any) =>
-            console.log("onSelectionChange", selection)
+          onResourceLocationChange={(resourceLocation: any) => {
+            // console.log("onResourceLocationChange", resourceLocation)
           }
-          onResourceItemClick={(event: any, number: any, rowData: any) =>
-            console.log("onResourceItemClick", event, number, rowData)
+          }
+          onSelectionChange={(selection: any) => {
+            // console.log("onSelectionChange", selection)
+          } 
+          }
+          onResourceItemClick={(event: any, number: any, rowData: any) => {
+            // console.log("onResourceItemClick", event, number, rowData)
+          } 
           }
           onResourceItemDoubleClick={(info: any) => {
             // console.log("onResourceItemDoubleClick", event, number, rowData);
@@ -69,12 +76,14 @@ function FileExplorer({ server, addToDoubleQuickQueue }: IFileExplorerProps) {
               addToDoubleQuickQueue({ name: file, id });
             }
           }}
-          onResourceItemRightClick={(event: any, number: any, rowData: any) =>
-            console.log("onResourceItemRightClick", event, number, rowData)
+          onResourceItemRightClick={(event: any, number: any, rowData: any) => {
+            // console.log("onResourceItemRightClick", event, number, rowData)
+          }
           }
         />
       </FileManager>
     </div>
+    </ErrorBoundary>
   );
 }
 

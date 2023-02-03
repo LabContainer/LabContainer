@@ -9,11 +9,12 @@ import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
 import Term from "../../components/Terminal/Terminal";
 import useAPI from "../../api";
-import { Lab, LabCreate, MilestoneCreate } from "../../clients/AnalyticsClient";
+import { Lab, LabCreate, Milestone, MilestoneCreate } from "../../clients/AnalyticsClient";
 import { CancelablePromise } from "../../clients/AuthClient";
 import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
 import Feedback from "./Feedback";
+import { MessageContainer } from "../../components/App/message";
 
 // server status enum
 enum ServerStatus {
@@ -40,7 +41,7 @@ export default function Environment() {
     const envPromise = EnvironmentApi.environmentGetEnvironment(team, user);
 
     envPromise.then((env) => {
-      console.log("Received Environment from analytics service: ", env);
+      // console.log("Received Environment from analytics service: ", env);
       setServer(env.url);
     });
 
@@ -88,7 +89,7 @@ export default function Environment() {
         user
       );
       presencePromise.then((r) => {
-        console.log("Reported presence to analytics service: ", r);
+        // console.log("Reported presence to analytics service: ", r);
       });
     }, 60000);
     return () => {
@@ -99,19 +100,35 @@ export default function Environment() {
   // fetch Lab, Milestone information
   const [lab, setLab] = React.useState<Lab>();
   const [milestones, setMilestones] = React.useState<MilestoneCreate[]>([]);
+  const [currentMilestone, setCurrentMilestone] = React.useState<Milestone>();
   React.useEffect(() => {
     if (!team || !user) return;
     const teamsPromise = TeamsApi.teamsGetTeam(team);
+    let labPromise : CancelablePromise<LabCreate>;
+    let milestonePromise : CancelablePromise<Milestone[]>;
     teamsPromise.then((t) => {
-      return LabsApi.labsGetLab(t.lab_id).then((l) => {
+      console.log("HRQQSDASDVAS")
+      console.log(t.current_milestone);
+      //@ts-ignore
+      labPromise = LabsApi.labsGetLab(t.lab_id)
+      return labPromise.then((l) => {
         setLab({ ...l, ...{ id: t.lab_id } });
-        MilestonesApi.milestonesGetMilestones(t.lab_id).then(m => {
+        //@ts-ignore
+        milestonePromise = MilestonesApi.milestonesGetMilestones(t.lab_id)
+        milestonePromise.then(m => {
           setMilestones(m);
+          if(t.current_milestone)
+            setCurrentMilestone(m.find(m => m.milestone_id === t.current_milestone))
+
         });
       });
     });
     return () => {
       teamsPromise.cancel();
+      if(labPromise && !labPromise.isCancelled) 
+        labPromise.cancel();
+      if(milestonePromise && !milestonePromise.isCancelled)
+        milestonePromise.cancel();
     };
   }, [team, user]);
 
@@ -238,7 +255,6 @@ export default function Environment() {
       </div>
     );
   }
-
   return (
     <div
       className="environment-container"
@@ -246,6 +262,7 @@ export default function Environment() {
         height: "100%",
       }}
     >
+      <MessageContainer/>
       <div className="flexbox-container">
         <div
           ref={leftPanelRef}
@@ -326,7 +343,7 @@ export default function Environment() {
             minHeight: "100px",
           }}
         >
-          <Term team={team} user={user} server={server} />
+          <Term team={team} user={user} server={server} test={currentMilestone?.test_script || ""} />
         </div>
       </div>
       <div
@@ -335,6 +352,7 @@ export default function Environment() {
           position: "absolute",
           right: 0,
           top: 0,
+
         }}
       >
         <div
@@ -373,9 +391,10 @@ export default function Environment() {
               height: progressTrackHeight,
               minHeight: progressTrackMinHeight + "px",
               backgroundColor: "white",
+              width: "100%",
             }}
           >
-            <ProgressTrack milestones={milestones}/>
+            <ProgressTrack milestones={milestones} current={currentMilestone} />
           </div>
           <div
             className="y-resizer begin"

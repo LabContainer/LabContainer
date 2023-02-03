@@ -1,6 +1,13 @@
 import request from 'superagent';
 import { normalizeResource } from './utils/common';
 
+// TODO:
+// 401's not hanndled correctly, if unauthorized, no refresh request is sent until some other service is used
+// Either
+// 1. Redo this file using axios instead of superagent [preferred, will take time]
+// 2. Add superagent interceptors similar to the axios interceptors in api.ts [no idea how]
+
+
 /**
  * hasSignedIn
  *
@@ -53,7 +60,7 @@ async function getChildrenForId(options, { id, sortBy = 'name', sortDirection = 
   const route = `${options.apiRoot}/files/${id}/children?orderBy=${sortBy}&orderDirection=${sortDirection}`;
   const method = 'GET';
   const response = await request(method, route).set(requestOptions.header).query(requestOptions.parameters);
-  return response.body.items.map(normalizeResource);
+  return response.body?.items?.map(normalizeResource) || [];
 }
 
 async function getParentsForId(options, id, result = []) {

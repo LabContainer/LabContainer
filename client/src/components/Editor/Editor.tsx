@@ -20,6 +20,8 @@ import FormDialogCreateFile from "../FormDialogCreateFile/FormDialogCreateFile";
 import CircularIndeterminate from "../common/CircularInderminate";
 import { Buffer } from "buffer";
 import path from "path-browserify";
+import { errorMessage, MessageContainer, successMessage } from "../App/message";
+import axios from "axios";
 
 interface IEditorProps {
   team: string;
@@ -49,6 +51,8 @@ interface IEditorState {
   downloading: boolean;
   downloads: downloadMap;
   downloadStarted: boolean;
+  // cache for dir children ids
+  dirChildren: { [id: string]: string[] };
 }
 class Editor extends React.Component<IEditorProps, IEditorState> {
   ref;
@@ -76,6 +80,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       downloading: false,
       downloads: {},
       downloadStarted: false,
+      dirChildren: {},
     };
     this.addFile = this.addFile.bind(this);
     this.setChosenFile = this.setChosenFile.bind(this);
@@ -136,7 +141,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         );
         let mode = "";
         if (language.length === 0) {
-          console.log("Language not supported! Ext: " + fileExt);
+          errorMessage("Language not supported! Ext: " + fileExt);
         } else {
           mode = language[0].lang;
         }
@@ -189,7 +194,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       file.mode
     );
     // check if file was new or was downloaded
-    console.log("changing: ", fileContents.length);
     session.setValue(fileContents);
     session.setMode(`ace/mode/${file.mode}`);
     session.setTabSize(2);
@@ -202,8 +206,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   closeAddFileDialog(
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ): void {
-    console.log("Closing");
-    console.log(event.currentTarget.value);
     this.setState({ fileDialogOpen: false });
   }
   /**
@@ -249,14 +251,25 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
    */
   static async downloadFile(server: string, file: string, id: string) {
     console.log("Downloading file", file);
-    return fetch(`${server}/filemanager/download?items=${id}`, {
-      method: "GET",
-    }).then((resp) => {
-      if (resp.ok) {
-        return resp.text().then((text) => Buffer.from(text, "utf8").toString());
-      }
-      return null;
+
+    // Write the following code using Axios
+    // return fetch(`${server}/filemanager/download?items=${id}`, {
+    //   method: "GET",
+    // }).then((resp) => {
+    //   if (resp.ok) {
+    //     return resp.text().then((text) => Buffer.from(text, "utf8").toString());
+    //   }
+    //   return null;
+    // });
+
+    const response = await axios.get(`${server}/filemanager/download?items=${id}`, {
+      responseType: 'arraybuffer'
     });
+    if (response.status === 200) {
+      return Buffer.from(response.data, 'binary').toString();
+    }
+    return null;
+
   }
   /**
    * Recursive function to return the filemanager resource id of a directory
@@ -266,17 +279,26 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   async findDirId(dir: string) {
     // Initial ID
     let id = "";
-    const respoonse = await fetch(
-      `${this.props.server}/filemanager/files/${id}`,
-      {
-        method: "GET",
-      }
-    );
-    if (!respoonse.ok) {
+    // Write the following code using Axios
+    // const respoonse = await fetch(
+    //   `${this.props.server}/filemanager/files/${id}`,
+    //   {
+    //     method: "GET",
+    //   }
+    // );
+    // if (!respoonse.ok) {
+    //   console.log("Failed to get directory: " + id);
+    //   return null;
+    // }
+    // const root = await respoonse.json();
+
+    const response = await axios.get(`${this.props.server}/filemanager/files/${id}`);
+    if (response.status !== 200) {
       console.log("Failed to get directory: " + id);
       return null;
     }
-    const root = await respoonse.json();
+    const root = response.data;
+
     if (root.type !== "dir") {
       // Need to search for dir
       return null;
@@ -308,17 +330,38 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   }
 
   async getDirChildren(id: string) {
-    const response_children = await fetch(
-      `${this.props.server}/filemanager/files/${id}/children`,
-      {
-        method: "GET",
-      }
-    );
-    if (!response_children.ok) {
+    // Write the following code using Axios
+    // const response_children = await fetch(
+    //   `${this.props.server}/filemanager/files/${id}/children`,
+    //   {
+    //     method: "GET",
+    //   }
+    // );
+    // if (!response_children.ok) {
+    //   console.log("Failed to get directory children: " + id);
+    //   return null;
+    // }
+    // return response_children.json();
+
+    // cache resposne in editor state
+    
+    // cache hit
+    // if (this.state.dirChildren[id]) {
+    //   return this.state.dirChildren[id];
+    // }
+    const response_children = await axios.get(`${this.props.server}/filemanager/files/${id}/children`);
+    if (response_children.status !== 200) {
       console.log("Failed to get directory children: " + id);
       return null;
     }
-    return response_children.json();
+    // // save to cache
+    // this.setState({
+    //   dirChildren: {
+    //     ...this.state.dirChildren,
+    //     [id]: response_children.data
+    //   }
+    // });
+    return response_children.data;
   }
   /**
    * Create New file on server
@@ -337,15 +380,26 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       }),
       filename
     );
-    return fetch(`${this.props.server}/filemanager/files`, {
-      method: "POST",
-      body: data,
-    }).then((resp) => {
-      if (resp.ok) {
-        console.log("File saved");
-        console.log(resp.json());
-      }
-    });
+    // Write the following code using Axios
+    // return fetch(`${this.props.server}/filemanager/files`, {
+    //   method: "POST",
+    //   body: data,
+    // }).then((resp) => {
+    //   if (resp.ok) {
+    //     successMessage("File saved");
+    //   }
+    // }).catch((err) => {
+    //   errorMessage("Failed to save file");
+    // });
+
+    return axios.post(`${this.props.server}/filemanager/files`, data)
+      .then((resp) => {
+        if (resp.status === 200) {
+          successMessage("File saved");
+        }
+      }).catch((err) => {
+        errorMessage("Failed to save file");
+      });
   }
 
   /**
@@ -353,13 +407,19 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
    * @param id
    */
   async deleteFile(id: string) {
-    const response = await fetch(
-      `${this.props.server}/filemanager/files/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
-    if (response.ok) {
+    // Write the following code using Axios
+    // const response = await fetch(
+    //   `${this.props.server}/filemanager/files/${id}`,
+    //   {
+    //     method: "DELETE",
+    //   }
+    // );
+    // if (response.ok) {
+    //   console.log("File deleted");
+    // }
+
+    const response = await axios.delete(`${this.props.server}/filemanager/files/${id}`);
+    if (response.status === 200) {
       console.log("File deleted");
     }
   }
@@ -390,12 +450,14 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
         return;
       }
     }
+    
     // File does not exist
     await this.createFile(filename, text, parent);
   }
   render() {
     return (
       <Stack flex={1} direction="column" style={{ width: "100%" }}>
+        <MessageContainer/>
         <Stack direction={"row"} style={{ width: "100%" }}>
           <ScrollTabs
             tabList={this.state.fileList}

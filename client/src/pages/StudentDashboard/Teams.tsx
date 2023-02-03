@@ -7,6 +7,8 @@ import { Button, Select } from "@mui/material";
 import FormDialogAddTeam from "../../components/FormDialogAddTeam/FormDialogAddTeam";
 import FormDialogJoinTeam from "../../components/FormDialogJoinTeam/FormDialogJoinTeam";
 import useApi from "../../api";
+import { ApiError } from "../../clients/AnalyticsClient";
+import { errorMessage } from "../../components/App/message";
 
 interface DataInterface {
     data: DashBoardData;
@@ -15,7 +17,7 @@ interface DataInterface {
 
 interface DataInterfaceItems extends Array<DataInterface>{};
 
-function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () => void }) {
+function Teams({data, labNames, refreshData}: { data: DataInterfaceItems, labNames : string[] ,refreshData: () => void }) {
     const { user } = React.useContext(AuthContext);
     const [createTeamOpen, setCreateTeamOpen] = React.useState(false);
     const [joinTeamOpen, setJoinTeamOpen] = React.useState(false);
@@ -36,6 +38,7 @@ function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () 
                     Create Team
                 </Button>
                 <FormDialogAddTeam
+                    labNames={labNames}
                     open={createTeamOpen}
                     handleClose={() => setCreateTeamOpen(false)}
                     handleSubmit={(event) => {
@@ -55,7 +58,14 @@ function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () 
                         TeamsApi.teamsCreateNewTeam({
                         lab_id: id_lab,
                         name: team as string,
-                        }).then(refreshData);
+                        }).then(refreshData).catch((err : ApiError) => {
+                            if(err.status === 409)
+                                errorMessage("Team name already exists")
+                            else{
+                                console.log("Error creating team: ")
+                                console.log(err)
+                            }
+                        });
                     } else {
                         console.log("Incorrect Lab Name.")
                     }

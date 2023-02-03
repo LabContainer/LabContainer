@@ -28,8 +28,6 @@ export default function useToken() {
                 email: payload.email
             })
         } else {
-            console.log("Setting user undefined")
-            console.log("Setting token :", userToken)
             setUser(undefined)
         }
     }

@@ -1,7 +1,6 @@
 import React from "react";
 import { AuthContext } from "../../components/App/AuthContext";
 import InstructorDashboard from "../InstructorDashboard/InstructorDashboard";
-import StudentDashboard from "../StudentDashboard/StudentDashboard";
 import StudentDashboardNew from "../StudentDashboard/StudentDashboardNew";
 
 export default function Dashboard() {

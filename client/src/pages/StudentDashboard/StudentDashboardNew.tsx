@@ -9,6 +9,7 @@ import Teams from "./Teams";
 import Notifications from "./Notifications";
 import { DashBoardData } from "./LabCard";
 import { Assignment, NotificationsOutlined, PeopleAltRounded } from "@mui/icons-material";
+import { MessageContainer } from "../../components/App/message";
 
 function StudentDashboardNew() {
     const { user } = React.useContext(AuthContext);
@@ -23,6 +24,7 @@ function StudentDashboardNew() {
         id: number;
       }[]
     >([]);
+    const [labNames, setLabNames] = useState<string[]>([]);
     // create a state to trigger re fetching of data
     const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
@@ -31,6 +33,7 @@ function StudentDashboardNew() {
         const labs_promise = LabsApi.labsGetLabs(user.username);
         const data_list: DashBoardData[] = [];
         labs_promise.then((labs) => {
+          setLabNames(labs.map((lab) => lab.name));
           teams_promise.then((teams) => {
             let promise_list = [];
             for (let lab of labs) {
@@ -95,22 +98,23 @@ function StudentDashboardNew() {
             hidden={value !== index}
             id={`full-width-tabpanel-${index}`}
             aria-labelledby={`full-width-tab-${index}`}
+            style={{height: "100%"}}
           >
             {value === index && (
-                <div>
+                <div style={{ height: "100%"}}>
                     {children}
                 </div>
             )}
           </div>
         );
       }
-
+      
     return (
         <DashboardPage>
-            <div>
-                <Typography className="student-dashboard-title">Hello {user?.username}</Typography>
-                <Grid container spacing={0}>
-                    <Grid item xs={3}>
+          <MessageContainer/>      
+                <Typography className="student-dashboard-title" sx={{ height: "10%" , boxSizing: "border-box", margin: "auto", padding: "0"}}>Hello {user?.username}</Typography>
+                <Grid container spacing={0} sx={{ height: "90%"}}>
+                    <Grid item xs={3}  sx={{ height: "90%"}}>
                         <Tabs orientation="vertical" value={section} onChange={handleChange} centered sx={{ borderRight: 1, borderColor: 'divider' }}>
                             <Tab label="Labs" 
                                 icon={<Assignment/>}
@@ -126,19 +130,19 @@ function StudentDashboardNew() {
                             />
                         </Tabs>
                     </Grid>
-                    <Grid item xs={9}>
+                    <Grid item xs={9}  sx={{ height: "90%"}}>
                         <TabPanel value={section} index={0}>
                             <Labs data={data}></Labs>
                         </TabPanel>
                         <TabPanel value={section} index={1}>
-                            <Teams data={data} refreshData={()=>setRefresh(r => !r)}></Teams>
+                            <Teams data={data} refreshData={()=>setRefresh(r => !r)} labNames={labNames}></Teams>
                         </TabPanel>
                         <TabPanel value={section} index={2}>
                             <Notifications></Notifications>
                         </TabPanel>
                     </Grid>
                 </Grid>
-            </div>
+            
         </DashboardPage>
     );
 }

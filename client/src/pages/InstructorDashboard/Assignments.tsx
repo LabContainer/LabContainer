@@ -55,7 +55,14 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
             width: "100%",
           }}
         >
-          <Box sx={{ margin: "20px" , width: "100%"}}>
+          {
+            // make content scrollable
+          }
+          <Box sx={{
+             margin: "20px", 
+             width: "100%",
+              overflow: "auto"
+          }}>
             <DataTable
               title="Labs"
               rows={
@@ -94,14 +101,10 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                 const environment_init_script = data.get(
                   "environment_init_script"
                 ) as string;
-                /** Get
-                 * "MilestoneDescription" + n
-              "MilestoneDeadline" + n
-              milestoneCount
-                 */
                 const milestoneCount = data.get("milestoneCount") as string;
+                console.log(milestoneCount);
                 const n = parseInt(milestoneCount);
-                const milestones : { deadline : string, description : string}[] = [];
+                const milestones : { deadline : string, description : string, test_script : string}[] = [];
                 for (let i = 0; i < n; i++) {
                   const milestoneDescription = data.get(
                     "MilestoneDescription" + i
@@ -109,14 +112,17 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                   const milestoneDeadline = data.get(
                     "MilestoneDeadline" + i
                   ) as string;
-                  console.log(milestoneDescription, milestoneDeadline);
-                  console.log(data)
+                  const MilestoneTestScript = data.get(
+                    "MilestoneTestScript" + i
+                  ) as string;
                   milestones.push({
                     description: milestoneDescription,
                     deadline: milestoneDeadline,
+                    test_script: MilestoneTestScript,
                   });
                 }
                 try {
+                  console.log(milestones);
                   LabsApi.labsCreateLab({
                     name,
                     course,
@@ -131,6 +137,7 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                         lab_id : res.response,
                         deadline : milestone.deadline,
                         description : milestone.description,
+                        test_script : milestone.test_script,
                       }).then().catch(error => {
                         errorMessage("Unable to create milestone!");
                       }))

@@ -3,7 +3,7 @@ import { XTerm } from "xterm-for-react";
 import { io, Socket } from "socket.io-client";
 import { useContext, useEffect, useRef, useState } from "react";
 import { FitAddon } from "xterm-addon-fit";
-import { Chip, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import "./Terminal.css";
@@ -26,10 +26,12 @@ function Term({
   team,
   user,
   server,
+  test
 }: {
   team: string;
   user: string;
   server: string;
+  test: string;
 }) {
   const { token } = useContext(AuthContext);
   const xtermRef = useRef<XTerm>(null);
@@ -75,13 +77,11 @@ function Term({
     };
     // Initial load
     setStatus(EnvStatus.disconnected);
-    console.log("Trying ", server);
+    console.log("Attempting Remote Connection : ", server);
     // get domain a https://api.labcontainer.io from server url
 
     const base_server = server.split("/").slice(0, 3).join("/");
     const path = server.split("/").slice(3).join("/");
-    console.log(base_server);
-    console.log(path);
     socketRef.current = io(base_server, {
       query: {
         token,
@@ -97,8 +97,7 @@ function Term({
       // transports: ["websocket"],
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
-    console.log(token);
-
+    
     let fitaddon = new FitAddon();
     xtermRef.current?.terminal.loadAddon(fitaddon);
     xtermRef.current?.terminal.onResize((size) => {
@@ -111,7 +110,6 @@ function Term({
     if (terminal_container) {
       const resizeObserver = new ResizeObserver((entries) => {
         fitaddon.fit();
-        console.log("Resized");
       });
       resizeObserver.observe(terminal_container);
     }
@@ -196,7 +194,30 @@ function Term({
               deleteIcon={<Pending />}
             />
           ) : null}
-          {/* </Box> */}
+
+          {
+            // Create Button to test and to submit code
+          }
+          <Box sx={{ flexGrow: 1 }} />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              socketRef.current?.emit("test", test);
+            }}
+          >
+            Test
+          </Button>
+          <Box sx={{ width: "10px" }} />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              socketRef.current?.emit("submit");
+            }}
+          >
+            Submit
+          </Button>
         </Container>
       </Stack>
       <XTerm

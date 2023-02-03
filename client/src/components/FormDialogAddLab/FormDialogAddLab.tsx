@@ -6,7 +6,13 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Box } from "@mui/material";
+import { Box, TextareaAutosize, Typography } from "@mui/material";
+
+import dayjs, { Dayjs } from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { AuthContext } from "../App/AuthContext";
 
 export default function FormDialogAddLab({
   open,
@@ -17,28 +23,40 @@ export default function FormDialogAddLab({
   handleClose: React.MouseEventHandler<HTMLButtonElement>;
   handleSubmit: React.FormEventHandler<HTMLFormElement>;
 }) {
-  const [clickedButton, setClickedButton] = React.useState('');
+  const { user } = React.useContext(AuthContext);
   const [count, setCount] = React.useState(0);
+  const [deadline, setDeadline] = React.useState<Dayjs | null>(
+    dayjs(''),
+  );
+  // create a list of deadlines for milestones
+  const [deadlines, setDeadlines] = React.useState<(Dayjs | null)[]>([]);
 
+  const handleChange = (newValue: Dayjs | null) => {
+    setDeadline(newValue);
+  };
 
   const clearhandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     setCount(0);
   };
 
-  const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const addButtonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-
-    setCount(count + 1);
-    const button: HTMLButtonElement = event.currentTarget;
-    setClickedButton(button.name);
+    setCount(x => {
+      setDeadlines(deadlines => [...deadlines, deadline]);
+      return x + 1;
+    });
   };
   return (
     <div style={{ display: "flex", justifyContent: "center", width: "50%" }}>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Create Lab</DialogTitle>
+
         <DialogContent>
           <DialogContentText>Lab Information</DialogContentText>
-          <form onSubmit={handleSubmit} id="dialog_form">
+          <form onSubmit={(event) => {
+            handleSubmit(event);
+            setCount(0);
+          }} id="dialog_form">
             <Box
               sx={{
                 display: "inline",
@@ -74,19 +92,7 @@ export default function FormDialogAddLab({
                   marginRight: "20px",
                 }}
               />
-              <TextField
-                autoFocus
-                margin="dense"
-                id="instructor_name"
-                label="Instructor"
-                name="instructor"
-                type="name"
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />
+              <input type="hidden" name="instructor" value={user?.username} />
               <TextField
                 autoFocus
                 margin="dense"
@@ -99,38 +105,41 @@ export default function FormDialogAddLab({
                 variant="standard"
                 sx={{
                   marginRight: "20px",
+                  marginBottom: "20px",
                 }}
               />
-              <TextField
+             <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DesktopDatePicker
+                label="Lab Deadline"
+                inputFormat="YYYY-MM-DD"
+                
+                value={deadline}
+                onChange={handleChange}
+                disablePast
+                renderInput={(params) => <TextField {...params} />}
+                
+                />
+              </LocalizationProvider>
+              < input type="hidden" name="deadline" value={deadline?.format('YYYY-MM-DD')} />
+              
+              <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
+                Environment Init Script
+              </Typography>
+              <TextareaAutosize
+                maxRows={4}
+                minRows={4}
+                aria-label="init_script"
+                placeholder="Environment Init Bash Script"
+                defaultValue=""
                 autoFocus
-                margin="dense"
-                id="deadline"
-                label="Deadline yyyy-mm-dd"
-                name="deadline"
-                type="name"
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
-                }}
-              />
-              <TextField
-                autoFocus
-                margin="dense"
                 id="environment_init_script"
-                label="Environment Init Script"
+                // label="Environment Init Script"
                 name="environment_init_script"
-                type="name"
-                multiline
-                fullWidth
-                variant="standard"
-                sx={{
-                  marginRight: "20px",
+                style={{
+                  width: "100%",
+
                 }}
               />
-
-
-
               <Box
                 component="span"
                 m={1}
@@ -138,7 +147,7 @@ export default function FormDialogAddLab({
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Button onClick={buttonHandler} variant="contained">Add Milestone</Button>
+                <Button onClick={addButtonHandler} variant="contained">Add Milestone</Button>
                 <Button onClick={clearhandler} variant="contained">Clear Milestones</Button>
               </Box>
 
@@ -157,23 +166,49 @@ export default function FormDialogAddLab({
                   variant="standard"
                   sx={{
                     marginRight: "20px",
+                    marginBottom: "20px",
                   }}
+                />
+                <LocalizationProvider dateAdapter={AdapterDayjs}   >
+                  <DesktopDatePicker
+                    key={"MilestoneKeyDate" + n}
+                    label={"Milestone " + n + " Deadline"}
+                    inputFormat="YYYY-MM-DD"
+                    disablePast
+                    minDate={ n > 0 ? deadlines[n-1] : null}
+                    maxDate={deadline}
+                    value={deadlines[n]}
+                    onChange={(newValue) => {
+                      setDeadlines(oldDeadlines => {
+                        const newDeadlines = [...oldDeadlines];
+                        newDeadlines[n] = newValue;
+                        return newDeadlines;
+                      });
+                    }}
+                    
+                    renderInput={(params) => <TextField {...params} />}
                   />
-                  <TextField
+                </LocalizationProvider>
+                < input type="hidden"  key={"MilestoneKeyHiddenDate" + n} name={"MilestoneDeadline" + n} value={deadlines[n]?.format('YYYY-MM-DD')} />
+            
+                <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }} key={"MilestoneKeyTestTitle" + n}>
+                  Milestone {n} Test Script
+                </Typography>
+                <TextareaAutosize
+                  maxRows={4}
+                  minRows={2}
+                  aria-label="test_script"
+                  placeholder="Bash Script To Test Milestone, Must Return 0 for success, 1 for failure"
+                  defaultValue=""
                   autoFocus
-                  margin="dense"
-                  id="milestoneBox One"
-                  label="Milestone Deadline(YYYY-MM-DD)"
-                  name={"MilestoneDeadline" + n}
-                  type="name"
-                  multiline
-                  fullWidth
-                  variant="standard"
-                  sx={{
-                    marginRight: "20px",
+                  key={"MilestoneKeyScript" + n}
+                  name={"MilestoneTestScript" + n}
+                  style={{
+                    width: "100%",
                   }}
-                  />
-                </>
+                />
+                  
+              </>
                 ) : null}
                 {// add hiden input field to store the milestone count
                 }
@@ -183,8 +218,13 @@ export default function FormDialogAddLab({
           </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose} type="submit" form="dialog_form">
+          <Button onClick={(event) => {
+            handleClose(event);
+            clearhandler(event);
+          }}>Cancel</Button>
+          <Button onClick={(event) => {
+            handleClose(event);
+          }} type="submit" form="dialog_form">
             Create
           </Button>
         </DialogActions>
