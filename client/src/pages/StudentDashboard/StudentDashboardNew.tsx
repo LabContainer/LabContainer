@@ -24,6 +24,7 @@ function StudentDashboardNew() {
         id: number;
       }[]
     >([]);
+    const [labNames, setLabNames] = useState<string[]>([]);
     // create a state to trigger re fetching of data
     const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
@@ -32,6 +33,7 @@ function StudentDashboardNew() {
         const labs_promise = LabsApi.labsGetLabs(user.username);
         const data_list: DashBoardData[] = [];
         labs_promise.then((labs) => {
+          setLabNames(labs.map((lab) => lab.name));
           teams_promise.then((teams) => {
             let promise_list = [];
             for (let lab of labs) {
@@ -133,7 +135,7 @@ function StudentDashboardNew() {
                             <Labs data={data}></Labs>
                         </TabPanel>
                         <TabPanel value={section} index={1}>
-                            <Teams data={data} refreshData={()=>setRefresh(r => !r)}></Teams>
+                            <Teams data={data} refreshData={()=>setRefresh(r => !r)} labNames={labNames}></Teams>
                         </TabPanel>
                         <TabPanel value={section} index={2}>
                             <Notifications></Notifications>

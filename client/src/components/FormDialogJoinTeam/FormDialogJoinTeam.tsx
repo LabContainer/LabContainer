@@ -46,7 +46,7 @@ export default function FormDialogJoinTeam({
           return () => {
             labs_promise.cancel();
           };
-        }})
+  }}, [user])
   return (
     <div>
       <Dialog open={open} onClose={handleClose}>

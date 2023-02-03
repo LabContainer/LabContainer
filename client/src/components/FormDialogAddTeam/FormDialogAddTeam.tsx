@@ -15,35 +15,37 @@ export default function FormDialogAddTeam({
   open,
   handleClose,
   handleSubmit,
+  labNames
 }: {
   open: boolean;
   handleClose: React.MouseEventHandler<HTMLButtonElement>;
   handleSubmit: React.FormEventHandler<HTMLFormElement>;
+  labNames: string[];
 }) {
   const { user } = React.useContext(AuthContext);
   const [labSelect, setLabSelect] = React.useState("");
-  const [data, setData] = React.useState<string[]>([]);
-  const { LabsApi } = useAPI();
+  // const [data, setData] = React.useState<string[]>([]);
+  // const { LabsApi } = useAPI();
 
-  useEffect(() => {
-    if (user) {
-      const labs_promise = LabsApi.labsGetLabs(user.username);
-      labs_promise.then((labs) => {
-        for (let lab of labs) {
-          setData((data) => {
-              if (data.includes(lab.name)) {
-                return data;
-              } else {
-                data.push(lab.name);
-                return data;
-              }
-          })
-        }
-      });
-      return () => {
-        labs_promise.cancel();
-      };
-    }})
+  // useEffect(() => {
+  //   if (user) {
+  //     const labs_promise = LabsApi.labsGetLabs(user.username);
+  //     labs_promise.then((labs) => {
+  //       for (let lab of labs) {
+  //         setData((data) => {
+  //             if (data.includes(lab.name)) {
+  //               return data;
+  //             } else {
+  //               data.push(lab.name);
+  //               return data;
+  //             }
+  //         })
+  //       }
+  //     });
+  //     return () => {
+  //       labs_promise.cancel();
+  //     };
+  // }}, [user])
 
   return (
     <div>
@@ -62,7 +64,7 @@ export default function FormDialogAddTeam({
                   name="labSelect"
                   sx={{width: "100%"}}
                 >
-                  {data.map((value, index) =>
+                  {labNames.map((value, index) =>
                       <MenuItem value={value} key={index}>
                           {value}
                       </MenuItem>

@@ -1,6 +1,13 @@
 import request from 'superagent';
 import { normalizeResource } from './utils/common';
 
+// TODO:
+// 401's not hanndled correctly, if unauthorized, no refresh request is sent until some other service is used
+// Either
+// 1. Redo this file using axios instead of superagent [preferred, will take time]
+// 2. Add superagent interceptors similar to the axios interceptors in api.ts [no idea how]
+
+
 /**
  * hasSignedIn
  *

@@ -17,7 +17,7 @@ interface DataInterface {
 
 interface DataInterfaceItems extends Array<DataInterface>{};
 
-function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () => void }) {
+function Teams({data, labNames, refreshData}: { data: DataInterfaceItems, labNames : string[] ,refreshData: () => void }) {
     const { user } = React.useContext(AuthContext);
     const [createTeamOpen, setCreateTeamOpen] = React.useState(false);
     const [joinTeamOpen, setJoinTeamOpen] = React.useState(false);
@@ -38,6 +38,7 @@ function Teams({data, refreshData}: { data: DataInterfaceItems, refreshData: () 
                     Create Team
                 </Button>
                 <FormDialogAddTeam
+                    labNames={labNames}
                     open={createTeamOpen}
                     handleClose={() => setCreateTeamOpen(false)}
                     handleSubmit={(event) => {

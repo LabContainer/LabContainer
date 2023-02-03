@@ -1,7 +1,6 @@
 import "./InstructorDashboard.css";
 import DashboardPage from "../../components/DashboardPage/DashboardPage";
 import { Grid, Typography, Tabs, Tab, Box } from "@mui/material";
-import { DashBoardData } from "./DashboardCard";
 import { AuthContext } from "../../components/App/AuthContext";
 import useAPI from "../../api";
 import React, { useEffect, useState } from "react";
@@ -30,8 +29,13 @@ function InstructorDashboard() {
     // create a state to trigger re fetching of data
     const [refresh, setRefresh] = useState<boolean>(false);
 
-    const [userInfoMap, setUserInfoMap] = React.useState<{ [key : string] : UserInfo}>({})
-
+    const userInfoMap = new Map<string, Promise<UserInfo>>();
+    const getUserInfo = (username: string) => {
+      if(!userInfoMap.has(username)){
+        userInfoMap.set(username, UserApi.usersGetUserInfo(username))
+      }
+      return userInfoMap.get(username) as Promise<UserInfo>
+    }
     React.useEffect(() => {
       const lab_promise = LabsApi.labsGetLabs();
 
@@ -46,15 +50,7 @@ function InstructorDashboard() {
             .map( lab_id => 
               LabsApi.labsGetLabUsers(lab_id).then( 
                 users => users.map( user => {
-                  if(userInfoMap[user.name])
-                    return Promise.resolve(userInfoMap[user.name]);
-                  else{
-                    // fetch user info from server
-                    return UserApi.usersGetUserInfo(user.name).then((user_info) => {
-                      setUserInfoMap({...userInfoMap, [user_info.username] : user_info});
-                      return user_info;
-                    })
-                  }
+                  return getUserInfo(user.name)
                 })
               ).then(us => Promise.all(us)).then(user_infos => ({ [lab_id] : user_infos}))
             )

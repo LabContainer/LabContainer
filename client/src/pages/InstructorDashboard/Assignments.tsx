@@ -95,6 +95,7 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                   "environment_init_script"
                 ) as string;
                 const milestoneCount = data.get("milestoneCount") as string;
+                console.log(milestoneCount);
                 const n = parseInt(milestoneCount);
                 const milestones : { deadline : string, description : string, test_script : string}[] = [];
                 for (let i = 0; i < n; i++) {
@@ -114,6 +115,7 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                   });
                 }
                 try {
+                  console.log(milestones);
                   LabsApi.labsCreateLab({
                     name,
                     course,

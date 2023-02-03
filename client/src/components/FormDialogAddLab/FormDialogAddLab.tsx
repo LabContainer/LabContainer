@@ -41,7 +41,10 @@ export default function FormDialogAddLab({
 
   const addButtonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    setCount(x => x + 1);
+    setCount(x => {
+      setDeadlines(deadlines => [...deadlines, deadline]);
+      return x + 1;
+    });
   };
   return (
     <div style={{ display: "flex", justifyContent: "center", width: "50%" }}>
@@ -50,7 +53,10 @@ export default function FormDialogAddLab({
 
         <DialogContent>
           <DialogContentText>Lab Information</DialogContentText>
-          <form onSubmit={handleSubmit} id="dialog_form">
+          <form onSubmit={(event) => {
+            handleSubmit(event);
+            setCount(0);
+          }} id="dialog_form">
             <Box
               sx={{
                 display: "inline",
@@ -163,8 +169,9 @@ export default function FormDialogAddLab({
                     marginBottom: "20px",
                   }}
                 />
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}   >
                   <DesktopDatePicker
+                    key={"MilestoneKeyDate" + n}
                     label={"Milestone " + n + " Deadline"}
                     inputFormat="YYYY-MM-DD"
                     disablePast
@@ -182,9 +189,9 @@ export default function FormDialogAddLab({
                     renderInput={(params) => <TextField {...params} />}
                   />
                 </LocalizationProvider>
-                < input type="hidden" name={"MilestoneDeadline" + n} value={deadlines[n]?.format('YYYY-MM-DD')} />
+                < input type="hidden"  key={"MilestoneKeyHiddenDate" + n} name={"MilestoneDeadline" + n} value={deadlines[n]?.format('YYYY-MM-DD')} />
             
-                <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }} key={"MilestoneKeyTestTitle" + n}>
                   Milestone {n} Test Script
                 </Typography>
                 <TextareaAutosize
@@ -194,6 +201,7 @@ export default function FormDialogAddLab({
                   placeholder="Bash Script To Test Milestone, Must Return 0 for success, 1 for failure"
                   defaultValue=""
                   autoFocus
+                  key={"MilestoneKeyScript" + n}
                   name={"MilestoneTestScript" + n}
                   style={{
                     width: "100%",
@@ -216,7 +224,6 @@ export default function FormDialogAddLab({
           }}>Cancel</Button>
           <Button onClick={(event) => {
             handleClose(event);
-            clearhandler(event);
           }} type="submit" form="dialog_form">
             Create
           </Button>
