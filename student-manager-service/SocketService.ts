@@ -73,6 +73,13 @@ export default class SocketService {
                 socket.on("resize", (size: { cols: number, rows: number }) => {
                     this.terminal?.ptyProcess?.resize(size.cols, size.rows);
                 });
+                // Test event, run command
+                socket.on("test", (data: string) => {
+                    // run as a command
+
+                    this.terminal?.write(data + "\r")
+                });
+
                 socket.on("disconnect", () => {
                     this.terminal?.ptyProcess?.kill();
                 });

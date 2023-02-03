@@ -35,8 +35,17 @@ def create_team(db: Session, team: schemas.TeamCreate):
     exists = db.query(Lab).filter(Lab.id == team.lab_id).first() is not None
     if not exists:
         raise Exception("Invalid lab id")
-    print(Team(**team.dict()))
-    new_team = Team(**team.dict())
+    # Find the first milestone in the lab (order by date)
+    first_milestone = (
+        db.query(Milestone)
+        .filter(Milestone.lab_id == team.lab_id)
+        .order_by(Milestone.deadline)
+        .first()
+    )
+    new_team = Team(
+        **team.dict(),
+        current_milestone=first_milestone.milestone_id if first_milestone else None,
+    )
     db.add(new_team)
     db.commit()
 
@@ -190,7 +199,12 @@ def create_milestone(db: Session, milestone: schemas.MilestoneCreate):
 
 
 def get_milestones(db: Session, lab_id: str) -> List[Milestone]:
-    return db.query(Milestone).join(Milestone.lab).filter(Lab.id == lab_id).all()
+    return (
+        db.query(Milestone)
+        .filter(Milestone.lab_id == lab_id)
+        .order_by(Milestone.deadline)
+        .all()
+    )
 
 
 def get_milestone(db: Session, milestone_id: str) -> Union[Milestone, None]:

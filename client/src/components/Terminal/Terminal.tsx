@@ -3,7 +3,7 @@ import { XTerm } from "xterm-for-react";
 import { io, Socket } from "socket.io-client";
 import { useContext, useEffect, useRef, useState } from "react";
 import { FitAddon } from "xterm-addon-fit";
-import { Chip, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import "./Terminal.css";
@@ -26,10 +26,12 @@ function Term({
   team,
   user,
   server,
+  test
 }: {
   team: string;
   user: string;
   server: string;
+  test: string;
 }) {
   const { token } = useContext(AuthContext);
   const xtermRef = useRef<XTerm>(null);
@@ -192,7 +194,30 @@ function Term({
               deleteIcon={<Pending />}
             />
           ) : null}
-          {/* </Box> */}
+
+          {
+            // Create Button to test and to submit code
+          }
+          <Box sx={{ flexGrow: 1 }} />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              socketRef.current?.emit("test", test);
+            }}
+          >
+            Test
+          </Button>
+          <Box sx={{ width: "10px" }} />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              socketRef.current?.emit("submit");
+            }}
+          >
+            Submit
+          </Button>
         </Container>
       </Stack>
       <XTerm

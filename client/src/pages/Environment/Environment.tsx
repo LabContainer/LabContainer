@@ -100,12 +100,15 @@ export default function Environment() {
   // fetch Lab, Milestone information
   const [lab, setLab] = React.useState<Lab>();
   const [milestones, setMilestones] = React.useState<MilestoneCreate[]>([]);
+  const [currentMilestone, setCurrentMilestone] = React.useState<Milestone>();
   React.useEffect(() => {
     if (!team || !user) return;
     const teamsPromise = TeamsApi.teamsGetTeam(team);
     let labPromise : CancelablePromise<LabCreate>;
     let milestonePromise : CancelablePromise<Milestone[]>;
     teamsPromise.then((t) => {
+      console.log("HRQQSDASDVAS")
+      console.log(t.current_milestone);
       //@ts-ignore
       labPromise = LabsApi.labsGetLab(t.lab_id)
       return labPromise.then((l) => {
@@ -114,6 +117,9 @@ export default function Environment() {
         milestonePromise = MilestonesApi.milestonesGetMilestones(t.lab_id)
         milestonePromise.then(m => {
           setMilestones(m);
+          if(t.current_milestone)
+            setCurrentMilestone(m.find(m => m.milestone_id === t.current_milestone))
+
         });
       });
     });
@@ -337,7 +343,7 @@ export default function Environment() {
             minHeight: "100px",
           }}
         >
-          <Term team={team} user={user} server={server} />
+          <Term team={team} user={user} server={server} test={currentMilestone?.test_script || ""} />
         </div>
       </div>
       <div
@@ -346,6 +352,7 @@ export default function Environment() {
           position: "absolute",
           right: 0,
           top: 0,
+
         }}
       >
         <div
@@ -384,9 +391,10 @@ export default function Environment() {
               height: progressTrackHeight,
               minHeight: progressTrackMinHeight + "px",
               backgroundColor: "white",
+              width: "100%",
             }}
           >
-            <ProgressTrack milestones={milestones}/>
+            <ProgressTrack milestones={milestones} current={currentMilestone} />
           </div>
           <div
             className="y-resizer begin"
