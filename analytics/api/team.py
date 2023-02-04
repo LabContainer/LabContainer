@@ -39,7 +39,7 @@ def get_team(
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("/", response_model=List[schemas.TeamCreate], tags=["teams"])
+@router.get("/", response_model=List[schemas.Team], tags=["teams"])
 def get_user_teams(
     username: str,
     response: Response,
@@ -48,7 +48,7 @@ def get_user_teams(
 ):
     if not payload["is_student"] or payload["user"] == username:
         teams = crud.get_teams_for_user(db, username)
-        return [schemas.TeamCreate(**team.__dict__) for team in teams]
+        return [schemas.Team(**team.__dict__) for team in teams]
     response.status_code = status.HTTP_403_FORBIDDEN
 
 

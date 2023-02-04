@@ -4,7 +4,15 @@ from fastapi import APIRouter, status, Response, Header, Depends
 from analytics.core.db import SessionLocal
 import analytics.crud.crud as crud
 from analytics.dependencies import has_access, get_db
-from analytics.env_manager import check_env, create_new_container, kill_env, build_env, check_image, commit_env, get_image_name
+from analytics.env_manager import (
+    check_env,
+    create_new_container,
+    kill_env,
+    build_env,
+    check_image,
+    commit_env,
+    get_image_name,
+)
 from analytics.core import schemas
 import traceback
 from datetime import datetime, timedelta
@@ -44,7 +52,9 @@ active_environments = {}
 env_expiry_time = 100
 
 
-@router.get("/{team_name}/{username}", response_model=schemas.Environment, tags=["environment"])
+@router.get(
+    "/{team_name}/{username}", response_model=schemas.Environment, tags=["environment"]
+)
 async def get_environment(
     team_name: str,
     username: str,
@@ -73,8 +83,9 @@ async def get_environment(
             if check:
                 # add to active if not exist
                 key = f"{team_name}_{username}_{len(team_name)}"
-                active_environments[key] = datetime.now() + \
-                    timedelta(seconds=env_expiry_time)
+                active_environments[key] = datetime.now() + timedelta(
+                    seconds=env_expiry_time
+                )
                 return schemas.Environment(url=env.url)
             # No env, remove
             crud.remove_user_env(db, username, team_name)
@@ -90,18 +101,23 @@ async def get_environment(
             username, team_name, port, image
         )
         url = f"http://localhost:{port}"
-        if os.getenv('ENVIRONMENT') == 'production':
+        if os.getenv("ENVIRONMENT") == "production":
             url = f"https://api.labcontainer.dev/env/{name}"
         new_env = schemas.EnvCreate(
-
-            env_id=container_id, url=url, image=image, name=name, user=username, team=team_name
+            env_id=container_id,
+            url=url,
+            image=image,
+            name=name,
+            user=username,
+            team=team_name,
         )
         try:
             env = crud.create_user_env(db, new_env, username, team_name)
             # add to active if not exist
             key = f"{team_name}_{username}_{len(team_name)}"
-            active_environments[key] = datetime.now(
-            ) + timedelta(seconds=env_expiry_time)
+            active_environments[key] = datetime.now() + timedelta(
+                seconds=env_expiry_time
+            )
             return schemas.Environment(url=env.url)
         except Exception as err:
             kill_env(name)
@@ -169,8 +185,8 @@ def report_active_environment(
 
     # create key with retreivable team_name and username
     key = f"{team_name}_{username}_{len(team_name)}"
-    active_environments[key] = datetime.utcnow(
-    ) + timedelta(seconds=env_expiry_time)
+    active_environments[key] = datetime.utcnow() + timedelta(seconds=env_expiry_time)
+
 
 # Run checking active environments every 10 seconds
 
@@ -179,6 +195,7 @@ async def check_active_environments():
     while True:
         await asyncio.sleep(env_expiry_time)
         check_active_envs()
+
 
 asyncio.create_task(check_active_environments())
 
@@ -203,8 +220,8 @@ def check_active_envs():
 
             # fetch user, team from key
             team_name_len = key.split("_")[-1]
-            team_name = key[:int(team_name_len)]
-            username = '_'.join(key[int(team_name_len)+1:].split('_')[:-1])
+            team_name = key[: int(team_name_len)]
+            username = "_".join(key[int(team_name_len) + 1 :].split("_")[:-1])
 
             # TODO delete env from db
             logger.info(f"Deleting env for user: {username} team: {team_name}")

@@ -26,7 +26,6 @@ export default function useAPI() {
     }));
 
     React.useEffect(() => {
-        console.log("token changed")
 
         // AUTH
         const auth = new AuthService({

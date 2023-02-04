@@ -107,7 +107,6 @@ export default function Environment() {
     let labPromise : CancelablePromise<LabCreate>;
     let milestonePromise : CancelablePromise<Milestone[]>;
     teamsPromise.then((t) => {
-      console.log(t.current_milestone);
       //@ts-ignore
       labPromise = LabsApi.labsGetLab(t.lab_id)
       return labPromise.then((l) => {
@@ -353,8 +352,6 @@ export default function Environment() {
             onTestPass={
               (m_id) => {
                 successMessage("Test Passed");
-                console.log("m_id", m_id);
-                console.log("currentMilestone?.milestone_id", currentMilestone?.milestone_id);
                 TeamsApi.teamsNextMilestone(team).then((current_milestone) => {
                     if(current_milestone.response){
                       MilestonesApi.milestonesGetMilestone(current_milestone.response).then((res) => {

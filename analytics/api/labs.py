@@ -124,23 +124,31 @@ def get_labs(
     return [schemas.Lab(**lab.__dict__) for lab in labs]
 
 
-@router.get("/{lab_id}/teams", response_model=List[schemas.TeamCreate], tags=["labs"])
+@router.get("/{lab_id}/teams", response_model=List[schemas.Team], tags=["labs"])
 def get_lab_teams(
     lab_id: str,
     response: Response,
+    username: Optional[str] = None,
     payload: Dict[str, str] = Depends(has_access),
     db=Depends(get_db),
 ):
     if not payload["is_student"] or payload["user"] in [
         user.name for user in crud.get_users_per_lab(db, lab_id)
     ]:
-        teams = crud.get_teams_per_lab(db, lab_id)
-        return [schemas.TeamCreate(**team.__dict__) for team in teams]
+        if username is None:
+            teams = crud.get_teams_per_lab(db, lab_id)
+            return [schemas.Team(**team.__dict__) for team in teams]
+        else:
+            team = crud.get_team_for_lab_user(db, username=username, lab_id=lab_id)
+            if team is None:
+                response.status_code = status.HTTP_404_NOT_FOUND
+                return []
+            return [schemas.Team(**team.__dict__)]
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
 @router.get(
-    "/{lab_id}/milestones", response_model=List[schemas.MilestoneCreate], tags=["labs"]
+    "/{lab_id}/milestones", response_model=List[schemas.Milestone], tags=["labs"]
 )
 def get_lab_milestones(
     lab_id: str,

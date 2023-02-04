@@ -119,6 +119,17 @@ def get_teams_for_user(db: Session, username: str) -> List[Team]:
     return db.query(Team).join(Team.users).filter(User.name == username).all()
 
 
+def get_team_for_lab_user(db: Session, lab_id: str, username: str) -> Union[Team, None]:
+    return (
+        db.query(Team)
+        .join(Team.lab)
+        .join(Team.users)
+        .filter(Lab.id == lab_id)
+        .filter(User.name == username)
+        .first()
+    )
+
+
 def get_lab_for_team(db: Session, team_name: str) -> Union[Any, Lab]:
     return db.query(Lab).join(Lab.teams).filter(Team.name == team_name).first()
 
