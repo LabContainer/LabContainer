@@ -2,6 +2,11 @@ import { Server } from "socket.io";
 import http from "http";
 import timer from "long-timeout";
 import jwt from 'jsonwebtoken';
+import { AnalyticsService } from "./AnalyticsClient/AnalyticsService.js";
+import util from 'util';
+import { exec as exec_callback } from "child_process";
+const exec = util.promisify(exec_callback);
+
 
 import {
     authenticateUser,
@@ -10,17 +15,22 @@ import {
 } from "./middleware.js";
 import { ServerType, Environment, activeList, SocketType, SocketIOMiddleware } from ".";
 import TerminalService from "./TerminalService.js";
+import { AnalyticsServiceAPI } from "./constants.js";
 
 
 export default class SocketService {
     active_users: activeList;
     terminal: TerminalService | null;
     valid_user: string;
+    analytics: AnalyticsService;
 
     constructor(valid_user: string) {
         this.valid_user = valid_user;
         this.active_users = [];
         this.terminal = null;
+        this.analytics = new AnalyticsService({
+            BASE: 'http://analytics:8000',
+        });
     }
 
     attach(server: http.Server) {
@@ -42,12 +52,18 @@ export default class SocketService {
             socket.data.active_users = this.active_users;
             next();
         }
+
         io
             .use(addActiveList)
             .use(authenticateUser(this.valid_user))
             .use(checkTokenExpiry)
             .use(checkMultipleSesions)
             .on("connection", (socket: SocketType) => {
+                // configure analytics service
+                this.analytics = new AnalyticsService({
+                    BASE: 'http://analytics:8000',
+                    TOKEN: socket.handshake.query.token as string,
+                })
                 socket.emit("connected", "Connected!");
 
                 socket.on("disconnect", () => {
@@ -74,10 +90,37 @@ export default class SocketService {
                     this.terminal?.ptyProcess?.resize(size.cols, size.rows);
                 });
                 // Test event, run command
-                socket.on("test", (data: string) => {
-                    // run as a command
+                socket.on("test", async (milestone_id: string) => {
+                    // get milestone from analytics service
+                    const milestone = await this.analytics.milestones.milestonesGetMilestone(milestone_id);
+                    milestone.test_script = milestone.test_script.replace(/\\n/g, "\n");
 
-                    this.terminal?.write(data + "\r")
+                    // spawn new process and run test script
+                    // get exit code from test script
+                    try {
+                        const { stdout, stderr } = await exec(milestone.test_script);
+                        // send to client
+                        socket.emit("data", "Test script ran successfully with exit code: 0 Output:");
+                        socket.emit("data", stdout);
+                        socket.emit("data", stderr);
+
+                        // assume test script is successful
+                        // send exit code client
+                        socket.emit("pass", milestone_id, "0");
+
+                    } catch (error: any) {
+                        console.error(error);
+                        // assume test script failed
+
+                        // send to client
+                        socket.emit("data", "Test script failed with exit code: " + error.code.toString() + " Output:");
+                        socket.emit("data", error.stdout);
+                        socket.emit("data", error.stderr);
+                        // send exit code client
+                        socket.emit("fail", milestone_id, error.code.toString());
+                    }
+
+                    // this.terminal?.write(milestone.test_script + "\r");
                 });
 
                 socket.on("disconnect", () => {

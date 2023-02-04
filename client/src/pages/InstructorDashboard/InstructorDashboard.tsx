@@ -119,6 +119,7 @@ function InstructorDashboard() {
                             
                             <Assignments
                                 labs={labs} refreshData={() => setRefresh(!refresh)}
+                                labUsers={labUsers}
                             />
                         </TabPanel>
                         <TabPanel value={section} index={1}>

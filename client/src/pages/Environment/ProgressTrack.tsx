@@ -11,6 +11,28 @@ import './ProgressTrack.css'
 import { Typography } from '@mui/material';
 
 function ProgressTrack({ milestones, current} : { milestones: MilestoneCreate[], current: Milestone | undefined}) {
+  
+  const [colours , setColours ]= React.useState<("success" | "error")[]>([])
+  React.useEffect(() => {
+    let encounteredCurrent = false
+    for (let i = 0; i < milestones.length; i++) {
+      if (current?.description === milestones[i].description) {
+        encounteredCurrent = true
+      }
+      if (!encounteredCurrent) {
+        setColours(colours => {
+          colours[i] = "success"
+          return [...colours]
+        })
+      } else {
+        setColours(colours => {
+          colours[i] = "error"
+          return [...colours]
+        })
+      }
+    }
+  }, [current, milestones])
+
   return (
     <div className="progress-tracking">
       <Typography variant="h6" component="h2" gutterBottom sx={{height: "5%"}}>
@@ -18,27 +40,25 @@ function ProgressTrack({ milestones, current} : { milestones: MilestoneCreate[],
       </Typography>
         <div className="milestones">
           {/*
-        //@ts-ignore */}
+          //@ts-ignore */}
           <Timeline position="right" sx={{
-        [`& .${timelineItemClasses.root}:before`]: {
-          flex: 0,
-          padding: 0,
-        },
-      }}>      
+            [`& .${timelineItemClasses.root}:before`]: {
+              flex: 0,
+              padding: 0,
+            },
+          }}>      
             {milestones.map((milestone, i) => (
                 <TimelineItem>
                 <TimelineSeparator>
                   <TimelineDot color=
                   { 
-                    current?.description === milestone.description ?
-                    "primary" : 
-                    "secondary"
+                    colours[i]
                   } />
                   <TimelineConnector />
                 </TimelineSeparator>
                 <TimelineContent>
                 <div className="milestone">
-                  <h4>Milestone {i}</h4>
+                  <h4>Milestone {i} {current?.description === milestone.description ? "[Current]" : null}</h4>
                   <p>{milestone.description}</p>
 
                   <div className="milestone-progress">

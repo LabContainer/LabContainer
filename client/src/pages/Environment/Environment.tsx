@@ -14,7 +14,7 @@ import { CancelablePromise } from "../../clients/AuthClient";
 import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
 import Feedback from "./Feedback";
-import { MessageContainer } from "../../components/App/message";
+import { errorMessage, MessageContainer, successMessage } from "../../components/App/message";
 
 // server status enum
 enum ServerStatus {
@@ -107,7 +107,6 @@ export default function Environment() {
     let labPromise : CancelablePromise<LabCreate>;
     let milestonePromise : CancelablePromise<Milestone[]>;
     teamsPromise.then((t) => {
-      console.log("HRQQSDASDVAS")
       console.log(t.current_milestone);
       //@ts-ignore
       labPromise = LabsApi.labsGetLab(t.lab_id)
@@ -343,7 +342,35 @@ export default function Environment() {
             minHeight: "100px",
           }}
         >
-          <Term team={team} user={user} server={server} test={currentMilestone?.test_script || ""} />
+          <Term 
+            team={team}
+            user={user} 
+            server={server} 
+            test={currentMilestone?.milestone_id || ""} 
+            onTestFail={ (m_id) => {
+              errorMessage("Test Failed Please try again");
+            }} 
+            onTestPass={
+              (m_id) => {
+                successMessage("Test Passed");
+                console.log("m_id", m_id);
+                console.log("currentMilestone?.milestone_id", currentMilestone?.milestone_id);
+                TeamsApi.teamsNextMilestone(team).then((current_milestone) => {
+                    if(current_milestone.response){
+                      MilestonesApi.milestonesGetMilestone(current_milestone.response).then((res) => {
+                        setCurrentMilestone(res);
+                      });
+                    }
+                }).catch((err) => {
+                  // if 404 then no more milestones
+                  if(err.status === 404){
+                    successMessage("Congratulations you have completed all milestones");
+                  }
+                  else console.log(err);
+                });
+              }
+            }
+          />
         </div>
       </div>
       <div

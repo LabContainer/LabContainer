@@ -11,6 +11,8 @@ import {
   successMessage,
   MessageContainer,
 } from "../../components/App/message";
+import LabStudentDetailDialog from "./LabStudentDetailDialog";
+import { ILabUsers } from "./Students";
 
 const headCellsLabs: IHeadCell[] = [
   {
@@ -33,9 +35,13 @@ const headCellsLabs: IHeadCell[] = [
   }
 ];
 
-function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => void}) {
+function Assignments({ labs, labUsers, refreshData }: { labs: Lab[], labUsers : ILabUsers ,refreshData: () => void}) {
   const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
   const { LabsApi , MilestonesApi} = useAPI();
+
+  // deatils dialog
+  const [labStudentDetailOpen, setLabStudentDetailOpen] = React.useState(false);
+  const [ labStudent, setLabStudent ] = React.useState<Lab | null>(null);
   return (
     <Box
       sx={{
@@ -73,6 +79,11 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
                     }))
                   : []
               }
+              onRowClick={(row_index) => {
+                console.log(labs[row_index]);
+                setLabStudent(labs[row_index]);
+                setLabStudentDetailOpen(true);
+              }}
               headCells={headCellsLabs}
               selectionEnable={false}
             />
@@ -159,6 +170,18 @@ function Assignments({ labs, refreshData }: { labs: Lab[], refreshData: () => vo
           </Box>
         </Container>
       </Stack>
+
+      {
+        // Dialog for student info
+      }
+      <LabStudentDetailDialog
+        open={labStudentDetailOpen}
+        handleClose={() => {
+          setLabStudentDetailOpen(false);
+        }}
+        lab={labStudent ? labStudent : null}
+        lusers={labStudent?.id ? labUsers[labStudent.id] : []}
+      />
     </Box>
   );
 }

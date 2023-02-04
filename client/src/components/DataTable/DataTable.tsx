@@ -208,18 +208,20 @@ export default function DataTable({
   title,
   onSelect,
   selectionEnable,
+  onRowClick,
 }: {
   rows: IDataTableRow[];
   headCells: IHeadCell[];
   title: string;
   onSelect?: (sl: readonly string[]) => void;
   selectionEnable: boolean;
+  onRowClick?: (row_index: number) => void;
 }) {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<string>("calories");
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
+  const [dense, setDense] = React.useState(true);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   React.useEffect(() => {
@@ -320,9 +322,10 @@ export default function DataTable({
                   return (
                     <TableRow
                       hover
-                      onClick={(event) =>
-                        handleClick(event, rows[index].key.toString())
-                      }
+                      onClick={(event) => {
+                        onRowClick?.(index + page * rowsPerPage)
+                        return handleClick(event, rows[index].key.toString())
+                      }}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}

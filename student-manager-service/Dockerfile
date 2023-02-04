@@ -18,9 +18,9 @@ RUN npm i -g nodemon
 COPY package*.json ./
 RUN npm ci
 
-COPY . .
-# COPY .env .
-RUN tsc
+# COPY . .
+COPY .env .
+# RUN tsc
 
 EXPOSE 8090
 

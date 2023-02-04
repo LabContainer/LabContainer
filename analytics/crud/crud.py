@@ -50,6 +50,33 @@ def create_team(db: Session, team: schemas.TeamCreate):
     db.commit()
 
 
+# move team to next milestone
+def next_milestone(db: Session, team_name: str):
+    team = get_team(db, team_name)
+    if team is None:
+        raise Exception("Invalid team name")
+    # get current milestone
+    if team.current_milestone is None:
+        raise Exception("No current milestone")
+    current = get_milestone(db, str(team.current_milestone))
+    if current is None:
+        raise Exception("Invalid current milestone")
+    # Find the next milestone in the lab (order by date)
+    next_milestone = (
+        db.query(Milestone)
+        .filter(Milestone.lab_id == team.lab_id)
+        .filter(Milestone.deadline > current.deadline)
+        .order_by(Milestone.deadline)
+        .first()
+    )
+    if next_milestone is None:
+        raise Exception("No next milestone")
+    team.current_milestone = next_milestone.milestone_id
+    db.commit()
+    db.refresh(team)
+    return team
+
+
 def get_team(db: Session, team_name: str) -> Union[Team, None]:
     return db.query(Team).filter(Team.name == team_name).first()
 

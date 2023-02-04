@@ -27,6 +27,7 @@ services:
       - ./student-manager-service:/app/student-manager-service
     networks:
       - backend
+      - envnet
       - analyticsdb
     # restart: on-failure
   postgresserver:
