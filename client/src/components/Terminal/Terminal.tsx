@@ -26,12 +26,16 @@ function Term({
   team,
   user,
   server,
-  test
+  test,
+  onTestFail,
+  onTestPass
 }: {
   team: string;
   user: string;
   server: string;
   test: string;
+  onTestFail: (milestone_id : string) => void;
+  onTestPass: (milestone_id: string) => void;
 }) {
   const { token } = useContext(AuthContext);
   const xtermRef = useRef<XTerm>(null);
@@ -144,6 +148,12 @@ function Term({
     socketRef?.current?.on("connect_error", onConnectError);
     socketRef?.current?.on("expired", () => {
       toggleRefresh(!refresh);
+    });
+    socketRef?.current?.on("fail", (milestone_id: string, code) => {
+      onTestFail(milestone_id);
+    });
+    socketRef?.current?.on("pass", (milestone_id: string) => {
+      onTestPass(milestone_id);
     });
     return () => {
       socketRef.current?.off("disconnect");

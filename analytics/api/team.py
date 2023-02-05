@@ -39,7 +39,7 @@ def get_team(
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
-@router.get("/", response_model=List[schemas.TeamCreate], tags=["teams"])
+@router.get("/", response_model=List[schemas.Team], tags=["teams"])
 def get_user_teams(
     username: str,
     response: Response,
@@ -48,7 +48,7 @@ def get_user_teams(
 ):
     if not payload["is_student"] or payload["user"] == username:
         teams = crud.get_teams_for_user(db, username)
-        return [schemas.TeamCreate(**team.__dict__) for team in teams]
+        return [schemas.Team(**team.__dict__) for team in teams]
     response.status_code = status.HTTP_403_FORBIDDEN
 
 
@@ -116,3 +116,27 @@ def get_team_lab(
 ):
     labs = crud.get_lab_for_team(db, team_name)
     return schemas.LabCreate(**labs.__dict__)
+
+
+# api endpoint to move team to next milestone
+@router.post("/{team_name}/next", tags=["teams"], response_model=schemas.String)
+def next_milestone(
+    team_name: str,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db=Depends(get_db),
+):
+    # TODO ideally should check if called from lab server. But lab server is exposed and keys cannot be encrypted there
+    try:
+        # return schemas.Team(**crud.next_milestone(db, team_name).__dict__)
+        return schemas.String(
+            response=str(crud.next_milestone(db, team_name).current_milestone)
+        )
+    except Exception as e:
+        # return exception message if message is "No next milestone"
+        if str(e) == "No next milestone":
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return schemas.String(response=str(e))
+        # return 409 if any other exception
+        response.status_code = status.HTTP_409_CONFLICT
+        logger.error(traceback.format_exc())
