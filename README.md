@@ -1,5 +1,9 @@
 # Lab Capture
 
+[![Deploy](https://github.com/LabContainer/LabContainer/actions/workflows/firebase-hosting-merge.yml/badge.svg)](https://github.com/LabContainer/LabContainer/actions/workflows/firebase-hosting-merge.yml)
+
+https://labcontainer.dev
+
 ## Reqirements
 
 - Python 3.8.10
@@ -15,12 +19,11 @@ cd client
 npm start
 ```
 
-or
-<https://codecapture.web.app>
-
 ### Backend
 
 Create `.env` file, secrets can be generated using `gen_auth_key` script.
+
+Root Directory: 
 
 ```bash
 SECRET_TOKEN=<secret>
@@ -31,10 +34,16 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=<secret>
 ```
 
+`student-mamanger-service` :
+
+```bash
+SECRET_TOKEN=<secret>
+```
+
 #### Run
 
 ```bash
-docker-compose up
+docker compose up --build
 ```
 
 ## Project Structure
@@ -56,8 +65,8 @@ docker-compose up
 - Frontend UI Library - Material UI
 - Backend - Auth Service - FastAPI
 - Backend - Student Manager Service - Nodejs express
-- Backend - analytics - for student/instructor dashboard - FastAPI
+- Backend - analytics - FastAPI
 - Backend - Container runtime - docker
-- Managing Student container - kubernetes TODO
+- Reverse Proxy - Nginx
 - Deploying - Frontend - Firebase
-- Deploying Backend - TODO
+- Deploying Backend - Google Cloud Compute Instance
