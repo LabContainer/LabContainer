@@ -51,12 +51,12 @@ export const authenticateUser = (valid_user: string): SocketIOMiddleware => (soc
         try {
             const decoded = jwt.verify(socket.handshake.query.token as string, process.env.SECRET_TOKEN as string) as jwt.JwtPayload;
             socket.data.decoded = decoded;
-            console.log('Connected to user: ', decoded)
             // check user
-            if (decoded.user !== valid_user) {
+            if (decoded.user !== valid_user && decoded.is_student) {
                 next(new Error('Invalid User'))
                 return;
             }
+            console.log('Connected to user: ', decoded)
             next();
             return;
         } catch (err) {
@@ -96,7 +96,7 @@ export const fileManagerAuth = (valid_user: string) => (req: any, res: any, next
             console.log(decoded)
             if (decoded) {
                 const user = decoded["user"] as string
-                if (user === valid_user) {
+                if (user === valid_user || !decoded.is_student) {
                     next()
                     return;
                 }
