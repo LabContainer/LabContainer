@@ -16,8 +16,8 @@ import dotenv
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
 
-
-env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
+pythonpath = os.getenv("PYTHONPATH")
+env_path = os.path.abspath(os.path.join(pythonpath, "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
 MIGRATIONS = False

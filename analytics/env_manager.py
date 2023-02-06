@@ -8,13 +8,16 @@ from analytics.logger import logger
 
 
 def get_image_name(user: str, team: str):
+    # remvoe special characters
+    user = user.replace(" ", "_")
+    team = team.replace(" ", "_")
     return f"envimage_{user}_{team}".lower()
 
 
 def build_env(user: str, team: str, init_script: str):
     # Build container image for user
-    wd = os.getcwd()
-    os.chdir(os.path.join(wd, "student-manager-service"))
+    # wd = os.getcwd()
+    # os.chdir(os.path.join(wd, "student-manager-service"))
     image = get_image_name(user, team)
     logger.info(f"Building user image... {image}")
     # TODO use .env for security
@@ -31,10 +34,11 @@ def build_env(user: str, team: str, init_script: str):
             ".",
         ],
         capture_output=True,
+        cwd=os.path.join(os.getcwd(), "student-manager-service"),
     )
+    # os.chdir(wd)
     if buildcmd.stderr:
         raise RuntimeError(buildcmd.stderr)
-    os.chdir(wd)
     return image
 
 
@@ -42,13 +46,12 @@ def create_new_container(user: str, team: str, port: int, image: str):
     # To debug student-manager-service, run tsc -w in student-manager-service
     debug_container = False
     # Start container
-    name = f"env_{user}_{team}"
+    name = f"env_{user}_{team}".replace(" ", "_").lower()
     network = "envnet"
     logger.info(f"Starting new container: {name} in {network} network")
     # "-p", f"{port}:22" to access via port
     if check_env(name):
         kill_env(name)
-    wd = os.getcwd()
     start_command = [
         "docker",
         "run",

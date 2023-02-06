@@ -1,5 +1,6 @@
 from typing import Dict
 from fastapi import APIRouter, status, Response, Header, Depends
+
 import analytics.crud.crud as crud
 from analytics.dependencies import has_access, get_db
 from analytics.env_manager import (
@@ -58,6 +59,7 @@ async def get_environment(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
+    db=Depends(get_db),
     db=Depends(get_db),
 ):
     if payload["user"] != username and payload["is_student"]:
