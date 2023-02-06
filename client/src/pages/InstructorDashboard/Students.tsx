@@ -57,10 +57,20 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
             setUserLabs(uL)
           }
         } else {
-          setUserLabs({...userLabs, [user.username] : {labs: [lab_id], info: user}})
+          setUserLabs(userLabs => ({...userLabs, [user.username] : {labs: [lab_id], info: user}}))
         }
       }
     }
+
+    // For users not in any labs
+    // fetch all users and add to userLabs
+    UserApi.usersGetUsers().then((users) => {
+      for (const user of users) {
+        if (!(user.username in userLabs)) {
+          setUserLabs(userLabs => ({...userLabs, [user.username] : {labs: [], info: user}}))
+        }
+      }
+    });
 
     
   }, [labUsers, userLabs]);
@@ -69,19 +79,21 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
     { values: { [key: string]: string }; key: number }[]
   >([]);
   React.useEffect(() => {
-    setRows(Object.values(userLabs)
-      .filter(({labs, info}) => info.is_student)
-      .map(({labs : currentUserLabs, info}, i) => { 
-        const p = currentUserLabs.map(lab_id => labs.find(lab => lab.id === lab_id)?.name)//.filter(lab => lab !== undefined);
-        return {
-          values: {
-            username: info.username,
-            email: info.email,
-            // get lab name from lab id using labs
-            lab: p.join(", ")
-          },
-          key: i,
-      }}))
+    const transform = Object.values(userLabs)
+    .filter(({labs, info}) => info.is_student)
+    .map(({labs : currentUserLabs, info}, i) => { 
+      const p = currentUserLabs.map(lab_id => labs.find(lab => lab.id === lab_id)?.name)//.filter(lab => lab !== undefined);
+      return {
+        values: {
+          username: info.username,
+          email: info.email,
+          // get lab name from lab id using labs
+          lab: p.join(", ")
+        },
+        key: i,
+    }})
+    // Accumulate all labs for each user
+    setRows(transform);
   }, [userLabs, labs, labUsers]);
 
   return (
@@ -131,7 +143,6 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
                 const labid = data.get("labid") as string;
                 for (const user_index of selectedUsers) {
                   const username = Object.keys(userLabs)[parseInt(user_index)];
-                  console.log(labid);
                   try {
                     await LabsApi.labsAddLabUser(labid, username);
                     successMessage("User added to lab!");
