@@ -1,7 +1,5 @@
 from typing import Dict
 from fastapi import APIRouter, status, Response, Header, Depends
-
-from analytics.core.db import SessionLocal
 import analytics.crud.crud as crud
 from analytics.dependencies import has_access, get_db
 from analytics.env_manager import (
@@ -60,9 +58,9 @@ async def get_environment(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
-    if payload["user"] != username:
+    if payload["user"] != username and payload["is_student"]:
         response.status_code = status.HTTP_403_FORBIDDEN
         return
     teams = crud.get_teams_for_user(db, username)
@@ -79,18 +77,18 @@ async def get_environment(
     async with lock():
         env = crud.get_env_for_user_team(db, username, team_name)
         if env:
-            check = check_env(env.name)
+            check = check_env(str(env.name))
             if check:
                 # add to active if not exist
                 key = f"{team_name}_{username}_{len(team_name)}"
                 active_environments[key] = datetime.now() + timedelta(
                     seconds=env_expiry_time
                 )
-                return schemas.Environment(url=env.url)
+                return schemas.Environment(url=str(env.url))
             # No env, remove
             crud.remove_user_env(db, username, team_name)
             if check is False:
-                kill_env(env.name)
+                kill_env(str(env.name))
         # env does not exist, build
         image = get_image_name(username, team_name)
         if not check_image(image):
@@ -118,7 +116,7 @@ async def get_environment(
             active_environments[key] = datetime.now() + timedelta(
                 seconds=env_expiry_time
             )
-            return schemas.Environment(url=env.url)
+            return schemas.Environment(url=str(env.url))
         except Exception as err:
             kill_env(name)
             traceback.print_exc()
@@ -132,7 +130,7 @@ def delete_env(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     # only Auth Service can call this endpoint
     if payload["internal"] != "AuthService":
@@ -141,9 +139,9 @@ def delete_env(
 
     env = crud.get_env_for_user_team(db, username, team_name)
     if env:
-        if check_env(env.name) is not None:
-            env.image = commit_env(env.env_id, username, team_name)
-            kill_env(env.name)
+        if check_env(str(env.name)) is not None:
+            env.image = commit_env(str(env.env_id), username, team_name)
+            kill_env(str(env.name))
         crud.remove_user_env(db, payload["user"], team_name)
         # remove from active environments
         key = f"{team_name}_{username}_{len(team_name)}"
@@ -160,14 +158,14 @@ def report_active_environment(
     username: str,
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
-    db: SessionLocal = Depends(get_db),
+    db=Depends(get_db),
 ):
     """
     Endpoint for frontend to report active status of environment
     If not reported within a time limit, env automatically deleted
     On active reports, time limit is reset and env is saved
     """
-    if payload["user"] != username:
+    if payload["user"] != username and payload["is_student"]:
         response.status_code = status.HTTP_403_FORBIDDEN
         return
 
@@ -177,7 +175,7 @@ def report_active_environment(
         response.status_code = status.HTTP_404_NOT_FOUND
         return
 
-    if not check_env(env.name):
+    if not check_env(str(env.name)):
         response.status_code = status.HTTP_404_NOT_FOUND
         return
 
@@ -186,6 +184,36 @@ def report_active_environment(
     # create key with retreivable team_name and username
     key = f"{team_name}_{username}_{len(team_name)}"
     active_environments[key] = datetime.utcnow() + timedelta(seconds=env_expiry_time)
+
+
+# Create Status Endpoint
+# Response model is a dict with key status and value active or inactive
+@router.get(
+    "/{team_name}/{username}/status",
+    tags=["environment"],
+    response_model=Dict[str, str],
+)
+def get_env_status(
+    team_name: str,
+    username: str,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db=Depends(get_db),
+):
+    if payload["user"] != username and payload["is_student"]:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return
+
+    env = crud.get_env_for_user_team(db, username, team_name)
+
+    if not env:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+    key = f"{team_name}_{username}_{len(team_name)}"
+
+    if key not in active_environments:
+        return {"status": "Inactive"}
+    return {"status": "Active"}
 
 
 # Run checking active environments every 10 seconds
@@ -205,8 +233,8 @@ def del_user_team(username, team_name):
     db = next(db_gen)
     env = crud.get_env_for_user_team(db, username, team_name)
     if env:
-        image = commit_env(env.env_id, username, team_name)
-        kill_env(env.name)
+        image = commit_env(str(env.env_id), username, team_name)
+        kill_env(str(env.name))
         env.image = image
         db.commit()
 

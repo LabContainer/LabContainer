@@ -36,29 +36,52 @@ export default function LabStudentDetailDialog({
     lab: Lab | null;
     lusers: UserInfo[];
 }) {
-    const {LabsApi } = useAPI();
+    const {LabsApi, EnvironmentApi } = useAPI();
     // fetch teams fir lusers
     const [teams, setTeams] = React.useState<{
-      [username: string]: Team;
+      [username: string]: {
+        team : Team;
+        status: string;
+      };
     }>({});
     // get lab milestones
     const [milestones, setMilestones] = React.useState<Milestone[]>([]);
     React.useEffect(() => {
       let labPromise: CancelablePromise<Milestone[]>;
-      let teamPromises: CancelablePromise<Team[]>[] = [];
+      let requestPromises: CancelablePromise<any>[] = [];
       let teamPromise: CancelablePromise<Team[]>;
+      let envPromise: CancelablePromise<Record<string, string>>;
       if(lab?.id){
         lusers.forEach((u) => {
           teamPromise = LabsApi.labsGetLabTeams(lab.id, u.username)
-          teamPromises.push(teamPromise);
+          requestPromises.push(teamPromise);
           teamPromise.then((t) => {
-
-            setTeams((teams) => {
-              return {
-                ...teams,
-                [u.username]: t[0],
-              };
-            });
+            envPromise = EnvironmentApi.environmentGetEnvStatus(t[0].name, u.username)
+            requestPromises.push(envPromise)
+            envPromise.then((status) => {
+              setTeams((teams) => {
+                return {
+                  ...teams,
+                  [u.username]: {
+                    team: t[0],
+                    status: status.status
+                  }
+                }
+              })
+            }).catch((e) => {
+              // if 404, then environment is not created
+              if(e.status === 404){
+                setTeams((teams) => {
+                  return {
+                  ...teams,
+                  [u.username]: {
+                    team: t[0],
+                    status: "Logged out"
+                  }
+                  }
+                })
+              }
+            })
           })
         })
         labPromise = LabsApi.labsGetLabMilestones(lab.id)
@@ -70,7 +93,7 @@ export default function LabStudentDetailDialog({
         if(labPromise){
           labPromise.cancel();
         }
-        teamPromises.forEach((p) => {
+        requestPromises.forEach((p) => {
           p.cancel();
         })
       }
@@ -94,13 +117,13 @@ export default function LabStudentDetailDialog({
               return {
                   name: u.username,
                   email: u.email,
-                  status: "Active",
-                  studentEnvironment: teams[u.username] ? `/environment/${teams[u.username].name}/${u.username}` : null,
+                  status: teams[u.username] ? teams[u.username].status : "NA",
+                  studentEnvironment: teams[u.username] ? `/environment/${teams[u.username].team.name}/${u.username}` : null,
                   // get lab name from lab id using labs
                   // progress: "0"
                   progress: teams[u.username] ? `${
                     (milestones.findIndex((m) => {
-                      return m.milestone_id === teams[u.username]?.current_milestone;
+                      return m.milestone_id === teams[u.username]?.team.current_milestone;
                     }) + 1).toString()
                   } / ${milestones.length.toString()} milestones completed` : "No progress"
                 }

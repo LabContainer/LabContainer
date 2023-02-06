@@ -20,11 +20,18 @@ def get_team(
     db=Depends(get_db),
 ):
     team = crud.get_team(db, team_name)
-    if not payload["is_student"]:
-        return team
     if not team:
         response.status_code = status.HTTP_404_NOT_FOUND
         return
+    if not payload["is_student"]:
+        return schemas.Team(
+            name=str(team.name),
+            lab_id=str(team.lab_id),
+            current_milestone=str(team.current_milestone)
+            if team.current_milestone
+            else None,
+            users=team.users,
+        )
     users = crud.get_users_in_team(db, str(team.name))
     for user in users:
         if user.name == payload["user"]:
