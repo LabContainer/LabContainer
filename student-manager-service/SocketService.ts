@@ -61,7 +61,7 @@ export default class SocketService {
             .on("connection", (socket: SocketType) => {
                 // configure analytics service
                 this.analytics = new AnalyticsService({
-                    BASE: 'http://analytics:8000',
+                    BASE: 'http://analytics_container:8000',
                     TOKEN: socket.handshake.query.token as string,
                 })
                 socket.emit("connected", "Connected!");
