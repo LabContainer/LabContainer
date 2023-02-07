@@ -60,7 +60,6 @@ async def get_environment(
     response: Response,
     payload: Dict[str, str] = Depends(has_access),
     db=Depends(get_db),
-    db=Depends(get_db),
 ):
     if payload["user"] != username and payload["is_student"]:
         response.status_code = status.HTTP_403_FORBIDDEN
