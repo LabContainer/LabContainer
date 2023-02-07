@@ -64,7 +64,8 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
 
     // For users not in any labs
     // fetch all users and add to userLabs
-    UserApi.usersGetUsers().then((users) => {
+    const userPromise = UserApi.usersGetUsers()
+    userPromise.then((users) => {
       for (const user of users) {
         if (!(user.username in userLabs)) {
           setUserLabs(userLabs => ({...userLabs, [user.username] : {labs: [], info: user}}))
@@ -72,6 +73,9 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
       }
     });
 
+    return () => {
+      userPromise.cancel();
+    }
     
   }, [labUsers, userLabs]);
 
