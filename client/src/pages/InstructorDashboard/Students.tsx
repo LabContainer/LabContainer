@@ -142,7 +142,11 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
                 const data = new FormData(event.currentTarget);
                 const labid = data.get("labid") as string;
                 for (const user_index of selectedUsers) {
-                  const username = Object.keys(userLabs)[parseInt(user_index)];
+                  console.log(user_index)
+                  // filter out users that are not students
+                  const users = Object.keys(userLabs).filter(username => userLabs[username].info.is_student)
+                  const username = users[parseInt(user_index)];
+                  console.log(username)
                   try {
                     await LabsApi.labsAddLabUser(labid, username);
                     successMessage("User added to lab!");
