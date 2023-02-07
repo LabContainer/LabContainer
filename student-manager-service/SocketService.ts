@@ -99,6 +99,7 @@ export default class SocketService {
                         test_script = milestone.test_script;
                     } catch (error) {
                         test_script = "echo 'Error getting milestone from analytics service'";
+                        console.error(error);
                     }
 
                     // spawn new process and run test script
