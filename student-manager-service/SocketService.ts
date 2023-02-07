@@ -92,13 +92,19 @@ export default class SocketService {
                 // Test event, run command
                 socket.on("test", async (milestone_id: string) => {
                     // get milestone from analytics service
-                    const milestone = await this.analytics.milestones.milestonesGetMilestone(milestone_id);
-                    milestone.test_script = milestone.test_script.replace(/\\n/g, "\n");
+                    let test_script = "";
+                    try {
+                        const milestone = await this.analytics.milestones.milestonesGetMilestone(milestone_id);
+                        milestone.test_script = milestone.test_script.replace(/\\n/g, "\n");
+                        test_script = milestone.test_script;
+                    } catch (error) {
+                        test_script = "echo 'Error getting milestone from analytics service'";
+                    }
 
                     // spawn new process and run test script
                     // get exit code from test script
                     try {
-                        const { stdout, stderr } = await exec(milestone.test_script);
+                        const { stdout, stderr } = await exec(test_script);
                         // send to client
                         socket.emit("data", "Test script ran successfully with exit code: 0 Output:");
                         socket.emit("data", stdout);
