@@ -40,6 +40,7 @@ services:
       - ./student-manager-service:/app/student-manager-service
     networks:
       - backend
+      - envnet
       - analyticsdb
     restart: on-failure
   postgresserver:
@@ -69,7 +70,6 @@ services:
       - "5433:5432"
     networks:
       - analyticsdb
-      - envnet
     restart: unless-stopped
   pgadmin:
     container_name: pgadmin_container
