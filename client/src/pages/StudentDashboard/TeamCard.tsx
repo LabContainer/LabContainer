@@ -22,9 +22,9 @@ function TeamCard({ data , refreshData }: {data: DashBoardData , refreshData: ()
                                 {data.Team}
                             </Typography>
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item xs={9}>
                             {data.Team_Users?.map((d) => (   
-                                <Typography key={d.name} className="team-title">
+                                <Typography key={d.name} className="team-member">
                                     {d.name}
                                 </Typography>
                             ))}

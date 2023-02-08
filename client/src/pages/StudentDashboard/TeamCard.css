@@ -13,6 +13,19 @@
     padding-top: 5%;
 }
 
+.team-member {
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.15000000596046448px;
+    text-align: left;
+    color: #000000DE;
+    padding-top: 1%;
+    padding-right: 10%;
+    float: left;
+}
+
 .team-card-content{
     width: 80%;
 }
