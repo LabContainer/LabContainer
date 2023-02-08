@@ -77,6 +77,7 @@ export default function FormDialogAddTeam({
                   id="team_name"
                   name="team_name"
                   type="team_name"
+                  required
                   fullWidth
                 />
               </Grid>

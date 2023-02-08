@@ -330,19 +330,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
   }
 
   async getDirChildren(id: string) {
-    // Write the following code using Axios
-    // const response_children = await fetch(
-    //   `${this.props.server}/filemanager/files/${id}/children`,
-    //   {
-    //     method: "GET",
-    //   }
-    // );
-    // if (!response_children.ok) {
-    //   console.log("Failed to get directory children: " + id);
-    //   return null;
-    // }
-    // return response_children.json();
-
     // cache resposne in editor state
     
     // cache hit
@@ -380,18 +367,7 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
       }),
       filename
     );
-    // Write the following code using Axios
-    // return fetch(`${this.props.server}/filemanager/files`, {
-    //   method: "POST",
-    //   body: data,
-    // }).then((resp) => {
-    //   if (resp.ok) {
-    //     successMessage("File saved");
-    //   }
-    // }).catch((err) => {
-    //   errorMessage("Failed to save file");
-    // });
-
+    
     return axios.post(`${this.props.server}/filemanager/files`, data)
       .then((resp) => {
         if (resp.status === 200) {
@@ -407,17 +383,6 @@ class Editor extends React.Component<IEditorProps, IEditorState> {
    * @param id
    */
   async deleteFile(id: string) {
-    // Write the following code using Axios
-    // const response = await fetch(
-    //   `${this.props.server}/filemanager/files/${id}`,
-    //   {
-    //     method: "DELETE",
-    //   }
-    // );
-    // if (response.ok) {
-    //   console.log("File deleted");
-    // }
-
     const response = await axios.delete(`${this.props.server}/filemanager/files/${id}`);
     if (response.status === 200) {
       console.log("File deleted");

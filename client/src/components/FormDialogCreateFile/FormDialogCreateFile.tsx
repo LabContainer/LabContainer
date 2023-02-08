@@ -29,7 +29,7 @@ export default function FormDialogCreateFile({
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Create File</DialogTitle>
         <DialogContent>
-          <DialogContentText>Please Enter filename to create</DialogContentText>
+          <DialogContentText>Please Enter filename to create (with full path , Example /home/ubuntu/abc.txt) </DialogContentText>
           <form onSubmit={handleSubmit} id="dialog_form">
             <Box
               sx={{
@@ -50,6 +50,7 @@ export default function FormDialogCreateFile({
                 sx={{
                   marginRight: "20px",
                 }}
+                required
               />
               <Select
                 autoFocus

@@ -99,7 +99,7 @@ export default function Environment() {
 
   // fetch Lab, Milestone information
   const [lab, setLab] = React.useState<Lab>();
-  const [milestones, setMilestones] = React.useState<MilestoneCreate[]>([]);
+  const [milestones, setMilestones] = React.useState<Milestone[]>([]);
   const [currentMilestone, setCurrentMilestone] = React.useState<Milestone>();
   React.useEffect(() => {
     if (!team || !user) return;

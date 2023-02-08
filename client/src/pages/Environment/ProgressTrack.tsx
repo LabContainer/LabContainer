@@ -10,7 +10,7 @@ import { Milestone, MilestoneCreate } from '../../clients/AnalyticsClient'
 import './ProgressTrack.css'
 import { Typography } from '@mui/material';
 
-function ProgressTrack({ milestones, current} : { milestones: MilestoneCreate[], current: Milestone | undefined}) {
+function ProgressTrack({ milestones, current} : { milestones: Milestone[], current: Milestone | undefined}) {
   
   const [colours , setColours ]= React.useState<("success" | "error")[]>([])
   React.useEffect(() => {
@@ -48,7 +48,7 @@ function ProgressTrack({ milestones, current} : { milestones: MilestoneCreate[],
             },
           }}>      
             {milestones.map((milestone, i) => (
-                <TimelineItem>
+                <TimelineItem key={milestone.milestone_id}>
                 <TimelineSeparator>
                   <TimelineDot color=
                   { 
@@ -58,7 +58,7 @@ function ProgressTrack({ milestones, current} : { milestones: MilestoneCreate[],
                 </TimelineSeparator>
                 <TimelineContent>
                 <div className="milestone">
-                  <h4>Milestone {i} {current?.description === milestone.description ? "[Current]" : null}</h4>
+                  <h4>Milestone {i} {current?.milestone_id === milestone.milestone_id ? "[Current]" : null}</h4>
                   <p>{milestone.description}</p>
 
                   <div className="milestone-progress">
@@ -72,7 +72,7 @@ function ProgressTrack({ milestones, current} : { milestones: MilestoneCreate[],
                   </div>
                 </div>
                 </TimelineContent>
-              </TimelineItem>
+                </TimelineItem>
                 
             ))}
           </Timeline>

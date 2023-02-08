@@ -77,6 +77,7 @@ export default function FormDialogAddLab({
                 sx={{
                   marginRight: "20px",
                 }}
+                required
               />
               <TextField
                 autoFocus
@@ -91,6 +92,7 @@ export default function FormDialogAddLab({
                 sx={{
                   marginRight: "20px",
                 }}
+                required
               />
               <input type="hidden" name="instructor" value={user?.username} />
               <TextField
@@ -107,6 +109,7 @@ export default function FormDialogAddLab({
                   marginRight: "20px",
                   marginBottom: "20px",
                 }}
+                required
               />
              <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DesktopDatePicker
@@ -116,7 +119,7 @@ export default function FormDialogAddLab({
                 value={deadline}
                 onChange={handleChange}
                 disablePast
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => <TextField {...params} required />}
                 
                 />
               </LocalizationProvider>
@@ -139,6 +142,7 @@ export default function FormDialogAddLab({
                   width: "100%",
 
                 }}
+                required
               />
               <Box
                 component="span"
@@ -168,6 +172,7 @@ export default function FormDialogAddLab({
                     marginRight: "20px",
                     marginBottom: "20px",
                   }}
+                  required
                 />
                 <LocalizationProvider dateAdapter={AdapterDayjs}   >
                   <DesktopDatePicker
@@ -186,7 +191,7 @@ export default function FormDialogAddLab({
                       });
                     }}
                     
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} required />}
                   />
                 </LocalizationProvider>
                 < input type="hidden"  key={"MilestoneKeyHiddenDate" + n} name={"MilestoneDeadline" + n} value={deadlines[n]?.format('YYYY-MM-DD')} />
@@ -206,6 +211,7 @@ export default function FormDialogAddLab({
                   style={{
                     width: "100%",
                   }}
+                  required
                 />
                   
               </>
@@ -223,7 +229,7 @@ export default function FormDialogAddLab({
             clearhandler(event);
           }}>Cancel</Button>
           <Button onClick={(event) => {
-            handleClose(event);
+            // handleClose(event);
           }} type="submit" form="dialog_form">
             Create
           </Button>

@@ -50,7 +50,7 @@ def create_new_container(user: str, team: str, port: int, image: str):
     network = "envnet"
     logger.info(f"Starting new container: {name} in {network} network")
     # "-p", f"{port}:22" to access via port
-    if check_env(name):
+    if check_env(name) is not None:
         kill_env(name)
     start_command = [
         "docker",
