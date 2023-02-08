@@ -37,7 +37,7 @@ export interface ILabUsers { [lab_id : string] : UserInfo[]}
 
 function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: Lab[] , refreshData: () => void}) {
   const [usersAddOpen, setUserAddOpen] = React.useState(false);
-  const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
+  const [selectedUsers, setSelectedUsers] = React.useState<readonly number[]>(
     []
   );
   const { UserApi, LabsApi } = useAPI();
@@ -45,31 +45,34 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
   // labs for each user
   const [userLabs, setUserLabs] = React.useState<{[username : string] : { labs : string[] , info : UserInfo}}>({});
   
+  const [users, setUsers] = React.useState<string[]>([]);
   React.useEffect(() => {
-    // go through labUsers and create reverse mapping
-    for (const lab_id of Object.keys(labUsers)) {
-      for (const user of labUsers[lab_id]) {
-        if (user.username in userLabs) {
-          const uL = userLabs
-          // only push if not already in labs
-          if (!uL[user.username].labs.includes(lab_id)){
-            uL[user.username].labs.push(lab_id)
-            setUserLabs(uL)
-          }
-        } else {
-          setUserLabs(userLabs => ({...userLabs, [user.username] : {labs: [lab_id], info: user}}))
-        }
-      }
-    }
-
     // For users not in any labs
     // fetch all users and add to userLabs
     const userPromise = UserApi.usersGetUsers()
     userPromise.then((users) => {
-      for (const user of users) {
-        if (!(user.username in userLabs)) {
-          setUserLabs(userLabs => ({...userLabs, [user.username] : {labs: [], info: user}}))
+      // go through labUsers and create reverse mapping
+      for (const lab_id of Object.keys(labUsers)) {
+        for (const user of labUsers[lab_id]) {
+          setUserLabs(uL => {
+            if (user.username in uL) {
+              // only push if not already in labs
+              if (!uL[user.username].labs.includes(lab_id)){
+                uL[user.username].labs.push(lab_id)
+              }
+              return uL
+            }
+            return {...uL, [user.username] : {labs: [lab_id], info: user}}
+          })
         }
+      }
+      for (const user of users) {
+        setUserLabs( uL => {
+          if (!(user.username in uL)) {
+            return {...uL, [user.username] : {labs: [], info: user}}
+          }
+          return uL
+        })
       }
     });
 
@@ -77,14 +80,13 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
       userPromise.cancel();
     }
     
-  }, [labUsers, userLabs]);
+  }, [labUsers]);
 
   const [rows, setRows] = React.useState<
     { values: { [key: string]: string }; key: number }[]
   >([]);
   React.useEffect(() => {
-    const transform = Object.values(userLabs)
-    .filter(({labs, info}) => info.is_student)
+    const transform = users.map(username => userLabs[username])
     .map(({labs : currentUserLabs, info}, i) => { 
       const p = currentUserLabs.map(lab_id => labs.find(lab => lab.id === lab_id)?.name)//.filter(lab => lab !== undefined);
       return {
@@ -98,8 +100,12 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
     }})
     // Accumulate all labs for each user
     setRows(transform);
-  }, [userLabs, labs, labUsers]);
+  }, [userLabs, labs, users]);
 
+  React.useEffect(() => {
+    // set users for order
+    setUsers(Object.keys(userLabs).filter(username => userLabs[username].info.is_student))
+  }, [userLabs])
   return (
     <Box
       sx={{
@@ -145,11 +151,12 @@ function Students({labUsers, labs, refreshData} : {labUsers: ILabUsers, labs: La
                 event.preventDefault();
                 const data = new FormData(event.currentTarget);
                 const labid = data.get("labid") as string;
+                
+                console.log(users)
                 for (const user_index of selectedUsers) {
                   console.log(user_index)
                   // filter out users that are not students
-                  const users = Object.keys(userLabs).filter(username => userLabs[username].info.is_student)
-                  const username = users[parseInt(user_index)];
+                  const username = users[user_index];
                   console.log(username)
                   try {
                     await LabsApi.labsAddLabUser(labid, username);

@@ -213,7 +213,7 @@ export default function DataTable({
   rows: IDataTableRow[];
   headCells: IHeadCell[];
   title: string;
-  onSelect?: (sl: readonly string[]) => void;
+  onSelect?: (sl: number[]) => void;
   selectionEnable: boolean;
   onRowClick?: (row_index: number) => void;
 }) {
@@ -225,7 +225,7 @@ export default function DataTable({
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   React.useEffect(() => {
-    if (onSelect && selectionEnable) onSelect(selected);
+    if (onSelect && selectionEnable) onSelect(selected.map( s =>  parseInt(s) + rowsPerPage * page));
   }, [selected, onSelect, selectionEnable]);
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,

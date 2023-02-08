@@ -42,7 +42,7 @@ export default function FormDialogUsersAdd({
                 sx={{width: "100%"}}
               >
                 {labs.map((lab) => (
-                  <MenuItem value={lab.id}>
+                  <MenuItem value={lab.id} key={lab.id}>
                     Name: {lab.name} Course: {lab.course}
                   </MenuItem>
                 ))}
