@@ -7,23 +7,11 @@ import "./Feedback.css"
 
 const data = [
   {
-    from: "John Doe",
-    date: "2019-01-01",
-    text: "Hello",
-    is_student: true
-  },
-  {
-    from: "John Doe",
-    date: "2019-01-01",
-    text: "Hello",
+    from: "Test Instructor",
+    date: "2023-01-01",
+    text: "Please ask any questions here",
     is_student: false
-  },
-  {
-    from: "John Doe",
-    date: "2019-01-01",
-    text: "Hello",
-    is_student: true
-  },
+  }
 ]
 
 function Feedback() {
