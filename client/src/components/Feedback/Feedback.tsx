@@ -2,23 +2,43 @@ import React from 'react'
 import { MessageBox , Input, Button} from "react-chat-elements";
 
 import "react-chat-elements/dist/main.css"
+import useAPI from '../../api';
 import { AuthContext } from '../App/AuthContext';
 import "./Feedback.css"
 
-const data = [
-  {
-    from: "Test Instructor",
-    date: "2023-01-01",
-    text: "Please ask any questions here",
-    is_student: false
-  }
-]
 
-function Feedback() {
+
+function Feedback({team, username} : {team : string, username: string}) {
   // get user
   // create referance to input
   const {user} = React.useContext(AuthContext)
   const inputRef = React.useRef<any>(null)
+  const [refresh, setRefresh] = React.useState(0)
+  const [data, setData] = React.useState([
+    
+      {
+        from: "Test Instructor",
+        date: "2023-01-01",
+        text: "Please ask any questions here",
+        is_student: false
+      }
+  ])
+
+  React.useEffect(() => {
+    // fetch messages
+    EnvironmentApi.environmentGetMessagesEnvironment(team, username).then((messages) => {
+      setData(messages.map((message) => {
+        return {
+          from: message.user,
+          date: message.timestamp,
+          text: message.message,
+          is_student: message.user === user?.username ? user.is_student : false
+        }
+      }))
+    })
+  }, [refresh])
+
+  const {EnvironmentApi} = useAPI();
   return (
     <div className="feedback">
       <h3 style={{
@@ -53,13 +73,15 @@ function Feedback() {
         <Button
           text={"Send"}
           onClick={() => {
-            data.push({
-              from: user?.username || "Unknown",
-              date: new Date().toISOString(),
-              text: inputRef.current?.value,
-              is_student: user?.is_student || false
-            })
-          }}
+              EnvironmentApi.environmentPostMessageEnvironment(team, username, {
+                message: inputRef.current?.value,
+                user: user?.username || "Unknown"
+              }).then(() => { 
+                setRefresh(refresh + 1)
+                inputRef.current.value = ""
+              })
+              
+            }}
           title="Send"
         />
       </div>

@@ -433,7 +433,10 @@ export default function Environment() {
               flexGrow: 1
             }}
           >
-            <Feedback></Feedback>
+            <Feedback
+              team={team}
+              username={user}
+            />
           </div>
         </div>
       </div>

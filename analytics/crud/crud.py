@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Union, List
 from sqlalchemy import update
 from sqlalchemy.orm import Session
-from analytics.core.db import Envionment, Lab, Team, User, Milestone
+from analytics.core.db import Envionment, Lab, Team, User, Milestone, Message
 import analytics.core.schemas as schemas
 from analytics.logger import logger
 import uuid
@@ -277,3 +277,25 @@ def update_milestone(
         db.commit()
         return True
     return False
+
+
+def postMessage(db: Session, message: schemas.MessageCreate, env_id: str):
+    new_message = Message(
+        **message.dict(),
+        timestamp=datetime.now(),
+        env_id=env_id,
+        message_id=str(uuid.uuid4()),
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+    return new_message
+
+
+def getMessages(db: Session, env_id: str) -> List[Message]:
+    return (
+        db.query(Message)
+        .filter(Message.env_id == env_id)
+        .order_by(Message.timestamp)
+        .all()
+    )

@@ -79,3 +79,17 @@ class Environment(BaseModel):
 
 class User(BaseModel):
     name: str
+
+
+class MessageCreate(BaseModel):
+    message: str
+    user: str
+
+
+class Message(MessageCreate):
+    message_id: str
+    timestamp: date
+    env_id: str
+
+    class Config:
+        orm_mode = True
