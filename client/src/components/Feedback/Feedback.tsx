@@ -9,6 +9,7 @@ import "./Feedback.css"
 
 
 function Feedback({team, username} : {team : string, username: string}) {
+
   // get user
   // create referance to input
   const {user} = React.useContext(AuthContext)
@@ -82,6 +83,7 @@ function Feedback({team, username} : {team : string, username: string}) {
               })
               
             }}
+
           title="Send"
         />
       </div>
