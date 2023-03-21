@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from fastapi import APIRouter, status, Response, Header, Depends
 
 import analytics.crud.crud as crud
@@ -215,6 +215,60 @@ def get_env_status(
     if key not in active_environments:
         return {"status": "Inactive"}
     return {"status": "Active"}
+
+
+@router.post("/{team_name}/{username}/postMessage", tags=["environment"])
+def post_message_environment(
+    team_name: str,
+    username: str,
+    message: schemas.MessageCreate,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db=Depends(get_db),
+):
+    """
+    Endpoint for posting messages to environment
+    """
+    if payload["user"] != username and payload["is_student"]:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return
+
+    env = crud.get_env_for_user_team(db, username, team_name)
+    if not env:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+    crud.postMessage(
+        db,
+        schemas.MessageCreate(message=message.message, user=payload["user"]),
+        env_id=str(env.env_id),
+    )
+
+
+@router.get(
+    "/{team_name}/{username}/getMessages",
+    tags=["environment"],
+    response_model=List[schemas.Message],
+)
+def get_messages_environment(
+    team_name: str,
+    username: str,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db=Depends(get_db),
+):
+    """
+    Endpoint for getting messages from environment
+    """
+    if payload["user"] != username and payload["is_student"]:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return
+
+    env = crud.get_env_for_user_team(db, username, team_name)
+    if not env:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+    messages = crud.getMessages(db, str(env.env_id))
+    return [schemas.Message(**message.__dict__) for message in messages]
 
 
 # Run checking active environments every 10 seconds
