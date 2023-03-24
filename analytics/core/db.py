@@ -101,6 +101,18 @@ class Envionment(Base):
     user = Column(String, ForeignKey("users.name"))
     owning_user = relationship("User", back_populates="environments")
     owning_team = relationship("Team", back_populates="environments")
+    messages = relationship("Message", back_populates="env")
+
+
+class Message(Base):
+    message_id = Column(String, primary_key=True, index=True)
+    __tablename__ = "messages"
+    env_id = Column(String, ForeignKey("environment.env_id"))
+    env = relationship("Envionment", back_populates="messages")
+    user = Column(String, ForeignKey("users.name"))
+    message = Column(String)
+    timestamp = Column(Date)
+    # Need to make user connection for team
 
 
 # Need to make milestone connection for team
