@@ -1,16 +1,13 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import "./Navbar.css";
-import IconButton from "@mui/material/IconButton";
-import Badge from "@mui/material/Badge";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App/AuthContext";
-import { Settings } from "@mui/icons-material";
-
-const api_url = "http://localhost:5000";
+import Logo from "../../static/Cube.png";
+import { AuthServiceAPI } from "../../constants";
 
 async function logoutUser(refresh_token: string) {
-  const response = await fetch(`${api_url}/webapp/logout`, {
+  const response = await fetch(`${AuthServiceAPI}/webapp/logout`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -28,53 +25,72 @@ function Navbar() {
   const { token, refresh_token, setToken, setRefreshToken } =
     useContext(AuthContext);
   return (
-    <>
-      <h1 className="nav-header">Lab Capture</h1>
-      <ul className="nav">
-        {!!token ? (
-          <>
-            <li
-              className="nav-item"
+    // <div style={{ height: "100%" }}>
+    <div className="nav-header">
+      <div className="nav-logo">
+        <img className="nav-logo-size" src={Logo} />
+      </div>
+      <div className="nav-title">Lab Container</div>
+      {!!token ? (
+        <>
+          <div className="dashboard-navbar">
+            <Button
+              variant="outlined"
               onClick={() => {
                 navigate("/dashboard");
               }}
+              sx={{
+                backgroundColor: "white",
+                borderRadius: "10px",
+                "&:hover": { background: "white" },
+              }}
+              size="medium"
             >
               Dashboard
-            </li>
-            <IconButton
-              color="error"
-              className="notifications"
-              style={{ margin: "8px", float: "right" }}
-            >
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <IconButton
-              color="error"
-              className="notifications"
-              style={{ margin: "8px", float: "right" }}
-            >
-              <Settings />
-            </IconButton>
-            <li
-              className="nav-item"
+            </Button>
+          </div>
+          <div className="logout-navbar">
+            <Button
+              variant="outlined"
               onClick={() => {
-                if (token) {
-                  logoutUser(refresh_token);
-                  setToken("");
-                  setRefreshToken("");
-                  navigate("/dashboard");
-                }
+                logoutUser(refresh_token);
+                setToken("");
+                setRefreshToken("");
+                navigate("/dashboard");
               }}
+              sx={{
+                backgroundColor: "white",
+                borderRadius: "10px",
+                "&:hover": { background: "white" },
+              }}
+              size="medium"
             >
               Logout
-            </li>
-          </>
-        ) : null}
-      </ul>
-    </>
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="nav-sign-in">
+          <Button
+            variant="outlined"
+            onClick={() => {
+              navigate("/login");
+            }}
+            sx={{
+              backgroundColor: "white",
+              borderRadius: "10px",
+              "&:hover": { background: "white" },
+            }}
+            size="medium"
+          >
+            Sign In
+          </Button>
+        </div>
+      )}
+      {/* </div> */}
+      {/* </div> */}
+    </div>
   );
 }
-
+// TODO: Make Dashboard Button
 export default Navbar;

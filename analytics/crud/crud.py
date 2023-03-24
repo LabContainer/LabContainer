@@ -1,12 +1,16 @@
+from datetime import datetime
 from typing import Any, Union, List
+from sqlalchemy import update
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import Session
-from analytics.core.db import Envionment, Lab, Team, User
+from analytics.core.db import Envionment, Lab, Team, User, Milestone, Message
 import analytics.core.schemas as schemas
+from analytics.logger import logger
+import uuid
 
 
-def create_lab(db: Session, lab: schemas.LabCreate):
-    new_lab = Lab(**lab.dict())
+def create_lab(db: Session, lab: schemas.LabCreate, lab_id: str):
+    lab_dict = lab.dict()
+    new_lab = Lab(**lab_dict, id=lab_id)
     db.add(new_lab)
     db.commit()
 
@@ -31,9 +35,46 @@ def create_team(db: Session, team: schemas.TeamCreate):
     exists = db.query(Lab).filter(Lab.id == team.lab_id).first() is not None
     if not exists:
         raise Exception("Invalid lab id")
-    new_team = Team(**team.dict())
+    # Find the first milestone in the lab (order by date)
+    first_milestone = (
+        db.query(Milestone)
+        .filter(Milestone.lab_id == team.lab_id)
+        .order_by(Milestone.deadline)
+        .first()
+    )
+    new_team = Team(
+        **team.dict(),
+        current_milestone=first_milestone.milestone_id if first_milestone else None,
+    )
     db.add(new_team)
     db.commit()
+
+
+# move team to next milestone
+def next_milestone(db: Session, team_name: str):
+    team = get_team(db, team_name)
+    if team is None:
+        raise Exception("Invalid team name")
+    # get current milestone
+    if team.current_milestone is None:
+        raise Exception("No current milestone")
+    current = get_milestone(db, str(team.current_milestone))
+    if current is None:
+        raise Exception("Invalid current milestone")
+    # Find the next milestone in the lab (order by date)
+    next_milestone = (
+        db.query(Milestone)
+        .filter(Milestone.lab_id == team.lab_id)
+        .filter(Milestone.deadline > current.deadline)
+        .order_by(Milestone.deadline)
+        .first()
+    )
+    if next_milestone is None:
+        raise Exception("No next milestone")
+    team.current_milestone = next_milestone.milestone_id
+    db.commit()
+    db.refresh(team)
+    return team
 
 
 def get_team(db: Session, team_name: str) -> Union[Team, None]:
@@ -42,15 +83,19 @@ def get_team(db: Session, team_name: str) -> Union[Team, None]:
 
 def add_user_to_lab(db: Session, username: str, lab_id: str):
     user = get_user(db, username)
-    # define user if none
-    if user is None:
-        user = User(name=username)
-        db.add(user)
-
     lab = get_lab(db, lab_id)
-    lab.users.append(user)
-    db.commit()
-    return
+
+    if lab is not None:
+        # define user if none
+        if user is None:
+            user = User(name=username)
+            db.add(user)
+        lab.users.append(user)
+        db.commit()
+    else:
+        return False
+
+    return True
 
 
 def remove_user_from_lab(db: Session, username: str, lab_id: str):
@@ -72,6 +117,17 @@ def get_teams_per_lab(db: Session, lab_id: str) -> List[Team]:
 
 def get_teams_for_user(db: Session, username: str) -> List[Team]:
     return db.query(Team).join(Team.users).filter(User.name == username).all()
+
+
+def get_team_for_lab_user(db: Session, lab_id: str, username: str) -> Union[Team, None]:
+    return (
+        db.query(Team)
+        .join(Team.lab)
+        .join(Team.users)
+        .filter(Lab.id == lab_id)
+        .filter(User.name == username)
+        .first()
+    )
 
 
 def get_lab_for_team(db: Session, team_name: str) -> Union[Any, Lab]:
@@ -106,6 +162,8 @@ def join_team(db: Session, team_name: str, username: str):
         if team.lab_id == lab.id:
             raise Exception("User already in team for lab")
     team = get_team(db, team_name)
+    if team is None:
+        raise Exception("Invalid team")
     team.users.append(user)
     db.commit()
     return
@@ -140,8 +198,7 @@ def get_env_for_user_team(
         .all()
     )
     if len(env_list) > 1:
-        raise Exception(
-            f"More than one env found for team {team_name} user {username}")
+        raise Exception(f"More than one env found for team {team_name} user {username}")
     if not env_list:
         return None
     return env_list[0]
@@ -150,16 +207,7 @@ def get_env_for_user_team(
 def create_user_env(
     db: Session, env: schemas.EnvCreate, username: str, team_name: str
 ) -> Envionment:
-
-    db_env = Envionment(
-        host=env.host,
-        env_id=env.id,
-        network=env.network,
-        ssh_password=env.ssh_password,
-        port=env.port,
-        ssh_user=username,
-        ssh_user_team=team_name,
-    )
+    db_env = Envionment(**env.dict())
     db.add(db_env)
     db.commit()
     db.refresh(db_env)
@@ -172,5 +220,82 @@ def remove_user_env(db: Session, username: str, team_name: str):
         db.delete(db_env)
         db.commit()
     else:
-        print(f"No Env for user {username}")
+        logger.info(f"No Env for user {username}")
     return
+
+
+def create_milestone(db: Session, milestone: schemas.MilestoneCreate):
+    milestone_dict = milestone.dict()
+    milestone_dict["deadline"] = milestone_dict["deadline"]
+    # Create milestone id
+    milestone_dict["milestone_id"] = str(uuid.uuid4())
+    new_milestone = Milestone(**milestone_dict)
+    db.add(new_milestone)
+    db.commit()
+    db.refresh(new_milestone)
+    return new_milestone
+
+
+def get_milestones(db: Session, lab_id: str) -> List[Milestone]:
+    return (
+        db.query(Milestone)
+        .filter(Milestone.lab_id == lab_id)
+        .order_by(Milestone.deadline)
+        .all()
+    )
+
+
+def get_milestone(db: Session, milestone_id: str) -> Union[Milestone, None]:
+    return db.query(Milestone).filter(Milestone.milestone_id == milestone_id).first()
+
+
+def get_milestones_per_lab(db: Session, lab_id: str) -> List[Milestone]:
+    return db.query(Milestone).join(Milestone.lab).filter(Lab.id == lab_id).all()
+
+
+def delete_milestone(db: Session, milestone_id: str):
+    milestone = get_milestone(db, milestone_id)
+    if milestone:
+        db.delete(milestone)
+        db.commit()
+        return True
+    return False
+
+
+def update_milestone(
+    db: Session, milestone_id: str, milestone: schemas.MilestoneCreate
+):
+    new_milestone_dict = milestone.dict()
+    old_milestone = get_milestone(db, milestone_id)
+    if old_milestone:
+        stmt = (
+            update(Milestone)
+            .where(Milestone.milestone_id == milestone_id)
+            .values(**new_milestone_dict)
+        )
+        db.execute(stmt)
+        db.commit()
+        return True
+    return False
+
+
+def postMessage(db: Session, message: schemas.MessageCreate, env_id: str):
+    new_message = Message(
+        **message.dict(),
+        timestamp=datetime.now(),
+        env_id=env_id,
+        message_id=str(uuid.uuid4()),
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+    return new_message
+
+
+def getMessages(db: Session, env_id: str) -> List[Message]:
+    return (
+        db.query(Message)
+        .filter(Message.env_id == env_id)
+        .order_by(Message.timestamp)
+        .all()
+    )

@@ -1,4 +1,3 @@
-
 import requests
 from fastapi import APIRouter, status, Depends, Response, Header
 from typing import Dict, List, Union
@@ -7,8 +6,6 @@ import os
 import jwt
 import smtplib, ssl
 import bcrypt
-
-
 
 
 from auth.core.db import SessionLocal
@@ -22,8 +19,7 @@ import smtplib
 router = APIRouter(prefix="/webapp")
 
 
-
-@router.post("/login", response_model=Union[str, schemas.LoginResult])
+@router.post("/login", response_model=schemas.LoginResult, tags=["webapp"])
 def login(
     login_info: schemas.UserLogin,
     response: Response,
@@ -37,7 +33,7 @@ def login(
                 "user": auth_user.username,
                 # refresh token lasts for 24 hours
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(seconds=60 * 60 * 24),
+                + datetime.timedelta(hours=24),
             },
             key=os.environ["REFRESH_SECRET"],
         )
@@ -45,11 +41,7 @@ def login(
         return {"access_token": access_token, "refresh_token": refresh_token}
 
     response.status_code = status.HTTP_401_UNAUTHORIZED
-    return "Not Allowed"
-
-
-#############
-
+    return schemas.LoginResult()
 
 
 @router.post("/passReset", response_model=Union[str, schemas.passwordUpdate])
@@ -58,28 +50,32 @@ def resetPasswordFunction(
     response: Response,
     db: SessionLocal = Depends(get_db),
 ):
-    auth_user = crud.get_user(db,usernameInfo.username)
+    auth_user = crud.get_user(db, usernameInfo.username)
     print(auth_user.email)
 
     if auth_user is not None:
-
-
-        try :
+        try:
             access_token = gen_reset_token(auth_user)
-            fromMy = "ece496@outlook.com" # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
-            to  = auth_user.email 
+            fromMy = "ece496@outlook.com"  # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
+            to = auth_user.email
             resetLink = "http://localhost:3000/passreset/?token=%s" % (access_token)
-            subj='Password Reset Email'
-            date='2/1/2010'
-            message_text= "Your Password Reset Link is %s" % (resetLink)
+            subj = "Password Reset Email"
+            date = "2/1/2010"
+            message_text = "Your Password Reset Link is %s" % (resetLink)
 
-            msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % ( fromMy, to, subj, date, message_text )
-            
-            mailserver = smtplib.SMTP('smtp.office365.com',587)
+            msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % (
+                fromMy,
+                to,
+                subj,
+                date,
+                message_text,
+            )
+
+            mailserver = smtplib.SMTP("smtp.office365.com", 587)
             mailserver.ehlo()
             mailserver.starttls()
             mailserver.login("ece496@outlook.com", "designteam1234")
-            mailserver.sendmail(fromMy, to,msg)
+            mailserver.sendmail(fromMy, to, msg)
 
             mailserver.quit()
             print("email sent")
@@ -89,20 +85,22 @@ def resetPasswordFunction(
 
 
 @router.put("", response_model=schemas.passwordUpdate)
-def reset(new_password: schemas.passwordUpdate, response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
-
-
-    if 'purpose' in payload and payload["purpose"] == "reset":
+def reset(
+    new_password: schemas.passwordUpdate,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db: SessionLocal = Depends(get_db),
+):
+    if "purpose" in payload and payload["purpose"] == "reset":
         try:
             user = payload["reset_user"]
-            crud.updatePassword(db,user,new_password)
-        except:     
+            crud.updatePassword(db, user, new_password)
+        except:
             response.status_code = status.HTTP_401_UNAUTHORIZED
             return
 
 
-
-@router.get("/refresh")
+@router.get("/refresh", response_model=schemas.LoginAccess, tags=["webapp"])
 def refresh(
     response: Response,
     payload: Dict = Depends(has_refresh),
@@ -115,7 +113,7 @@ def refresh(
         return {"access_token": access_token}
 
 
-@router.post("/logout")
+@router.post("/logout", tags=["webapp"])
 def logout(payload: Dict = Depends(has_refresh), db: SessionLocal = Depends(get_db)):
     crud.set_user_inactive(db, payload["user"])
     crud.invalidate_rts(db, payload["user"])
@@ -129,12 +127,9 @@ def logout(payload: Dict = Depends(has_refresh), db: SessionLocal = Depends(get_
         headers={"Authorization": f"Bearer {auth_service_token}"},
     )
     teams = resp.json()
-    print(teams)
     for team in teams:
-        print(team)
         resp = requests.delete(
             f"{analytics_api}/environment/{team['name']}/{payload['user']}",
             headers={"Authorization": f"Bearer {auth_service_token}"},
         )
-        print(resp.text)
     return

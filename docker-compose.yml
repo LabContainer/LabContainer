@@ -17,17 +17,20 @@ services:
     # restart: on-failure
   analytics:
     build: analytics
+    container_name: analytics_container
     ports:
       - "${ANALYTICS_PORT}:8000"
     environment:
       - SECRET_TOKEN=${SECRET_TOKEN}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT=development
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./student-manager-service:/app/student-manager-service
     networks:
       - backend
+      - envnet
       - analyticsdb
     # restart: on-failure
   postgresserver:
@@ -57,6 +60,7 @@ services:
       - "5433:5432"
     networks:
       - analyticsdb
+      - envnet
     restart: unless-stopped
   pgadmin:
     container_name: pgadmin_container
@@ -65,6 +69,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      GUNICORN_ACCESS_LOGFILE: '/dev/null'
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
@@ -72,6 +77,7 @@ services:
     networks:
       - authdb
       - analyticsdb
+      - backend
     logging:
       driver: none
     restart: unless-stopped
@@ -79,7 +85,6 @@ services:
 networks:
   envnet:
     name: envnet
-    driver: bridge
   backend:
     driver: bridge
   authdb:

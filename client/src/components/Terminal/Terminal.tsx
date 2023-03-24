@@ -2,16 +2,15 @@
 import { XTerm } from "xterm-for-react";
 import { io, Socket } from "socket.io-client";
 import { useContext, useEffect, useRef, useState } from "react";
-import { useImmer } from "use-immer";
 import { FitAddon } from "xterm-addon-fit";
-import { Chip, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import "./Terminal.css";
 import { AuthContext } from "../App/AuthContext";
 import { Pending } from "@mui/icons-material";
 import { Container } from "@mui/system";
-import { refresh } from "../App/fetch";
+import useRefresh from "../App/useRefresh";
 
 enum EnvStatus {
   disconnected,
@@ -27,18 +26,24 @@ function Term({
   team,
   user,
   server,
+  test,
+  onTestFail,
+  onTestPass
 }: {
   team: string;
   user: string;
   server: string;
+  test: string;
+  onTestFail: (milestone_id : string) => void;
+  onTestPass: (milestone_id: string) => void;
 }) {
-  const { token, refresh_token, setToken } = useContext(AuthContext);
-  const [data, setData] = useImmer("");
+  const { token } = useContext(AuthContext);
   const xtermRef = useRef<XTerm>(null);
   const socketRef = useRef<Socket>();
   const commandRef = useRef<string>("");
   const [status, setStatus] = useState(EnvStatus.disconnected);
-
+  const [refresh, toggleRefresh] = useState(false);
+  useRefresh(refresh);
   // Connect to remote container via ssh
   useEffect(() => {
     const onConnect = () => {
@@ -49,16 +54,19 @@ function Term({
 
     const onDisconnect = () => {
       xtermRef.current?.terminal.writeln("***Disconnected from backend***");
-      refresh(refresh_token, setToken);
       setStatus(EnvStatus.disconnected);
     };
-    const onConnectError = (err: Error) => {
-      console.log(err.message);
-      if (err.message === INVALID_TOKEN) refresh(refresh_token, setToken);
-      else if (err.message === NO_ADDITIONAL_SESSIONS)
-        xtermRef.current?.terminal.writeln("***Connection limit reached***");
-      else console.error(err.message);
+    const onConnectError = async (err: Error) => {
       setStatus(EnvStatus.disconnected);
+      console.log("Error connecting to backend");
+      if (err.message === INVALID_TOKEN) {
+        toggleRefresh(!refresh);
+      } else if (err.message === NO_ADDITIONAL_SESSIONS)
+        xtermRef.current?.terminal.writeln("***Connection limit reached***");
+      else {
+        setStatus(EnvStatus.connecting);
+        console.error(err.message);
+      }
     };
     const onError = (err: string) => {
       if (err === NO_USER_TEAMS) {
@@ -68,22 +76,47 @@ function Term({
       setStatus(EnvStatus.disconnected);
     };
     const onData = (msg: string) => {
-      setData(msg);
+      // setData(msg);
+      xtermRef.current?.terminal.write(msg);
     };
     // Initial load
     setStatus(EnvStatus.disconnected);
-    console.log("Trying ", server);
-    socketRef.current = io(server, {
+    console.log("Attempting Remote Connection : ", server);
+    // get domain a https://api.labcontainer.io from server url
+
+    const base_server = server.split("/").slice(0, 3).join("/");
+    const path = server.split("/").slice(3).join("/");
+    socketRef.current = io(base_server, {
       query: {
         token,
         team,
       },
+      // resolve path, no double slash incase of localhost
+      path:
+        (!path.startsWith("/") && path !== "" ? "/" : "") + path + "/socket.io",
+      // rejectUnauthorized: false,
+      // server.includes("localhost")
+      //   ? "/socket.io"
+      //   : server.split(".dev")[1] + "/socket.io",
+      // transports: ["websocket"],
     }) as unknown as Socket;
     setStatus(EnvStatus.connecting);
-
+    
     let fitaddon = new FitAddon();
     xtermRef.current?.terminal.loadAddon(fitaddon);
+    xtermRef.current?.terminal.onResize((size) => {
+      socketRef.current?.emit("resize", size);
+    });
     fitaddon.fit();
+
+    // start observing a DOM node
+    const terminal_container = document.querySelector(".terminal-container");
+    if (terminal_container) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        fitaddon.fit();
+      });
+      resizeObserver.observe(terminal_container);
+    }
 
     // Allow copy and paste in terminal
     xtermRef.current?.terminal.attachCustomKeyEventHandler(
@@ -113,20 +146,26 @@ function Term({
     socketRef?.current?.on("error", onError);
     socketRef?.current?.on("disconnect", onDisconnect);
     socketRef?.current?.on("connect_error", onConnectError);
+    socketRef?.current?.on("expired", () => {
+      toggleRefresh(!refresh);
+    });
+    socketRef?.current?.on("fail", (milestone_id: string, code) => {
+      onTestFail(milestone_id);
+    });
+    socketRef?.current?.on("pass", (milestone_id: string) => {
+      onTestPass(milestone_id);
+    });
     return () => {
       socketRef.current?.off("disconnect");
       socketRef.current?.disconnect();
     };
-  }, [token, team, setData, refresh_token, setToken, server]);
-
-  useEffect(() => {
-    xtermRef.current?.terminal.write(data);
-  }, [data]);
+  }, [team, server, token]);
 
   return (
-    <Stack sx={{}} flex={1}>
+    <Stack sx={{ height: "100%", width: "100%" }} flex={1}>
       <Stack sx={{ width: "100%" }} direction="row" spacing={1}>
         <Container
+          maxWidth={false}
           sx={{
             backgroundColor: "white",
             flexDirection: "row",
@@ -134,6 +173,7 @@ function Term({
             alignItems: "center",
             borderLeft: "1px solid",
             padding: "7px",
+            width: "100%",
           }}
         >
           <Typography sx={{ width: "fit-content", paddingRight: "10px" }}>
@@ -164,7 +204,30 @@ function Term({
               deleteIcon={<Pending />}
             />
           ) : null}
-          {/* </Box> */}
+
+          {
+            // Create Button to test and to submit code
+          }
+          <Box sx={{ flexGrow: 1 }} />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              socketRef.current?.emit("test", test);
+            }}
+          >
+            Test
+          </Button>
+          <Box sx={{ width: "10px" }} />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              socketRef.current?.emit("submit");
+            }}
+          >
+            Submit
+          </Button>
         </Container>
       </Stack>
       <XTerm

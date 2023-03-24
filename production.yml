@@ -1,0 +1,107 @@
+version: "3.5"
+services:
+  nginx:
+    image: nginx:latest
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/ssl/
+    networks:
+      - envnet
+      - backend
+  auth:
+    build: auth
+    ports:
+      - "${AUTH_PORT}:5000"
+    environment:
+      - SECRET_TOKEN=${SECRET_TOKEN}
+      - REFRESH_SECRET=${REFRESH_SECRET}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - authdb
+      - backend
+    restart: on-failure
+  analytics:
+    build: analytics
+    ports:
+      - "${ANALYTICS_PORT}:8000"
+    environment:
+      - SECRET_TOKEN=${SECRET_TOKEN}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT=production
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./student-manager-service:/app/student-manager-service
+    networks:
+      - backend
+      - envnet
+      - analyticsdb
+    restart: on-failure
+  postgresserver:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - authdb
+    restart: unless-stopped
+  postgres-analytics:
+    container_name: postgres_container_analyics
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_analytics:/data/postgres
+    ports:
+      - "5433:5432"
+    networks:
+      - analyticsdb
+    restart: unless-stopped
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      GUNICORN_ACCESS_LOGFILE: '/dev/null'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - authdb
+      - analyticsdb
+      - backend
+    logging:
+      driver: none
+    restart: unless-stopped
+
+networks:
+  envnet:
+    name: envnet
+  backend:
+    driver: bridge
+  authdb:
+    driver: bridge
+  analyticsdb:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
+  postgres_analytics:

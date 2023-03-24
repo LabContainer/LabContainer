@@ -1,5 +1,13 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Boolean, Column, ForeignKey, String, Table, ForeignKeyConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    String,
+    Table,
+    ForeignKeyConstraint,
+    Date,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -8,8 +16,8 @@ import dotenv
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlite.db"
 
-
-env_path = os.path.abspath(os.path.join(os.getenv("PYTHONPATH"), "..", ".env"))
+pythonpath = os.getenv("PYTHONPATH")
+env_path = os.path.abspath(os.path.join(pythonpath, "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
 MIGRATIONS = False
@@ -39,8 +47,13 @@ class Lab(Base):
     __tablename__ = "labs"
     id = Column(String, primary_key=True, index=True)
     course = Column(String)
+    name = Column(String)
     instructor = Column(String)
+    description = Column(String)
+    deadline = Column(Date)
+    environment_init_script = Column(String)
     teams = relationship("Team", back_populates="lab")
+    milestones = relationship("Milestone", back_populates="lab")
     users = relationship(
         "User", secondary=association_table_user_lab, back_populates="labs"
     )
@@ -59,6 +72,7 @@ class Team(Base):
     name = Column(String, primary_key=True, index=True)
     lab_id = Column(String, ForeignKey("labs.id"))
     lab = relationship("Lab", back_populates="teams")
+    current_milestone = Column(String, ForeignKey("milestone.milestone_id"))
     users = relationship(
         "User", secondary=association_table_user_team, back_populates="teams"
     )
@@ -80,14 +94,48 @@ class User(Base):
 class Envionment(Base):
     __tablename__ = "environment"
     env_id = Column(String, primary_key=True, index=True)
-    host = Column(String, index=True)
-    network = Column(String, index=True)
-    port = Column(String)
-    ssh_password = Column(String)
-    ssh_user_team = Column(String, ForeignKey("teams.name"))
-    ssh_user = Column(String, ForeignKey("users.name"))
+    url = Column(String, index=True)
+    image = Column(String)
+    name = Column(String)
+    team = Column(String, ForeignKey("teams.name"))
+    user = Column(String, ForeignKey("users.name"))
     owning_user = relationship("User", back_populates="environments")
     owning_team = relationship("Team", back_populates="environments")
+    messages = relationship("Message", back_populates="env")
+
+
+class Message(Base):
+    message_id = Column(String, primary_key=True, index=True)
+    __tablename__ = "messages"
+    env_id = Column(String, ForeignKey("environment.env_id"))
+    env = relationship("Envionment", back_populates="messages")
+    user = Column(String, ForeignKey("users.name"))
+    message = Column(String)
+    timestamp = Column(Date)
+    # Need to make user connection for team
+
+
+class Message(Base):
+    __tablename__ = "messages"
+    message_id = Column(String, primary_key=True, index=True)
+    env_id = Column(String, ForeignKey("environment.env_id"))
+    user = Column(String, ForeignKey("users.name"))
+    message = Column(String)
+    timestamp = Column(Date)
+    # Need to make user connection for team
+
+
+# Need to make milestone connection for team
+
+
+class Milestone(Base):
+    __tablename__ = "milestone"
+    milestone_id = Column(String, primary_key=True, index=True)
+    lab_id = Column(String, ForeignKey("labs.id"))
+    lab = relationship("Lab", back_populates="milestones")
+    deadline = Column(Date)
+    description = Column(String)
+    test_script = Column(String)
 
 
 Base.metadata.create_all()

@@ -1,0 +1,21 @@
+
+.progress-tracking {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  /* justify-content: center; */
+  text-align: center;
+  width: 100%;
+  height: 100%; 
+}
+
+.milestones {
+    height: 95%;
+    overflow-y: scroll;
+}
+
+/** Make Css for timer class , red color, big text time*/
+.timer {
+  color: red;
+  font-size: 20px;
+}

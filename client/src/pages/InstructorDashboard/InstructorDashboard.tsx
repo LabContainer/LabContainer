@@ -1,209 +1,142 @@
-import { Box, Button, Container, Stack, Typography } from "@mui/material";
-import React from "react";
-import { AuthContext, IUser } from "../../components/App/AuthContext";
-import fetchData from "../../components/App/fetch";
-import DataTable, { IHeadCell } from "../../components/DataTable/DataTable";
-import FormDialogAddLab from "../../components/FormDialogAddLab/FormDialogAddLab";
-import FormDialogUsersAdd from "../../components/FormDialogUsersAdd/FormDialogUsersAdd";
-import { AnalyticsServiceAPI, AuthServiceAPI } from "../../constants";
-import { ILab } from "../StudentDashboard/StudentDashboard";
+import "./InstructorDashboard.css";
+import DashboardPage from "../../components/DashboardPage/DashboardPage";
+import { Grid, Typography, Tabs, Tab, Box } from "@mui/material";
+import { AuthContext } from "../../components/App/AuthContext";
+import useAPI from "../../api";
+import React, { useEffect, useState } from "react";
+import Labs from "./Assignments";
+import Teams, { ILabUsers } from "./Students";
+import Notifications from "./Notifications";
+import { MessageContainer } from "../../components/App/message";
+import { Assignment , PeopleAltRounded, NotificationsOutlined } from "@mui/icons-material";
+import Assignments from "./Assignments";
+import Students from "./Students";
+import { Lab } from "../../clients/AnalyticsClient";
+import { UserInfo } from "../../clients/AuthClient";
 
-const headCellsUsers: IHeadCell[] = [
-  {
-    id: "username",
-    numeric: false,
-    disablePadding: true,
-    label: "Username",
-  },
-  {
-    id: "email",
-    numeric: false,
-    disablePadding: true,
-    label: "Email",
-  },
-  {
-    id: "lab",
-    numeric: true,
-    disablePadding: false,
-    label: "Labs",
-  },
-  {
-    id: "info",
-    numeric: true,
-    disablePadding: false,
-    label: "More Info",
-  },
-];
-const headCellsLabs: IHeadCell[] = [
-  {
-    id: "id",
-    numeric: false,
-    disablePadding: true,
-    label: "Lab ID",
-  },
-  {
-    id: "course",
-    numeric: false,
-    disablePadding: true,
-    label: "Course",
-  },
-  {
-    id: "instructor",
-    numeric: true,
-    disablePadding: false,
-    label: "Instructor",
-  },
-  {
-    id: "info",
-    numeric: true,
-    disablePadding: false,
-    label: "More Info",
-  },
-];
+
 
 function InstructorDashboard() {
-  const { token, refresh_token, setToken } = React.useContext(AuthContext);
-  const [users, setUsers] = React.useState<IUser[]>([]);
-  const [labs, setLabs] = React.useState<ILab[]>([]);
-  const [labsCreateOpen, setLabsCreateOpen] = React.useState(false);
-  const [usersAddOpen, setUserAddOpen] = React.useState(false);
-  const [selectedUsers, setSelectedUsers] = React.useState<readonly string[]>(
-    []
-  );
-
-  React.useEffect(() => {
-    const abortController = new AbortController();
-    // Fetch all data
-    fetchData(AuthServiceAPI, "/users", token, refresh_token, setToken, {
-      method: "GET",
-      signal: abortController.signal,
-    }).then(setUsers);
-    fetchData(AnalyticsServiceAPI, "/labs", token, refresh_token, setToken, {
-      method: "GET",
-      signal: abortController.signal,
-    }).then(setLabs);
-    return () => {
-      abortController.abort();
+    const { user } = React.useContext(AuthContext);
+    const [section, setSection ] = useState<number>(0);
+    const handleChange = (event: React.SyntheticEvent, newSection: number) => {
+        setSection(newSection);
     };
-  }, [token, refresh_token, setToken, setUsers]);
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignContent: "center",
-      }}
-    >
-      <Stack>
-        <Typography variant="h3" sx={{ textAlign: "center" }}>
-          Instructor Dashboard
-        </Typography>
-        <Container
-          sx={{
-            flexDirection: "row",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Box sx={{ margin: "20px" }}>
-            <DataTable
-              onSelect={setSelectedUsers}
-              title="Users"
-              rows={
-                users
-                  ? users.map((user, i) => ({
-                      values: user as any,
-                      key: i,
-                    }))
-                  : []
-              }
-              headCells={headCellsUsers}
-            />
-            <Button variant="contained" onClick={() => setUserAddOpen(true)}>
-              {" "}
-              Add to Lab{" "}
-            </Button>
-            <FormDialogUsersAdd
-              handleClose={() => {
-                setUserAddOpen(false);
-              }}
-              open={usersAddOpen}
-              handleSubmit={(event) => {
-                event.preventDefault();
-                const data = new FormData(event.currentTarget);
-                const labid = data.get("id") as string;
-                for (const user_index of selectedUsers) {
-                  fetchData(
-                    AnalyticsServiceAPI,
-                    `/labs/${labid}/users?username=${
-                      users[parseInt(user_index)].username
-                    }`,
-                    token,
-                    refresh_token,
-                    setToken,
-                    {
-                      method: "POST",
-                    }
-                  );
-                }
-              }}
-            />
-          </Box>
-          <Box sx={{ margin: "20px" }}>
-            <DataTable
-              title="Labs"
-              rows={
-                labs
-                  ? labs.map((user, i) => ({
-                      values: user as any,
-                      key: i,
-                    }))
-                  : []
-              }
-              headCells={headCellsLabs}
-            />
-            <Button
-              variant="contained"
-              onClick={() => {
-                setLabsCreateOpen(true);
-              }}
-            >
-              {" "}
-              Create Lab{" "}
-            </Button>
-            <FormDialogAddLab
-              handleClose={() => {
-                setLabsCreateOpen(false);
-              }}
-              open={labsCreateOpen}
-              handleSubmit={(event) => {
-                event.preventDefault();
-                const data = new FormData(event.currentTarget);
-                const labid = data.get("id") as string;
-                const course = data.get("course") as string;
-                const instructor = data.get("instructor") as string;
-                fetchData(
-                  AnalyticsServiceAPI,
-                  "/labs/create",
-                  token,
-                  refresh_token,
-                  setToken,
-                  {
-                    method: "POST",
-                    body: JSON.stringify({
-                      id: labid,
-                      course: course,
-                      instructor: instructor,
-                    }),
-                  }
-                );
-              }}
-            />
-          </Box>
-        </Container>
-      </Stack>
-    </Box>
-  );
+
+    const [labUsers, setLabUsers] = React.useState<ILabUsers>({});
+    const [labs, setLabs] = React.useState<Lab[]>([]);
+    const { UserApi, LabsApi } = useAPI();
+    // create a state to trigger re fetching of data
+    const [refresh, setRefresh] = useState<boolean>(false);
+
+    const userInfoMap = new Map<string, Promise<UserInfo>>();
+    const getUserInfo = (username: string) => {
+      if(!userInfoMap.has(username)){
+        userInfoMap.set(username, UserApi.usersGetUserInfo(username))
+      }
+      return userInfoMap.get(username) as Promise<UserInfo>
+    }
+    React.useEffect(() => {
+      const lab_promise = LabsApi.labsGetLabs();
+
+      lab_promise.then((labs) => {
+        setLabs(labs);
+        return labs
+      }
+      ).then( labs => 
+        Promise.all(
+          labs
+            .map( lab => lab.id)
+            .map( lab_id => 
+              LabsApi.labsGetLabUsers(lab_id).then( 
+                users => users.map( user => {
+                  return getUserInfo(user.name)
+                })
+              ).then(us => Promise.all(us)).then(user_infos => ({ [lab_id] : user_infos}))
+            )
+          )
+        ).then((lab_users) => {
+        const lab_users_dict = lab_users.reduce((acc, lab_user) => ({...acc, ...lab_user}), {});
+        setLabUsers(lab_users_dict);
+      }).catch((err) => {
+        console.log(err);
+      });
+
+  
+      return () => {
+        lab_promise.cancel();
+      };
+    }, [refresh]);
+
+    interface TabPanelProps {
+        children?: React.ReactNode;
+        value: number;
+        index: number;
+    }
+    function TabPanel(props: TabPanelProps) {
+        const { value, index, children } = props;
+      
+        return (
+          <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`full-width-tabpanel-${index}`}
+            aria-labelledby={`full-width-tab-${index}`}
+          >
+            {value === index && (
+                <div>
+                    {children}
+                </div>
+            )}
+          </div>
+        );
+      }
+
+    return (
+        <DashboardPage>
+            <MessageContainer />
+            <div>
+                <Typography className="student-dashboard-title">Hello {user?.username}</Typography>
+                <Grid container spacing={0}>
+                    <Grid item xs={3}>
+                        <Tabs orientation="vertical" value={section} onChange={handleChange} centered sx={{ borderRight: 1, borderColor: 'divider' }}>
+                            <Tab label="Assignments" 
+                              icon={<Assignment/>}
+                              iconPosition="start"
+                            />
+                            <Tab label="Students" 
+                              icon={<PeopleAltRounded/>}
+                              iconPosition="start"
+                            />
+                            <Tab label="Notifications" 
+                              icon={<NotificationsOutlined/>}
+                              iconPosition="start"
+                            />
+                        </Tabs>
+                    </Grid>
+                    <Grid item xs={9}>
+                        <TabPanel value={section} index={0}>
+                            
+                            <Assignments
+                                labs={labs} refreshData={() => setRefresh(!refresh)}
+                                labUsers={labUsers}
+                            />
+                        </TabPanel>
+                        <TabPanel value={section} index={1}>
+                            <Students
+                                labs={labs}
+                                labUsers={labUsers}
+                                refreshData={() => setRefresh(!refresh)}
+                            />
+                        </TabPanel>
+                        <TabPanel value={section} index={2}>
+                            <Notifications></Notifications>
+                        </TabPanel>
+                    </Grid>
+                </Grid>
+            </div>
+        </DashboardPage>
+    );
 }
 
 export default InstructorDashboard;

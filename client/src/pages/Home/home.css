@@ -1,0 +1,23 @@
+.home-form-title {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 3em;
+    line-height: 24px;
+    color: #444444;
+    padding: 28% 0% 2% 14%;
+}
+
+.home-textfield {
+    margin: 3% 13% 0% 14%;
+}
+
+.home-form-button {
+    color: white;
+    border-radius: 10px;
+    margin: 4% 13% 0% 14%;
+}
+
+.home-form-button.create-account {
+    margin-top: 4%;
+}
