@@ -115,15 +115,6 @@ class Message(Base):
     # Need to make user connection for team
 
 
-class Message(Base):
-    __tablename__ = "messages"
-    message_id = Column(String, primary_key=True, index=True)
-    env_id = Column(String, ForeignKey("environment.env_id"))
-    user = Column(String, ForeignKey("users.name"))
-    message = Column(String)
-    timestamp = Column(Date)
-    # Need to make user connection for team
-
 
 # Need to make milestone connection for team
 

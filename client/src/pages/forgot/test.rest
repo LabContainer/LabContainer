@@ -1,0 +1,8 @@
+### 
+
+GET http://localhost:5000/webapp/forgot 
+
+{
+    "username": "sowrov",
+     "email": "chickin909@gmail.com"
+}

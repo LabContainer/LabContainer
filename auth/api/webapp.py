@@ -4,12 +4,17 @@ from typing import Dict, List, Union
 import datetime
 import os
 import jwt
+import smtplib, ssl
+import bcrypt
+
 
 from auth.core.db import SessionLocal
 from auth.crud import crud
 import auth.core.schemas as schemas
 from auth.dependencies import get_db, has_access, has_refresh
-from auth.utils import gen_access_token, gen_internal_token
+from auth.utils import gen_access_token, gen_internal_token, gen_reset_token
+import smtplib
+
 
 router = APIRouter(prefix="/webapp")
 
@@ -37,6 +42,62 @@ def login(
 
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return schemas.LoginResult()
+
+
+@router.post("/passReset", response_model=Union[str, schemas.passwordUpdate], tags=["webapp"])
+def resetPasswordFunction(
+    usernameInfo: schemas.UserForgotInfo,
+    response: Response,
+    db: SessionLocal = Depends(get_db),
+):
+    auth_user = crud.get_user(db, usernameInfo.username)
+    print(auth_user.email)
+
+    if auth_user is not None:
+        try:
+            access_token = gen_reset_token(auth_user)
+            fromMy = "ece496@outlook.com"  # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
+            to = auth_user.email
+            resetLink = "http://localhost:3000/passreset/?token=%s" % (access_token)
+            subj = "Password Reset Email"
+            date = "2/1/2010"
+            message_text = "Your Password Reset Link is %s" % (resetLink)
+
+            msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % (
+                fromMy,
+                to,
+                subj,
+                date,
+                message_text,
+            )
+
+            mailserver = smtplib.SMTP("smtp.office365.com", 587)
+            mailserver.ehlo()
+            mailserver.starttls()
+            mailserver.login("ece496@outlook.com", "designteam1234")
+            mailserver.sendmail(fromMy, to, msg)
+
+            mailserver.quit()
+            print("email sent")
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return
+
+
+@router.put("/updatePass", response_model=schemas.passwordUpdate, tags=["webapp"])
+def reset(
+    new_password: schemas.passwordUpdate,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db: SessionLocal = Depends(get_db),
+):
+    if "purpose" in payload and payload["purpose"] == "reset":
+        try:
+            user = payload["reset_user"]
+            crud.updatePassword(db, user, new_password)
+        except:
+            response.status_code = status.HTTP_401_UNAUTHORIZED
+            return
 
 
 @router.get("/refresh", response_model=schemas.LoginAccess, tags=["webapp"])

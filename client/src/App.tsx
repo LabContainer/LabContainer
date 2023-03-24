@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar/Navbar";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Environment from "./pages/Environment/Environment";
 import Login from "./pages/Login/Login";
+import Forgot from "./pages/forgot/forgot"
+import ResetPage from "./pages/passwordReset/passReset"
 import Home from "./pages/Home/home";
 import StudentDashboardNew from "./pages/StudentDashboard/StudentDashboardNew";
 
@@ -38,7 +40,8 @@ function App() {
               <Route path="/forgotpassword" element={<ForgotPassword />} />
               <Route path="/signup" element={<CreateAccount />} />
               <Route path="/login" element={<Home />} />
-
+              <Route path="/forgot" element={<Forgot/>} />
+               <Route path="/passReset" element={<ResetPage/>} />
               <Route path="/*" element={<Navigate to="/login" />} />
             </Routes>
           )}

@@ -10,6 +10,9 @@ import auth.core.schemas as schemas
 def get_user(db: Session, username: str) -> User:
     return db.query(User).filter(User.username == username).first()
 
+def get_userByEmail(db: Session, email: str) -> User:
+    return db.query(User).filter(User.email == email).first()
+
 
 def get_all_users(db: Session, limit: int = None) -> List[User]:
     query = db.query(User)
@@ -20,6 +23,7 @@ def get_all_users(db: Session, limit: int = None) -> List[User]:
 
 
 def create_user(db: Session, user: schemas.UserCreate) -> User:
+    print("skr")
     salt = bcrypt.gensalt()
     hashed_pass = bcrypt.hashpw(user.password.encode("utf8"), salt).hex()
     db_user = User(
@@ -45,6 +49,32 @@ def login_user(db: Session, user: schemas.UserLogin):
         db.refresh(saved_user)
         return saved_user
     return None
+
+################
+
+def updatePassword(db: Session,username,new_password) -> User:
+    user = get_user(db, username)
+    salt = bcrypt.gensalt()
+    print("point1")
+    print(new_password)
+    x = getattr(new_password,"newPassword")
+    print(x)
+    hashed_pass = bcrypt.hashpw(x.encode("utf8"), salt).hex()
+    print("point2")
+    print(user.username)
+    print(user.hashed_password)
+    print(hashed_pass)
+    user.hashed_password = hashed_pass
+    print("new")
+    print(user.hashed_password)
+    
+    print("point3")
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+######################
 
 
 def set_user_inactive(db: Session, username: str):

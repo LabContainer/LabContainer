@@ -12,6 +12,8 @@ services:
     networks:
       - authdb
       - backend
+    volumes:
+      - ./auth:/app/auth
     # restart: on-failure
   analytics:
     build: analytics

@@ -14,11 +14,11 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction
 
-COPY . auth/
+# COPY . auth/
 
 EXPOSE 5000
 
 # Volume for named pipe on host. Temp Solution, change when using kubernetes api
 # VOLUME [ "/hostpipe" ]
 
-CMD [ "uvicorn" , "auth.main:app", "--host", "0.0.0.0", "--port", "5000"]  
+CMD [ "uvicorn" , "auth.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]  
