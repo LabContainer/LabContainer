@@ -63,10 +63,9 @@ class UserCreate(UserLogin, UserInfo):
     class Config:
         orm_mode = True
 
-
 class LoginAccess(BaseModel):
     access_token: str = None
-
-
-class LoginResult(LoginAccess):
+    
+class LoginResult(BaseModel):
+    access_token: str = None
     refresh_token: str = None

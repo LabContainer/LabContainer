@@ -44,7 +44,7 @@ def login(
     return schemas.LoginResult()
 
 
-@router.post("/passReset", response_model=Union[str, schemas.passwordUpdate])
+@router.post("/passReset", response_model=Union[str, schemas.passwordUpdate], tags=["webapp"])
 def resetPasswordFunction(
     usernameInfo: schemas.UserForgotInfo,
     response: Response,
@@ -84,7 +84,7 @@ def resetPasswordFunction(
             return
 
 
-@router.put("", response_model=schemas.passwordUpdate)
+@router.put("/updatePass", response_model=schemas.passwordUpdate, tags=["webapp"])
 def reset(
     new_password: schemas.passwordUpdate,
     response: Response,
