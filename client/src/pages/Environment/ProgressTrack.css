@@ -13,3 +13,9 @@
     height: 95%;
     overflow-y: scroll;
 }
+
+/** Make Css for timer class , red color, big text time*/
+.timer {
+  color: red;
+  font-size: 20px;
+}

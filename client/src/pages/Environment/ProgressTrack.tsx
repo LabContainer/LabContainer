@@ -33,6 +33,23 @@ function ProgressTrack({ milestones, current} : { milestones: Milestone[], curre
     }
   }, [current, milestones])
 
+  const [timeLeft, setTimeLeft] = React.useState(0);
+    
+  function refreshClock() {
+    setTimeLeft( new Date(current?.deadline || "").getTime() - new Date().getTime());
+  }
+  React.useEffect(() => {
+      const timerId = setInterval(refreshClock, 1000);
+      return function cleanup() {
+        clearInterval(timerId);
+      };
+  }, [])
+  
+  const secs = Math.floor(Math.abs(timeLeft) / 1000);
+  const mins = Math.floor(secs / 60);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+
   return (
     <div className="progress-tracking">
       <Typography variant="h6" component="h2" gutterBottom sx={{height: "5%"}}>
@@ -76,6 +93,18 @@ function ProgressTrack({ milestones, current} : { milestones: Milestone[], curre
                 
             ))}
           </Timeline>
+        </div>
+        <b>Time Left</b>
+        <div className="timer">
+          {
+            timeLeft > 0 ? `${days} Days ${hours - days * 24}:${mins - hours * 60}:${secs - mins * 60}` : "No current milestone"
+          }
+          {
+            console.log(timeLeft)
+          }
+          {
+            console.log(new Date(current?.deadline || "").getTime() - new Date().getTime())
+          }
         </div>
     </div>
   )

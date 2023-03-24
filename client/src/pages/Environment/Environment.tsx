@@ -13,7 +13,7 @@ import { Lab, LabCreate, Milestone, MilestoneCreate } from "../../clients/Analyt
 import { CancelablePromise } from "../../clients/AuthClient";
 import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
-import Feedback from "./Feedback";
+import Feedback from "../../components/Feedback/Feedback";
 import { errorMessage, MessageContainer, successMessage } from "../../components/App/message";
 
 // server status enum
@@ -141,7 +141,7 @@ export default function Environment() {
   const filemanagerMinWidth = 270;
   const filemanagerMaxWidth = 800;
   const rightPaneMinWidth = 40;
-  const rightPaneMaxWidth = 300;
+  const rightPaneMaxWidth = 500;
 
   const labMinHeight = 100;
   const labMaxHeight = 700;
@@ -424,7 +424,21 @@ export default function Environment() {
             className="y-resizer begin"
             onMouseDown={startResizingProgressTracking}
           />
-            <Feedback></Feedback>
+          <div
+            style={{
+              backgroundColor: "white",
+              width: "100%",
+              // height: `100% - ${progressTrackHeight}px - ${labSectionHeight}px`,
+              bottom: 0,
+              flexGrow: 1
+            }}
+          >
+            <Feedback
+              team={team}
+              username={user}
+            />
+
+          </div>
         </div>
       </div>
     </div>
