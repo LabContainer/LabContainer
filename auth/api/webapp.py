@@ -62,18 +62,13 @@ def resetPasswordFunction(
     print(auth_user.email)
 
     if auth_user is not None:
-        print("username belowz")
-        print(auth_user.username)
-        print(auth_user.email)
+
 
         try :
-            print("Generating token")
             access_token = gen_reset_token(auth_user)
             fromMy = "ece496@outlook.com" # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
             to  = auth_user.email 
-            print("THISHIFAOEUBFGOEUBGOUEWGOUWENGU")
-            print(auth_user.email)
-            resetLink = "http://localhost:3000/passReset/?token=%s" % (access_token)
+            resetLink = "http://localhost:3000/passreset/?token=%s" % (access_token)
             subj='Password Reset Email'
             date='2/1/2010'
             message_text= "Your Password Reset Link is %s" % (resetLink)
@@ -83,77 +78,27 @@ def resetPasswordFunction(
             mailserver = smtplib.SMTP('smtp.office365.com',587)
             mailserver.ehlo()
             mailserver.starttls()
-            print("point two")
             mailserver.login("ece496@outlook.com", "designteam1234")
-            print("point3")
-            #Adding a newline before the body text fixes the missing message body
             mailserver.sendmail(fromMy, to,msg)
-            print("point4")
+
             mailserver.quit()
             print("email sent")
         except:
-            print('email not sent')
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return
 
 
 @router.put("", response_model=schemas.passwordUpdate)
 def reset(new_password: schemas.passwordUpdate, response: Response, payload: Dict[str, str] = Depends(has_access), db: SessionLocal = Depends(get_db)):
-    print("stR")
 
-    if payload["purpose"] == "reset":
-        print("initially ok")
+
+    if 'purpose' in payload and payload["purpose"] == "reset":
         try:
             user = payload["reset_user"]
-            print("user is")
-            print(user)
             crud.updatePassword(db,user,new_password)
-            print("worked")
         except:     
-            print("didnt work")  
-
-# @router.post("/passReset", response_model=Union[str, schemas.passwordUpdate])
-# def resetPasswordFunction(
-#     usernameInfo: schemas.UserForgotInfo,
-#     response: Response,
-#     db: SessionLocal = Depends(get_db),
-# ):
-#     auth_user = crud.get_user(db,usernameInfo.username)
-
-@router.get("/forgot")
-def forgot(
-    usernameInfo: schemas.UserForgotInfo,
-    db: SessionLocal = Depends(get_db),
-):
-    auth_user = crud.get_user(db,usernameInfo.username)
-    if auth_user is not None:
-        try :
-            access_token = gen_access_token(auth_user)
-            print("point one")
-            fromMy = "ece496@outlook.com" # fun-fact: "from" is a keyword in python, you can't use it as variable.. did anyone check if this code even works?
-            to  = usernameInfo.email
-            resetLink = "http://localhost:3000/passReset/%s" % (access_token)
-            subj='Password Reset Email'
-            date='2/1/2010'
-            message_text= "Your Password Reset Link is %s" % (resetLink)
-
-            msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % ( fromMy, to, subj, date, message_text )
-
-
-            mailserver = smtplib.SMTP('smtp.office365.com',587)
-            mailserver.ehlo()
-            mailserver.starttls()
-            print("point two")
-            mailserver.login("ece496@outlook.com", "designteam1234")
-            print("point3")
-            #Adding a newline before the body text fixes the missing message body
-            mailserver.sendmail(fromMy, to,msg)
-            print("point4")
-            mailserver.quit()
-            print("email sent")
-        except :
-            print('email not sent')
-
-
-
+            response.status_code = status.HTTP_401_UNAUTHORIZED
+            return
 
 
 

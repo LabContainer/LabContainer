@@ -51,7 +51,7 @@ def gen_reset_token(auth_user: schemas.UserCreate):
         "reset_user": auth_user.username,
         "purpose": "reset",
         # Keep logged in for 5 mins before refresh
-        "exp": expTime(seconds=3000),
+        "exp": expTime(seconds=3600),
     }
     return jwt.encode(payload, key=os.environ["SECRET_TOKEN"])
     
