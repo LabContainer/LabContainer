@@ -14,6 +14,7 @@ import { CancelablePromise } from "../../clients/AuthClient";
 import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
 import Feedback from "../../components/Feedback/Feedback";
+import Panel from "./Panel";
 import { errorMessage, MessageContainer, successMessage } from "../../components/App/message";
 
 // server status enum
@@ -285,7 +286,8 @@ export default function Environment() {
         className="central-container"
         style={{
           left: leftPaneWidth,
-          width: `calc(100% - ${leftPaneWidth + rightPaneWidth + 20}px)`,
+          // width: `calc(100% - ${leftPaneWidth + rightPaneWidth + 20}px)`,
+          width: '76.5%',
         }}
       >
         <div
@@ -379,7 +381,18 @@ export default function Environment() {
 
         }}
       >
-        <div
+        <Panel 
+          lab={lab}
+          labSectionHeight={labSectionHeight} 
+          labMinHeight={labMinHeight} 
+          milestones={milestones} 
+          currentMilestone={currentMilestone}
+          progressTrackHeight={progressTrackHeight}
+          progressTrackMinHeight={progressTrackMinHeight}
+          team={team}
+          user={user}
+        />
+        {/* <div
           className="x-resizer begin"
           onMouseDown={startResizingRightPanel}
         ></div>
@@ -439,7 +452,7 @@ export default function Environment() {
             />
 
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

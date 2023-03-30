@@ -1,10 +1,13 @@
 import React from 'react'
 import { Lab } from '../../clients/AnalyticsClient'
+import { Typography } from '@mui/material';
 
 function LabInfo({lab} : {lab: Lab}) {
   return (
     <div className="lab-section">
-        <h3>Lab Information</h3>
+      <Typography variant="h4">
+         Lab Information
+      </Typography>
     
         <h4>{lab.name}</h4>
         <h6>
