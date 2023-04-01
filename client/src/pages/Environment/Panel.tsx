@@ -35,7 +35,6 @@ function Panel({lab, labSectionHeight, labMinHeight, milestones, currentMileston
             return (
                 <div
                     style={{
-                    height: labSectionHeight,
                     minHeight: labMinHeight + "px",
                     backgroundColor: "white",
                     overflowX: "hidden",
