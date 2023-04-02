@@ -13,17 +13,17 @@ import { useState } from "react";
 
 interface PanelProps {
     lab: any;
-    labSectionHeight: any;
-    labMinHeight: any;
+    // labSectionHeight: any;
+    // labMinHeight: any;
     milestones: any;
     currentMilestone: any;
-    progressTrackHeight: any;
-    progressTrackMinHeight: any;
+    // progressTrackHeight: any;
+    // progressTrackMinHeight: any;
     user: any;
     team: any;
   }
 
-function Panel({lab, labSectionHeight, labMinHeight, milestones, currentMilestone, progressTrackHeight, progressTrackMinHeight, user, team}: PanelProps){
+function Panel({lab, milestones, currentMilestone, user, team}: PanelProps){
     const [isDrawerOpen,  setIsDrawerOpen] = useState(false);
     const [section, setSection] = useState('Description');
     function openDrawer(section: string) {
@@ -35,7 +35,7 @@ function Panel({lab, labSectionHeight, labMinHeight, milestones, currentMileston
             return (
                 <div
                     style={{
-                    minHeight: labMinHeight + "px",
+                    // minHeight: labMinHeight + "px",
                     backgroundColor: "white",
                     overflowX: "hidden",
                     overflowY: "auto",
@@ -49,8 +49,8 @@ function Panel({lab, labSectionHeight, labMinHeight, milestones, currentMileston
             return(
                 <div
                     style={{
-                    height: progressTrackHeight,
-                    minHeight: progressTrackMinHeight + "px",
+                    // height: progressTrackHeight,
+                    // minHeight: progressTrackMinHeight + "px",
                     backgroundColor: "white",
                     width: "100%",
                     }}

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { TextField, Button, Typography, Box, Container, CircularProgress } from "@mui/material";
-import axios from 'axios';
 import useAPI from '../../api';
 
 const ResetPassword = () => {
@@ -31,15 +30,16 @@ const ResetPassword = () => {
 
     try {
       if(resetToken === null)
-        throw "Invalid token";
+        throw new Error("Invalid token");
       const storerToken = WebappApi.httpRequest.config.TOKEN
       WebappApi.httpRequest.config.TOKEN = (resetToken)
       await WebappApi.webappReset({
         username: username,
         newPassword: password,
+      }).then(() => {
+        setLoading(false);
+        setComplete(true);
       });
-      setLoading(false);
-      setComplete(true);
       WebappApi.httpRequest.config.TOKEN = storerToken;
       setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
