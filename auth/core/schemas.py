@@ -8,12 +8,14 @@ class UserBase(BaseModel):
 
     username: str
 
+    
+
 
 class UserInfo(UserBase):
     """
     Schema for User creation
     """
-
+ 
     email: str
     is_student: bool
 
@@ -26,6 +28,7 @@ class UserForgotInfo(UserBase):
     email: str
 
 
+
 class UserLogin(UserBase):
     """
     Schema for Login information
@@ -33,13 +36,23 @@ class UserLogin(UserBase):
 
     password: str
 
+class resetPassword(UserBase):
+    """
+    Schema for Login information
+    """
 
-class PasswordUpdate(UserBase):
+    password: str
+
+
+
+
+class passwordUpdate(UserBase):
     """
     Schema for Updating password
     """
 
-    newPassword: str
+    newPassword : str
+
 
 
 class UserCreate(UserLogin, UserInfo):
@@ -50,11 +63,9 @@ class UserCreate(UserLogin, UserInfo):
     class Config:
         orm_mode = True
 
-
 class LoginAccess(BaseModel):
     access_token: str = None
-
-
+    
 class LoginResult(BaseModel):
     access_token: str = None
     refresh_token: str = None
