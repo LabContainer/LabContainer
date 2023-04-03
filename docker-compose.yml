@@ -9,6 +9,7 @@ services:
       - REFRESH_SECRET=${REFRESH_SECRET}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT=development
     networks:
       - authdb
       - backend
