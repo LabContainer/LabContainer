@@ -11,7 +11,9 @@
     margin-top: auto;
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: 95%;
+    position: absolute;
+    bottom: 0;
 }
 
 .input-container {

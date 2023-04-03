@@ -1,21 +1,26 @@
 import React from 'react'
 import { Lab } from '../../clients/AnalyticsClient'
+import { Typography } from '@mui/material';
+import "./LabInfo.css";
 
 function LabInfo({lab} : {lab: Lab}) {
   return (
     <div className="lab-section">
-        <h3>Lab Information</h3>
-    
-        <h4>{lab.name}</h4>
-        <h6>
-          Course Name: {lab.course} | Instructor:{lab.instructor}
-        </h6>
-        <p style={{ width: "100%" }}>
-          <b>Lab Description:</b> {lab.description}
-        </p>
-        <p>
-          <b>Due:</b> {lab.deadline}
-        </p>
+      <Typography variant="h4" sx={{paddingBottom: "5%"}}>
+        Lab Information
+      </Typography>
+      <Typography variant="h5" sx={{paddingBottom: "5%"}}>
+        {lab.name}
+      </Typography>
+      <Typography sx={{paddingBottom: "5%"}}>
+        Course Name: {lab.course} | Instructor:{lab.instructor}
+      </Typography>
+      <Typography sx={{width: "100%", paddingBottom: "5%", overflowY: "visible"}}>
+        <b>Lab Description:</b> {lab.description}
+      </Typography>
+      <Typography>
+        <b>Due:</b> {lab.deadline}
+      </Typography>
     </div>
   )
 }

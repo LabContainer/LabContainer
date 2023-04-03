@@ -1,0 +1,7 @@
+.selection-panel {
+    background-color: white;
+    padding-left: 10%;
+    border-left: 5px solid black;
+    box-sizing: border-box;
+    width: 50px;
+  }

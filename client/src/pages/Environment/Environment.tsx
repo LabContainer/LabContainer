@@ -14,6 +14,7 @@ import { CancelablePromise } from "../../clients/AuthClient";
 import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
 import Feedback from "../../components/Feedback/Feedback";
+import Panel from "./Panel";
 import { errorMessage, MessageContainer, successMessage } from "../../components/App/message";
 
 // server status enum
@@ -132,27 +133,27 @@ export default function Environment() {
 
   // States for resizing
   const [leftPaneWidth, setLeftPaneWidth] = React.useState(300);
-  const [rightPaneWidth, setRightPaneWidth] = React.useState(300);
+  // const [rightPaneWidth, setRightPaneWidth] = React.useState(300);
   const [editorHeight, setEditorHeight] = React.useState(300);
-  const [labSectionHeight, setLabSectionHeight] = React.useState(300);
-  const [progressTrackHeight, setProgressTrackHeight] = React.useState(300);
+  // const [labSectionHeight, setLabSectionHeight] = React.useState(300);
+  // const [progressTrackHeight, setProgressTrackHeight] = React.useState(300);
   const editorMinHeight = 45;
   const editorMaxHeight = 700;
   const filemanagerMinWidth = 270;
   const filemanagerMaxWidth = 800;
-  const rightPaneMinWidth = 40;
-  const rightPaneMaxWidth = 500;
+  // const rightPaneMinWidth = 40;
+  // const rightPaneMaxWidth = 500;
 
-  const labMinHeight = 100;
-  const labMaxHeight = 700;
-  const progressTrackMinHeight = 100;
-  const progressTrackMaxHeight = 700;
+  // const labMinHeight = 100;
+  // const labMaxHeight = 700;
+  // const progressTrackMinHeight = 100;
+  // const progressTrackMaxHeight = 700;
 
   const leftPanelRef = React.useRef<HTMLDivElement | null>(null);
-  const rightPanelRef = React.useRef<HTMLDivElement | null>(null);
+  // const rightPanelRef = React.useRef<HTMLDivElement | null>(null);
   const editorRef = React.useRef<HTMLDivElement | null>(null);
-  const labRef = React.useRef<HTMLDivElement | null>(null);
-  const progressTrackRef = React.useRef<HTMLDivElement | null>(null);
+  // const labRef = React.useRef<HTMLDivElement | null>(null);
+  // const progressTrackRef = React.useRef<HTMLDivElement | null>(null);
   const [isResizingLeftPanel, setIsResizingLeftPanel] = React.useState(false);
   const [isResizingRightPanel, setIsResizingRightPanel] = React.useState(false);
   const [isResizingEditor, setIsResizingEditor] = React.useState(false);
@@ -163,18 +164,18 @@ export default function Environment() {
   const startResizingLeftPanel = React.useCallback((mouseDownEvent) => {
     setIsResizingLeftPanel(true);
   }, []);
-  const startResizingRightPanel = React.useCallback((mouseDownEvent) => {
-    setIsResizingRightPanel(true);
-  }, []);
+  // const startResizingRightPanel = React.useCallback((mouseDownEvent) => {
+  //   setIsResizingRightPanel(true);
+  // }, []);
   const startResizingEditor = React.useCallback((mouseDownEvent) => {
     setIsResizingEditor(true);
   }, []);
-  const startResizingLabSection = React.useCallback((mouseDownEvent) => {
-    setIsResizingLabSection(true);
-  }, []);
-  const startResizingProgressTracking = React.useCallback((mouseDownEvent) => {
-    setIsResizingProgressTracking(true);
-  }, []);
+  // const startResizingLabSection = React.useCallback((mouseDownEvent) => {
+  //   setIsResizingLabSection(true);
+  // }, []);
+  // const startResizingProgressTracking = React.useCallback((mouseDownEvent) => {
+  //   setIsResizingProgressTracking(true);
+  // }, []);
 
   const stopResizing = React.useCallback(() => {
     setIsResizingLeftPanel(false);
@@ -193,13 +194,13 @@ export default function Environment() {
         if (val > filemanagerMinWidth && val < filemanagerMaxWidth)
           setLeftPaneWidth(val);
       }
-      if (isResizingRightPanel) {
-        const val =
-          (rightPanelRef.current?.getBoundingClientRect().right || 0) -
-          mouseMoveEvent.clientX;
-        if (val > rightPaneMinWidth && val < rightPaneMaxWidth)
-          setRightPaneWidth(val);
-      }
+      // if (isResizingRightPanel) {
+      //   const val =
+      //     (rightPanelRef.current?.getBoundingClientRect().right || 0) -
+      //     mouseMoveEvent.clientX;
+      //   if (val > rightPaneMinWidth && val < rightPaneMaxWidth)
+      //     setRightPaneWidth(val);
+      // }
       if (isResizingEditor) {
         const val =
           mouseMoveEvent.clientY -
@@ -207,19 +208,19 @@ export default function Environment() {
         if (val > editorMinHeight && val < editorMaxHeight)
           setEditorHeight(val);
       }
-      if (isResizingLabSection) {
-        const val =
-          mouseMoveEvent.clientY -
-          (labRef.current?.getBoundingClientRect().top || 0);
-        if (val > labMinHeight && val < labMaxHeight) setLabSectionHeight(val);
-      }
-      if (isResizingProgressTracking) {
-        const val =
-          mouseMoveEvent.clientY -
-          (progressTrackRef.current?.getBoundingClientRect().top || 0);
-        if (val > progressTrackMinHeight && val < progressTrackMaxHeight)
-          setProgressTrackHeight(val);
-      }
+      // if (isResizingLabSection) {
+      //   const val =
+      //     mouseMoveEvent.clientY -
+      //     (labRef.current?.getBoundingClientRect().top || 0);
+      //   if (val > labMinHeight && val < labMaxHeight) setLabSectionHeight(val);
+      // }
+      // if (isResizingProgressTracking) {
+      //   const val =
+      //     mouseMoveEvent.clientY -
+      //     (progressTrackRef.current?.getBoundingClientRect().top || 0);
+      //   if (val > progressTrackMinHeight && val < progressTrackMaxHeight)
+      //     setProgressTrackHeight(val);
+      // }
     },
     [
       isResizingLeftPanel,
@@ -284,8 +285,9 @@ export default function Environment() {
       <div
         className="central-container"
         style={{
-          left: leftPaneWidth,
-          width: `calc(100% - ${leftPaneWidth + rightPaneWidth + 20}px)`,
+          left: leftPaneWidth > filemanagerMinWidth ? leftPaneWidth : filemanagerMinWidth,
+          width: `calc(100% - ${leftPaneWidth + 50}px)`,
+          // width: '76.5%',
         }}
       >
         <div
@@ -379,7 +381,20 @@ export default function Environment() {
 
         }}
       >
-        <div
+        <Panel 
+          lab={lab}
+          // labSectionHeight={labSectionHeight} 
+          // labMinHeight={labMinHeight} 
+          milestones={milestones} 
+          currentMilestone={currentMilestone}
+          // progressTrackHeight={progressTrackHeight}
+          // progressTrackMinHeight={progressTrackMinHeight}
+          team={team}
+          user={user}
+        />
+
+        {
+        /* <div
           className="x-resizer begin"
           onMouseDown={startResizingRightPanel}
         ></div>
@@ -439,7 +454,8 @@ export default function Environment() {
             />
 
           </div>
-        </div>
+        </div> */
+        }
       </div>
     </div>
   );
