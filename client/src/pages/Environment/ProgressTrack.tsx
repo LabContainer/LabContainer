@@ -10,7 +10,12 @@ import { Milestone, MilestoneCreate } from '../../clients/AnalyticsClient'
 import './ProgressTrack.css'
 import { Typography } from '@mui/material';
 
-function ProgressTrack({ milestones, current} : { milestones: Milestone[], current: Milestone | undefined}) {
+function ProgressTrack({ milestones, current, timeSpent, currEnvCreated} : { 
+  milestones: Milestone[], 
+  current: Milestone | undefined, 
+  timeSpent: number,
+  currEnvCreated: string,
+}) {
   
   const [colours , setColours ]= React.useState<("success" | "error")[]>([])
   React.useEffect(() => {
@@ -34,21 +39,29 @@ function ProgressTrack({ milestones, current} : { milestones: Milestone[], curre
   }, [current, milestones])
 
   const [timeLeft, setTimeLeft] = React.useState(0);
+  const [timeSpentClock, setTimeSpentClock] = React.useState(0);
     
   function refreshClock() {
-    setTimeLeft( new Date(current?.deadline || "").getTime() - new Date().getTime());
+    // get time in current timezone
+    setTimeLeft( new Date(current?.deadline || "").getTime()  - new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000);
+    setTimeSpentClock(new Date().getTime() - new Date(currEnvCreated).getTime() + new Date().getTimezoneOffset() * 60 * 1000 + timeSpent * 1000);
   }
   React.useEffect(() => {
       const timerId = setInterval(refreshClock, 1000);
       return function cleanup() {
         clearInterval(timerId);
       };
-  }, [])
+  }, []);
   
   const secs = Math.floor(Math.abs(timeLeft) / 1000);
   const mins = Math.floor(secs / 60);
   const hours = Math.floor(mins / 60);
   const days = Math.floor(hours / 24);
+  
+  const secs_spent = Math.floor(Math.abs(timeSpentClock) / 1000);
+  const mins_spent = Math.floor(secs_spent / 60);
+  const hours_spent = Math.floor(mins_spent / 60);
+  const days_spent = Math.floor(hours_spent / 24);
 
   return (
     <div className="progress-tracking">
@@ -97,18 +110,24 @@ function ProgressTrack({ milestones, current} : { milestones: Milestone[], curre
         <div className='time'>
           <b> 
             <Typography variant="h5" component="h2" sx={{height: "5%"}}>
-              Time Left
+              Time Spent on Lab
+            </Typography>
+          </b>
+          <div className="timer">
+            {
+              timeSpentClock > 0 ? `${days_spent} Days ${hours_spent - days_spent * 24}:${mins_spent - hours_spent * 60}:${secs_spent - mins_spent * 60}` : "unkonwn"
+            }
+          </div>
+        {/* </div> */}
+        {/* <div className='time'> */}
+          <b> 
+            <Typography variant="h5" component="h2" sx={{height: "5%"}}>
+              Current Milestone Time Left
             </Typography>
           </b>
           <div className="timer">
             {
               timeLeft > 0 ? `${days} Days ${hours - days * 24}:${mins - hours * 60}:${secs - mins * 60}` : "No current milestone"
-            }
-            {
-              console.log(timeLeft)
-            }
-            {
-              console.log(new Date(current?.deadline || "").getTime() - new Date().getTime())
             }
           </div>
         </div>

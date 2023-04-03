@@ -82,10 +82,15 @@ async def get_environment(
             if check:
                 # add to active if not exist
                 key = f"{team_name}_{username}_{len(team_name)}"
-                active_environments[key] = datetime.now() + timedelta(
-                    seconds=env_expiry_time
+                active_environments[key] = {
+                    "expiry": datetime.now() + timedelta(seconds=env_expiry_time),
+                    "created": datetime.now()
+                    if key not in active_environments
+                    else active_environments[key]["created"],
+                }
+                return schemas.Environment(
+                    url=str(env.url), created_at=active_environments[key]["created"]
                 )
-                return schemas.Environment(url=str(env.url))
             # No env, remove
             crud.remove_user_env(db, username, team_name)
             if check is False:
@@ -114,10 +119,15 @@ async def get_environment(
             env = crud.create_user_env(db, new_env, username, team_name)
             # add to active if not exist
             key = f"{team_name}_{username}_{len(team_name)}"
-            active_environments[key] = datetime.now() + timedelta(
-                seconds=env_expiry_time
+            active_environments[key] = {
+                "expiry": datetime.now() + timedelta(seconds=env_expiry_time),
+                "created": datetime.now()
+                if key not in active_environments
+                else active_environments[key]["created"],
+            }
+            return schemas.Environment(
+                url=str(env.url), created_at=active_environments[key]["created"]
             )
-            return schemas.Environment(url=str(env.url))
         except Exception as err:
             kill_env(name)
             traceback.print_exc()
@@ -147,6 +157,13 @@ def delete_env(
         # remove from active environments
         key = f"{team_name}_{username}_{len(team_name)}"
         if key in active_environments:
+            # update team time spent
+            team = crud.get_team(db, team_name)
+            team.time_spent += (
+                datetime.now() - active_environments[key]["created"]
+            ).total_seconds()
+            db.commit()
+            db.refresh(team)
             del active_environments[key]
     else:
         logger.error(f"No env found for user {payload['user']} :")
@@ -184,7 +201,13 @@ def report_active_environment(
 
     # create key with retreivable team_name and username
     key = f"{team_name}_{username}_{len(team_name)}"
-    active_environments[key] = datetime.utcnow() + timedelta(seconds=env_expiry_time)
+
+    active_environments[key] = {
+        "expiry": datetime.now() + timedelta(seconds=env_expiry_time),
+        "created": datetime.now()
+        if key not in active_environments
+        else active_environments[key]["created"],
+    }
 
 
 # Create Status Endpoint
@@ -283,11 +306,13 @@ async def check_active_environments():
 asyncio.create_task(check_active_environments())
 
 
-def del_user_team(username, team_name):
+def del_user_team(username, team_name, time_increase):
     db_gen = get_db()
     db = next(db_gen)
     env = crud.get_env_for_user_team(db, username, team_name)
     if env:
+        team = crud.get_team(db, team_name)
+        team.time_spent += time_increase
         image = commit_env(str(env.env_id), username, team_name)
         kill_env(str(env.name))
         env.image = image
@@ -297,8 +322,11 @@ def del_user_team(username, team_name):
 def check_active_envs():
     # save dict items to list to avoid runtime error
     for key, value in list(active_environments.items()):
-        if value < datetime.utcnow():
+        if value["expiry"] < datetime.now():
             # env has expired, delete
+            time_increase = (
+                datetime.now() - active_environments[key]["created"]
+            ).total_seconds()
             del active_environments[key]
 
             # fetch user, team from key
@@ -309,4 +337,4 @@ def check_active_envs():
             # TODO delete env from db
             logger.info(f"Deleting env for user: {username} team: {team_name}")
 
-            del_user_team(username, team_name)
+            del_user_team(username, team_name, time_increase)

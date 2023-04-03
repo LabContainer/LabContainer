@@ -19,7 +19,7 @@
   position: absolute;
   bottom: 0;
   text-align: center;
-  padding-left: 25%;
+  /* padding-left: 25%; */
   font-weight: bold;
 }
 /** Make Css for timer class , red color, big text time*/

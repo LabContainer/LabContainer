@@ -7,6 +7,7 @@ from sqlalchemy import (
     Table,
     ForeignKeyConstraint,
     Date,
+    Integer,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -23,8 +24,9 @@ dotenv.load_dotenv(dotenv_path=env_path)
 MIGRATIONS = False
 
 postgres_host = "0.0.0.0" if MIGRATIONS else "postgres-analytics"
+postgres_port = "5433" if MIGRATIONS else "5432"
 # postgres:
-SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{postgres_host}:5432"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{postgres_host}:{postgres_port}"
 
 # sqlite ::: connect_args={"check_same_thread": False})
 engine = create_engine(
@@ -73,6 +75,9 @@ class Team(Base):
     lab_id = Column(String, ForeignKey("labs.id"))
     lab = relationship("Lab", back_populates="teams")
     current_milestone = Column(String, ForeignKey("milestone.milestone_id"))
+    # Create a variable to store the total time spent on the lab, and update it when a milestone is completed
+    time_spent = Column(Integer, default=0)
+    submitted = Column(Boolean, default=False)
     users = relationship(
         "User", secondary=association_table_user_team, back_populates="teams"
     )
@@ -113,7 +118,6 @@ class Message(Base):
     message = Column(String)
     timestamp = Column(Date)
     # Need to make user connection for team
-
 
 
 # Need to make milestone connection for team
