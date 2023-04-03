@@ -10,8 +10,7 @@ import auth.core.schemas as schemas
 def get_user(db: Session, username: str) -> User:
     return db.query(User).filter(User.username == username).first()
 
-
-def get_user_by_email(db: Session, email: str) -> User:
+def get_userByEmail(db: Session, email: str) -> User:
     return db.query(User).filter(User.email == email).first()
 
 
@@ -43,7 +42,7 @@ def create_user(db: Session, user: schemas.UserCreate) -> User:
 def login_user(db: Session, user: schemas.UserLogin):
     saved_user = get_user(db, user.username)
     if saved_user is not None and bcrypt.checkpw(
-        user.password.encode("utf8"), bytes.fromhex(str(saved_user.hashed_password))
+        user.password.encode("utf8"), bytes.fromhex(saved_user.hashed_password)
     ):
         saved_user.is_active = True
         db.commit()
@@ -51,14 +50,31 @@ def login_user(db: Session, user: schemas.UserLogin):
         return saved_user
     return None
 
+################
 
-def update_password(db: Session, username: str, new_password: str) -> User:
+def updatePassword(db: Session,username,new_password) -> User:
     user = get_user(db, username)
     salt = bcrypt.gensalt()
-    user.hashed_password = bcrypt.hashpw(new_password.encode("utf8"), salt).hex()
+    print("point1")
+    print(new_password)
+    x = getattr(new_password,"newPassword")
+    print(x)
+    hashed_pass = bcrypt.hashpw(x.encode("utf8"), salt).hex()
+    print("point2")
+    print(user.username)
+    print(user.hashed_password)
+    print(hashed_pass)
+    user.hashed_password = hashed_pass
+    print("new")
+    print(user.hashed_password)
+    
+    print("point3")
     db.commit()
     db.refresh(user)
     return user
+
+
+######################
 
 
 def set_user_inactive(db: Session, username: str):

@@ -52,7 +52,7 @@ function ProgressTrack({ milestones, current} : { milestones: Milestone[], curre
 
   return (
     <div className="progress-tracking">
-      <Typography variant="h5" component="h2" gutterBottom sx={{height: "5%", fontWeight: "bold"}}>
+      <Typography variant="h6" component="h2" gutterBottom sx={{height: "5%"}}>
          Progress Tracking
       </Typography>
         <div className="milestones">
@@ -94,23 +94,17 @@ function ProgressTrack({ milestones, current} : { milestones: Milestone[], curre
             ))}
           </Timeline>
         </div>
-        <div className='time'>
-          <b> 
-            <Typography variant="h5" component="h2" sx={{height: "5%"}}>
-              Time Left
-            </Typography>
-          </b>
-          <div className="timer">
-            {
-              timeLeft > 0 ? `${days} Days ${hours - days * 24}:${mins - hours * 60}:${secs - mins * 60}` : "No current milestone"
-            }
-            {
-              console.log(timeLeft)
-            }
-            {
-              console.log(new Date(current?.deadline || "").getTime() - new Date().getTime())
-            }
-          </div>
+        <b>Time Left</b>
+        <div className="timer">
+          {
+            timeLeft > 0 ? `${days} Days ${hours - days * 24}:${mins - hours * 60}:${secs - mins * 60}` : "No current milestone"
+          }
+          {
+            console.log(timeLeft)
+          }
+          {
+            console.log(new Date(current?.deadline || "").getTime() - new Date().getTime())
+          }
         </div>
     </div>
   )
