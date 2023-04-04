@@ -4,10 +4,13 @@ import "./ForgotPassword.css";
 import Logo from '../../static/Cube.png';
 import HomeColumn from "../../components/HomeColumn/HomeColumn";
 import axios from 'axios';
+import useAPI from "../../api";
+import { MessageContainer, successMessage } from "../../components/App/message";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const {WebappApi} = useAPI();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -16,15 +19,21 @@ function ForgotPassword() {
     console.log(emailString, usernameString);
     
     try {
-      const response = await axios.post('http://localhost:5000/webapp/passReset', { username: usernameString, email: emailString });
-      console.log(response);
+      WebappApi.webappResetPasswordFunction({
+        email, username
+      }).then((response) => {
+        successMessage("Email sent! Please check your email to reset your password.")
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      });
     } catch (error) {
-      console.error(error);
     }
   };
 
   return (
     <HomeColumn>
+      <MessageContainer/>
       <div style={{ marginTop: "110px" }} className="forgot-form-title">
         Forgot Password
       </div>
