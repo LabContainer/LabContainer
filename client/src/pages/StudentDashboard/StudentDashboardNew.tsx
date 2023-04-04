@@ -124,10 +124,6 @@ function StudentDashboardNew() {
                                 icon={<PeopleAltRounded/>}
                                 iconPosition="start"
                             />
-                            <Tab label="Notifications" 
-                                icon={< NotificationsOutlined />}
-                                iconPosition="start"
-                            />
                         </Tabs>
                     </Grid>
                     <Grid item xs={9}  sx={{ height: "90%"}}>
@@ -137,12 +133,8 @@ function StudentDashboardNew() {
                         <TabPanel value={section} index={1}>
                             <Teams data={data} refreshData={()=>setRefresh(r => !r)} labNames={labNames}></Teams>
                         </TabPanel>
-                        <TabPanel value={section} index={2}>
-                            <Notifications></Notifications>
-                        </TabPanel>
                     </Grid>
                 </Grid>
-            
         </DashboardPage>
     );
 }

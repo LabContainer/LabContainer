@@ -108,10 +108,6 @@ function InstructorDashboard() {
                               icon={<PeopleAltRounded/>}
                               iconPosition="start"
                             />
-                            <Tab label="Notifications" 
-                              icon={<NotificationsOutlined/>}
-                              iconPosition="start"
-                            />
                         </Tabs>
                     </Grid>
                     <Grid item xs={9}>
@@ -128,9 +124,6 @@ function InstructorDashboard() {
                                 labUsers={labUsers}
                                 refreshData={() => setRefresh(!refresh)}
                             />
-                        </TabPanel>
-                        <TabPanel value={section} index={2}>
-                            <Notifications></Notifications>
                         </TabPanel>
                     </Grid>
                 </Grid>
