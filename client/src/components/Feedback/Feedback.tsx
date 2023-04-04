@@ -33,7 +33,7 @@ function Feedback({team, username} : {team : string, username: string}) {
           from: message.user,
           date: message.timestamp,
           text: message.message,
-          is_student: message.user === user?.username ? user.is_student : false
+          is_student: message.user === user?.username
         }
       }))
     })

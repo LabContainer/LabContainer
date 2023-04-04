@@ -77,6 +77,7 @@ class Team(Base):
         "User", secondary=association_table_user_team, back_populates="teams"
     )
     environments = relationship("Envionment", back_populates="owning_team")
+    messages = relationship("Message", back_populates="team")
 
 
 class User(Base):
@@ -101,15 +102,14 @@ class Envionment(Base):
     user = Column(String, ForeignKey("users.name"))
     owning_user = relationship("User", back_populates="environments")
     owning_team = relationship("Team", back_populates="environments")
-    messages = relationship("Message", back_populates="env")
 
 
 class Message(Base):
     message_id = Column(String, primary_key=True, index=True)
     __tablename__ = "messages"
-    env_id = Column(String, ForeignKey("environment.env_id"))
-    env = relationship("Envionment", back_populates="messages")
-    user = Column(String, ForeignKey("users.name"))
+    team_id = Column(String, ForeignKey("teams.name"))
+    team = relationship("Team", back_populates="messages")
+    user = Column(String)
     message = Column(String)
     timestamp = Column(Date)
     # Need to make user connection for team

@@ -279,11 +279,11 @@ def update_milestone(
     return False
 
 
-def postMessage(db: Session, message: schemas.MessageCreate, env_id: str):
+def postMessage(db: Session, message: schemas.MessageCreate, team_id: str):
     new_message = Message(
         **message.dict(),
         timestamp=datetime.now(),
-        env_id=env_id,
+        team_id=team_id,
         message_id=str(uuid.uuid4()),
     )
     db.add(new_message)
@@ -292,10 +292,10 @@ def postMessage(db: Session, message: schemas.MessageCreate, env_id: str):
     return new_message
 
 
-def getMessages(db: Session, env_id: str) -> List[Message]:
+def getMessages(db: Session, team_id: str) -> List[Message]:
     return (
         db.query(Message)
-        .filter(Message.env_id == env_id)
+        .filter(Message.team_id == team_id)
         .order_by(Message.timestamp)
         .all()
     )

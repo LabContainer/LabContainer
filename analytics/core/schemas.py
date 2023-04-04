@@ -89,7 +89,7 @@ class MessageCreate(BaseModel):
 class Message(MessageCreate):
     message_id: str
     timestamp: date
-    env_id: str
+    team_id: str
 
     class Config:
         orm_mode = True

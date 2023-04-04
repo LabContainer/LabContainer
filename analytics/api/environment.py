@@ -233,14 +233,10 @@ def post_message_environment(
         response.status_code = status.HTTP_403_FORBIDDEN
         return
 
-    env = crud.get_env_for_user_team(db, username, team_name)
-    if not env:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return
     crud.postMessage(
         db,
         schemas.MessageCreate(message=message.message, user=payload["user"]),
-        env_id=str(env.env_id),
+        team_id=team_name
     )
 
 
@@ -263,11 +259,7 @@ def get_messages_environment(
         response.status_code = status.HTTP_403_FORBIDDEN
         return
 
-    env = crud.get_env_for_user_team(db, username, team_name)
-    if not env:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return
-    messages = crud.getMessages(db, str(env.env_id))
+    messages = crud.getMessages(db, team_name)
     return [schemas.Message(**message.__dict__) for message in messages]
 
 
