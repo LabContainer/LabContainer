@@ -25,7 +25,7 @@ Using `Alembic` for database migrations. Need to do migrations whenever Models a
 ### Steps
 
 - Run `poetry shell` to enter virtualenv
-- Run `docker-compose up -d postgresserver` to start postgres
+- Run `docker-compose up -d postgres-analytics` to start postgres
 - Change `MIGRATIONS=True` in line 15 `core/db.py`, change it back before `docker-compose build`
 - Run `alembic revision --autogenerate -m "<Revision Message>"`
 - Run `alembic upgrade head` to apply revision

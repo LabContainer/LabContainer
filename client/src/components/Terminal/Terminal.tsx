@@ -28,7 +28,8 @@ function Term({
   server,
   test,
   onTestFail,
-  onTestPass
+  onTestPass,
+  onSubmission,
 }: {
   team: string;
   user: string;
@@ -36,6 +37,7 @@ function Term({
   test: string;
   onTestFail: (milestone_id : string) => void;
   onTestPass: (milestone_id: string) => void;
+  onSubmission: () => void;
 }) {
   const { token } = useContext(AuthContext);
   const xtermRef = useRef<XTerm>(null);
@@ -205,9 +207,7 @@ function Term({
             />
           ) : null}
 
-          {
-            // Create Button to test and to submit code
-          }
+          
           <Box sx={{ flexGrow: 1 }} />
           <Button
             variant="contained"
@@ -224,6 +224,7 @@ function Term({
             color="primary"
             onClick={() => {
               socketRef.current?.emit("submit");
+              onSubmission();
             }}
           >
             Submit
