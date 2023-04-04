@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 import FileExplorer from "../../components/FileExplorer/FileExplorer";
 import Term from "../../components/Terminal/Terminal";
 import useAPI from "../../api";
-import { Lab, LabCreate, Milestone, MilestoneCreate } from "../../clients/AnalyticsClient";
+import { ApiError, Lab, LabCreate, Milestone, MilestoneCreate } from "../../clients/AnalyticsClient";
 import { CancelablePromise } from "../../clients/AuthClient";
 import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
@@ -36,6 +36,11 @@ export default function Environment() {
     ServerStatus.Unavailable
   );
   const [childKey, setChildKey] = React.useState(1);
+
+  // timer
+  const [prevTimeSpent, setPrevTimeSpent] = React.useState<number>(0);
+  const [currEnvCreated, setCurrEnvCreated] = React.useState<string>("");
+
   //Fetch Server
   React.useEffect(() => {
     if (!team || !user) return;
@@ -44,6 +49,9 @@ export default function Environment() {
     envPromise.then((env) => {
       // console.log("Received Environment from analytics service: ", env);
       setServer(env.url);
+      // time spent = current time - created at
+      setCurrEnvCreated(env.created_at);
+      console.log(env.created_at)
     });
 
     return () => {
@@ -102,6 +110,7 @@ export default function Environment() {
   const [lab, setLab] = React.useState<Lab>();
   const [milestones, setMilestones] = React.useState<Milestone[]>([]);
   const [currentMilestone, setCurrentMilestone] = React.useState<Milestone>();
+  
   React.useEffect(() => {
     if (!team || !user) return;
     const teamsPromise = TeamsApi.teamsGetTeam(team);
@@ -110,6 +119,9 @@ export default function Environment() {
     teamsPromise.then((t) => {
       //@ts-ignore
       labPromise = LabsApi.labsGetLab(t.lab_id)
+      console.log(t.time_spent)
+      
+      setPrevTimeSpent( +(t?.time_spent || 0));
       return labPromise.then((l) => {
         setLab({ ...l, ...{ id: t.lab_id } });
         //@ts-ignore
@@ -365,10 +377,24 @@ export default function Environment() {
                   if(err.status === 404){
                     successMessage("Congratulations you have completed all milestones");
                   }
+                  if(err.status === 403) {
+                    errorMessage("Not moving to next milestone: " + err.body.response) 
+                  }
                   else console.log(err);
                 });
               }
             }
+            onSubmission={ () => {
+              TeamsApi.teamsSubmitLab(team, user).then((res) => {
+                successMessage("Lab Submitted");
+                
+              }).catch((err) => {
+                if(err.status === 403){
+                  errorMessage("Lab Not Submitted");
+                }
+                else console.log(err);
+              });
+            }}
           />
         </div>
       </div>
@@ -391,71 +417,9 @@ export default function Environment() {
           // progressTrackMinHeight={progressTrackMinHeight}
           team={team}
           user={user}
+          timeSpent={prevTimeSpent}
+          currEnvCreated={currEnvCreated}
         />
-
-        {
-        /* <div
-          className="x-resizer begin"
-          onMouseDown={startResizingRightPanel}
-        ></div>
-        <div
-          ref={rightPanelRef}
-          className="sidebar"
-          style={{
-            width: rightPaneWidth,
-            minWidth: rightPaneMinWidth + "px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div
-            ref={labRef}
-            style={{
-              height: labSectionHeight,
-              minHeight: labMinHeight + "px",
-              backgroundColor: "white",
-              overflowX: "hidden",
-              overflowY: "auto",
-            }}
-          >
-            {lab ? ( <LabInfo lab={lab}/>) : null}
-          </div>
-          <div
-            className="y-resizer begin"
-            onMouseDown={startResizingLabSection}
-          />
-          <div
-            ref={progressTrackRef}
-            style={{
-              height: progressTrackHeight,
-              minHeight: progressTrackMinHeight + "px",
-              backgroundColor: "white",
-              width: "100%",
-            }}
-          >
-            <ProgressTrack milestones={milestones} current={currentMilestone} />
-          </div>
-          <div
-            className="y-resizer begin"
-            onMouseDown={startResizingProgressTracking}
-          />
-          <div
-            style={{
-              backgroundColor: "white",
-              width: "100%",
-              // height: `100% - ${progressTrackHeight}px - ${labSectionHeight}px`,
-              bottom: 0,
-              flexGrow: 1
-            }}
-          >
-            <Feedback
-              team={team}
-              username={user}
-            />
-
-          </div>
-        </div> */
-        }
       </div>
     </div>
   );

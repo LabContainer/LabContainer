@@ -31,6 +31,7 @@ def get_team(
             if team.current_milestone
             else None,
             users=team.users,
+            time_spent=str(team.time_spent),
         )
     users = crud.get_users_in_team(db, str(team.name))
     for user in users:
@@ -42,6 +43,7 @@ def get_team(
                 if team.current_milestone
                 else None,
                 users=team.users,
+                time_spent=str(team.time_spent),
             )
     response.status_code = status.HTTP_403_FORBIDDEN
 
@@ -134,6 +136,18 @@ def next_milestone(
     db=Depends(get_db),
 ):
     # TODO ideally should check if called from lab server. But lab server is exposed and keys cannot be encrypted there
+    team = crud.get_team(db, team_name)
+    if not team:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return schemas.String(response="Team not found")
+    if not payload["is_student"]:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return schemas.String(response="Not a student")
+
+    if team.submitted:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return schemas.String(response="Team already submitted")
+
     try:
         # return schemas.Team(**crud.next_milestone(db, team_name).__dict__)
         return schemas.String(
@@ -145,5 +159,32 @@ def next_milestone(
             response.status_code = status.HTTP_404_NOT_FOUND
             return schemas.String(response=str(e))
         # return 409 if any other exception
+        response.status_code = status.HTTP_409_CONFLICT
+        logger.error(traceback.format_exc())
+
+
+@router.post("/{team_name}/submit", tags=["teams"])
+def submit_lab(
+    team_name: str,
+    username: str,
+    response: Response,
+    payload: Dict[str, str] = Depends(has_access),
+    db=Depends(get_db),
+):
+    try:
+        if not payload["is_student"] or payload["user"] == username:
+            # check if user is in team
+            team = crud.get_team(db, team_name)
+            if not team:
+                response.status_code = status.HTTP_404_NOT_FOUND
+                return
+            users = crud.get_users_in_team(db, str(team_name))
+            for user in users:
+                if user.name == payload["user"]:
+                    team.submitted = True
+                    db.commit()
+                    break
+            return
+    except Exception as e:
         response.status_code = status.HTTP_409_CONFLICT
         logger.error(traceback.format_exc())

@@ -10,20 +10,19 @@ import LabInfo from "./LabInfo";
 import ProgressTrack from "./ProgressTrack";
 import Feedback from "../../components/Feedback/Feedback";
 import { useState } from "react";
+import { Lab, Milestone } from "../../clients/AnalyticsClient";
 
 interface PanelProps {
-    lab: any;
-    // labSectionHeight: any;
-    // labMinHeight: any;
-    milestones: any;
-    currentMilestone: any;
-    // progressTrackHeight: any;
-    // progressTrackMinHeight: any;
-    user: any;
-    team: any;
+    lab: Lab | undefined;
+    milestones: Milestone[];
+    currentMilestone: Milestone | undefined;
+    user: string;
+    team: string;
+    timeSpent: number;
+    currEnvCreated: string;
   }
 
-function Panel({lab, milestones, currentMilestone, user, team}: PanelProps){
+function Panel({lab, milestones, currentMilestone, user, team, timeSpent, currEnvCreated}: PanelProps){
     const [isDrawerOpen,  setIsDrawerOpen] = useState(false);
     const [section, setSection] = useState('Description');
     function openDrawer(section: string) {
@@ -55,7 +54,7 @@ function Panel({lab, milestones, currentMilestone, user, team}: PanelProps){
                     width: "100%",
                     }}
                 >
-                    <ProgressTrack milestones={milestones} current={currentMilestone} />
+                    <ProgressTrack milestones={milestones} current={currentMilestone} timeSpent={timeSpent} currEnvCreated={currEnvCreated} />
                 </div>
             )
         }

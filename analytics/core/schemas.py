@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import datetime, date
 
 
 class TeamCreate(BaseModel):
@@ -12,6 +12,7 @@ class Team(BaseModel):
     name: str
     lab_id: str
     current_milestone: Optional[str]
+    time_spent: Optional[str]
     users: Optional[list]
 
 
@@ -72,6 +73,7 @@ class Environment(BaseModel):
     """
 
     url: str
+    created_at: datetime
 
     class Config:
         orm_mode = True
@@ -88,8 +90,7 @@ class MessageCreate(BaseModel):
 
 class Message(MessageCreate):
     message_id: str
-    timestamp: date
     team_id: str
-
+    timestamp: datetime
     class Config:
         orm_mode = True
