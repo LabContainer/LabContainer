@@ -7,7 +7,7 @@ from sqlalchemy import (
     Table,
     ForeignKeyConstraint,
     Date,
-    DateTime
+    DateTime,
     Integer,
 )
 from sqlalchemy.ext.declarative import declarative_base
