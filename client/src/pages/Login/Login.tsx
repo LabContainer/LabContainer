@@ -17,6 +17,7 @@ import { AuthContext } from "../../components/App/AuthContext";
 import useApi from "../../api";
 
 import "./Login.css";
+import { errorMessage, MessageContainer } from "../../components/App/message";
 
 const theme = createTheme();
 
@@ -29,8 +30,7 @@ export default function Login() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("submit");
-
+    
     const data = new FormData(event.currentTarget);
     const username = data.get("username") as string;
     const password = data.get("password") as string;
@@ -49,13 +49,14 @@ export default function Login() {
           navigate("/dashboard");
         }
       } else {
-        setFailedMsg("Incorrect username/password , please try again");
+        errorMessage("Incorrect username/password , please try again");
       }
     }
   };
-
+  
   return (
     <div className="login">
+      <MessageContainer />
       <ThemeProvider theme={theme}>
         <Container component="main" maxWidth="xs">
           <CssBaseline />

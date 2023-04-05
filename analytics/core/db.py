@@ -7,6 +7,7 @@ from sqlalchemy import (
     Table,
     ForeignKeyConstraint,
     Date,
+    DateTime
     Integer,
 )
 from sqlalchemy.ext.declarative import declarative_base
@@ -116,7 +117,7 @@ class Message(Base):
     team = relationship("Team", back_populates="messages")
     user = Column(String)
     message = Column(String)
-    timestamp = Column(Date)
+    timestamp = Column(DateTime)
     # Need to make user connection for team
 
 

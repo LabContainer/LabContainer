@@ -4,6 +4,7 @@ import "./CreateAccount.css";
 import HomeColumn from "../../components/HomeColumn/HomeColumn";
 import { useNavigate } from "react-router-dom";
 import useApi from "../../api";
+import { MessageContainer } from "../../components/App/message";
 
 function CreateAccount() {
     const [failedAttempt, setFailedAttempt] = React.useState(false);
@@ -40,6 +41,7 @@ function CreateAccount() {
     
     return (
         <HomeColumn>
+            < MessageContainer />
             <Box component="form" noValidate onSubmit={handleSubmit}>
                 <div className="create-form-title">
                     Create Account
@@ -62,6 +64,7 @@ function CreateAccount() {
                 <div className="create-form-button">
                     <Button type="submit" variant="contained" color="inherit" fullWidth={true} sx={{ fontSize: '1rem', backgroundColor: '#243E6B', borderRadius: '10px', "&:hover": {background: "#243E6B"}}} size="large">Create Account</Button>
                 </div>
+                { failedAttempt ? <div className="create-form-error">{failMsg}</div> : null }
             </Box>
         </HomeColumn>
     );
