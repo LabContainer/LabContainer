@@ -15,8 +15,7 @@ pythonpath = pythonpath if pythonpath else os.getcwd()
 env_path = os.path.abspath(os.path.join(pythonpath, "..", ".env"))
 dotenv.load_dotenv(dotenv_path=env_path)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def find_free_port():
@@ -52,11 +51,11 @@ def gen_reset_token(auth_user: schemas.UserCreate):
     payload = {
         "reset_user": auth_user.username,
         "purpose": "reset",
-        # Keep logged in for 5 mins before refresh
-        "exp": expTime(seconds=3600),
+        # 24 hours validity
+        "exp": expTime(seconds=60 * 60 * 24),
     }
     return jwt.encode(payload, key=os.environ["SECRET_TOKEN"])
-    
+
 
 def verify_access_token(token: str, credential_exception: Dict):
     try:
@@ -72,15 +71,19 @@ def verify_access_token(token: str, credential_exception: Dict):
     except JWTError:
         raise credential_exception
 
+
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not verify token, token expired",
-        headers={"WWW-AUTHENTICATE": "Bearer", }
+        headers={
+            "WWW-AUTHENTICATE": "Bearer",
+        },
     )
 
     current_user_id = verify_access_token(
-        token=token, credential_exception=credential_exception).id
+        token=token, credential_exception=credential_exception
+    ).id
 
     current_user = db["users"].find_one({"_id": current_user_id})
 

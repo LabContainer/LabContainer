@@ -58,7 +58,7 @@ def resetPasswordFunction(
             to = auth_user.email
             base_url = f"http://localhost:3000"
             if os.getenv("ENVIRONMENT") == "production":
-                base_url = f"https://api.labcontainer.dev"
+                base_url = f"https://labcontainer.dev"
             resetLink = f"{base_url}/passreset/?token={access_token}"
             subject = "Password Reset Email"
             date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
