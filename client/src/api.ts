@@ -91,7 +91,7 @@ export default function useAPI() {
             error => {
                 const status = error.response ? error.response.status : null
                 const originalRequest = error.config;
-                if (status === 401 && !originalRequest._retry) {
+                if (status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/webapp/login')) {
                     originalRequest._retry = true;
 
                     // If new token not requested, create new refresh event

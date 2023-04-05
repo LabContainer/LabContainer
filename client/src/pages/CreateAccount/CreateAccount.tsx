@@ -4,7 +4,7 @@ import "./CreateAccount.css";
 import HomeColumn from "../../components/HomeColumn/HomeColumn";
 import { useNavigate } from "react-router-dom";
 import useApi from "../../api";
-import { MessageContainer } from "../../components/App/message";
+import { MessageContainer, errorMessage } from "../../components/App/message";
 
 function CreateAccount() {
     const [failedAttempt, setFailedAttempt] = React.useState(false);
@@ -12,7 +12,7 @@ function CreateAccount() {
     const { UserApi } = useApi();
     let failMsg;
     if (failedAttempt) {
-      failMsg = "Invalid data";
+      failMsg = "Unable to create account. Please try again.";
     }
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -34,6 +34,7 @@ function CreateAccount() {
           }
       } catch (error) {
         setFailedAttempt(true);
+        errorMessage("Unable to create account. Please try again.");
       }
       
     };

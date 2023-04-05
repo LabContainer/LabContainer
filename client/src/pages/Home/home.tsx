@@ -6,6 +6,7 @@ import HomeColumn from "../../components/HomeColumn/HomeColumn";
 import { AuthContext } from "../../components/App/AuthContext";
 import useApi from "../../api";
 import { useLocation, useNavigate } from "react-router-dom";
+import { MessageContainer, errorMessage } from "../../components/App/message";
 
 
 function Home() {
@@ -22,27 +23,33 @@ function Home() {
         const username = data.get("username") as string;
         const password = data.get("password") as string;
         if (username !== null && password !== null) {
-            const tokens = await WebappApi.webappLogin({
-            username,
-            password,
-            });
+            try {
+                const tokens = await WebappApi.webappLogin({
+                username,
+                password,
+                });
 
-            if (tokens !== undefined) {
-            const { access_token, refresh_token: new_refresh_token } = tokens;
-            setToken(access_token as string);
-            setRefreshToken(new_refresh_token as string);
-            if (location.pathname === "/login") {
-                // Redirect user to hashboard from login on success
-                navigate("/dashboard");
-            }
-            } else {
-            setFailedMsg("Incorrect username/password , please try again");
+                if (tokens !== undefined) {
+                const { access_token, refresh_token: new_refresh_token } = tokens;
+                setToken(access_token as string);
+                setRefreshToken(new_refresh_token as string);
+                if (location.pathname === "/login") {
+                    // Redirect user to hashboard from login on success
+                    navigate("/dashboard");
+                }
+                } else {
+                setFailedMsg("Incorrect username/password , please try again");
+                }
+            } catch (error) {
+                console.log(error);
+                errorMessage("Incorrect username/password , please try again");
             }
         }
     };
 
     return (
         <HomeColumn>
+            < MessageContainer />
             <Typography>{failedMsg}</Typography>    
             <Box component="form" noValidate onSubmit={handleSubmit}>
                 <div className="home-form-title">
@@ -64,6 +71,7 @@ function Home() {
             <Link sx={{padding: "0% 0% 0% 14%"}} href="/forgotpassword" variant="body2">
                     {"Forgot password?"}
             </Link>
+            { failedMsg }
         </HomeColumn>
     );
 }

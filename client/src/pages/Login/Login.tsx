@@ -35,20 +35,28 @@ export default function Login() {
     const username = data.get("username") as string;
     const password = data.get("password") as string;
     if (username !== null && password !== null) {
-      const tokens = await WebappApi.webappLogin({
-        username,
-        password,
-      });
+      // disable retry on error
+      try {
 
-      if (tokens !== undefined) {
-        const { access_token, refresh_token: new_refresh_token } = tokens;
-        setToken(access_token as string);
-        setRefreshToken(new_refresh_token as string);
-        if (location.pathname === "/login") {
-          // Redirect user to hashboard from login on success
-          navigate("/dashboard");
+      
+        const tokens = await WebappApi.webappLogin({
+          username,
+          password,
+        })
+
+        if (tokens !== undefined) {
+          const { access_token, refresh_token: new_refresh_token } = tokens;
+          setToken(access_token as string);
+          setRefreshToken(new_refresh_token as string);
+          if (location.pathname === "/login") {
+            // Redirect user to hashboard from login on success
+            navigate("/dashboard");
+          }
+        } else {
+          errorMessage("Incorrect username/password , please try again");
         }
-      } else {
+      } catch (error) {
+        console.log(error);
         errorMessage("Incorrect username/password , please try again");
       }
     }
